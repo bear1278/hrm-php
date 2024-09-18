@@ -37,13 +37,13 @@ class ResumeController{
             $candidateModel = new CandidateModel();
             $candidate = $candidateModel->findCandidateById($id);
             if ($candidate){
-                header('Location: /dashboard');
+                header('Location: /');
                 exit();
             }
 
             $result = $candidateModel->createCandidate($id,$number,$resume,$exp,$location);
             if ($result){
-                header('Location: /dashboard');
+                header('Location: /');
                 exit();
             }else{
                 $error = 'Database error.';

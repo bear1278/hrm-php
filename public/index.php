@@ -16,16 +16,19 @@ switch ($request_uri) {
         }
         break;
 
-    case '/dashboard':
+    case '/':
+        require_once __DIR__ . '/../app/Controllers/DashboardController.php';
+        $dashboardController= new DashboardController();
         if (!isset($_SESSION['user_id'])) {
             header('Location: /login');
             exit();
         }
-        if ($_SESSION['role']==4){
-            header('Location: /profile');
-            exit();
-        }else if ($_SESSION['role']=2) {
-            require_once __DIR__ . '/../app/Controllers/DashboardController.php';
+        
+        // if ($_SESSION['role']==4){
+        //     header('Location: /profile');
+        //     exit();
+        else /*if ($_SESSION['role']=2)*/ {
+            $dashboardController->showDasboard();
         }
         
         break;

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/loginForm.css" />
+    <title>Auth</title>
+  </head>
+  <body>
+    <header>
+      <main>
+        <div class="circle"></div>
+
+        <!-- Added action and method to the form -->
+        <form
+          class="register-form-container"
+          action="/login"
+          method="POST"
+          novalidate
+        >
+          <div id="result"></div>
+          <h1 class="form-title">Вход</h1>
+          <div class="form-fields">
+            <div class="form-field">
+              <!-- Added 'required' for validation -->
+              <input type="email" placeholder="Email" name="email" />
+            </div>
+            <div class="form-field">
+              <!-- Added 'required' for validation -->
+              <input type="password" placeholder="Password" name="password" />
+            </div>
+            <div class="form-buttons">
+              <button class="button" type="submit">Войти</button>
+              <div class="divider">OR</div>
+              <a
+                style="text-decoration: none"
+                href="http://localhost/signup"
+                class="button button-signup"
+                >Регистрация</a
+              >
+            </div>
+          </div>
+        </form>
+      </main>
+    </header>
+    <script>
+      document
+        .querySelector("form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Предотвращаем отправку формы
+
+          let email = document.querySelector('input[name="email"]');
+          let password = document.querySelector('input[name="password"]');
+          let error = "";
+
+          // Простейшая проверка email
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!email.value || !emailPattern.test(email.value)) {
+            error = "Пожалуйста, введите корректный email";
+          }
+
+          // Проверка пароля (минимум 6 символов)
+          const passwordPattern = /^[A-Za-z0-9!@#$%^&*()_+={}:;.,<>?-]+$/;
+          if (!password.value || password.value.length < 6) {
+            error += "<br>Пароль должен быть не менее 6 символов";
+          } else if (!passwordPattern.test(password.value)) {
+            error +=
+              "<br>Пароль может содержать только латинские буквы и специальные символы";
+          }
+
+          if (error) {
+            // Отображаем ошибки
+            document.getElementById(
+              "result"
+            ).innerHTML = `<p style="color: red;">${error}</p>`;
+            return;
+          }
+
+          let form = event.target;
+          let formData = new FormData(form);
+
+          // Send the form data to the server using fetch
+          fetch("/login", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json()) // Parse the JSON response
+            .then((data) => {
+              // Clear previous error message
+              document.getElementById("result").innerHTML = "";
+
+              if (data.error) {
+                // Display error if exists
+                document.getElementById(
+                  "result"
+                ).innerHTML = `<p style="color: red;">${data.error}</p>`;
+              } else if (data.success) {
+                // Redirect on successful login
+                window.location.href = "/";
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              document.getElementById("result").innerHTML =
+                '<p style="color: red;">An error occurred. Please try again.</p>';
+            });
+        });
+    </script>
+  </body>
+</html>
