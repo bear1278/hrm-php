@@ -1,0 +1,36 @@
+[2024-09-13 22:21:48] User ID: , Username: , Email: grigoriganusik@gmail.com
+[2024-09-13 22:25:22] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:35:07] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:39:29] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:40:49] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:41:27] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:42:55] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:43:17] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:44:53] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:46:22] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:46:44] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:51:51] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:53:45] User: grigoriganusik@gmail.com
+[2024-09-13 22:53:45] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:53:52] User: grigoriganusik@gmail.com
+[2024-09-13 22:53:52] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:54:33] User: grigoriganusik@gmail.com
+[2024-09-13 22:54:33] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:55:55] User: grigoriganusik@gmail.com] Password 12
+[2024-09-13 22:55:55] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:56:02] User: grigoriganusik@gmail.com] Password qazwsx123
+[2024-09-13 22:56:02] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:56:55] User: 'grigoriganusik@gmail.com'' Password 'qw'
+[2024-09-13 22:56:55] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:58:27] User: 'grigoriganusik@gmail.com'' Password '123'
+[2024-09-13 22:58:27] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:58:34] User: 'grigoriganusik@gmail.com'' Password 'qa'
+[2024-09-13 22:58:34] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:58:40] User: 'grigoriganusik@gmail.com'' Password 'qazwsx123'
+[2024-09-13 22:58:40] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 22:59:48] User: 'grigoriganusik@gmail.com'' Password 'qazwsx123'
+[2024-09-13 22:59:48] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 23:02:38] User: 'grigoriganusik@gmail.com'' Password '1'
+[2024-09-13 23:02:38] User ID: 1, Email: grigoriganusik@gmail.com, Password: qazwsx123
+[2024-09-13 23:02:50] User: 'admin'' Password '1'
+[2024-09-13 23:02:50] User ID: , Email: , Password: 
