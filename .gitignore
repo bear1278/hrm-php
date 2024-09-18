@@ -1,2 +1,2 @@
-log.txt
-.htaccess
+**/public/log.txt
+**/public/.htaccess
