@@ -15,16 +15,20 @@ class UserModel {
         $this->pdo = $pdo;
     }
 
-    // Find a user by their username
     public function findUserByUsername($email) {
-        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        try{
+            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+        catch(PDOException $e){
+            throw new Exception("Ошибка при входе пользователя: " . $e->getMessage());
+        }
     }
 
     public function createUser($firstname,$lastname,$email,$password){
         try {
-        // Prepare an SQL statement to insert the user data into the "users" table
+        
         $stmt = $this->pdo->prepare("INSERT INTO users (first_name, last_name, email, password,role_ID) VALUES (:firstname, :lastname, :email, :password, :role_ID)");
         $role=4;
         // Bind parameters to the SQL query
@@ -39,9 +43,8 @@ class UserModel {
         
         return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
-            // Handle any errors
-            echo "Error: " . $e->getMessage();
-            return false;
+            
+            throw new Exception("Ошибка при регистрации пользователя: " . $e->getMessage());
         }
     }
 }

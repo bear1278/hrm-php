@@ -18,12 +18,7 @@
         <div class="circle"></div>
 
         <!-- Added action and method to the form -->
-        <form
-          class="register-form-container"
-          action="/login"
-          method="POST"
-          novalidate
-        >
+        <form class="register-form-container" action="/login" method="POST">
           <div id="result"></div>
           <h1 class="form-title">Вход</h1>
           <div class="form-fields">
@@ -49,68 +44,6 @@
         </form>
       </main>
     </header>
-    <script>
-      document
-        .querySelector("form")
-        .addEventListener("submit", function (event) {
-          event.preventDefault(); // Предотвращаем отправку формы
-
-          let email = document.querySelector('input[name="email"]');
-          let password = document.querySelector('input[name="password"]');
-          let error = "";
-
-          // Простейшая проверка email
-          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!email.value || !emailPattern.test(email.value)) {
-            error = "Пожалуйста, введите корректный email";
-          }
-
-          // Проверка пароля (минимум 6 символов)
-          const passwordPattern = /^[A-Za-z0-9!@#$%^&*()_+={}:;.,<>?-]+$/;
-          if (!password.value || password.value.length < 6) {
-            error += "<br>Пароль должен быть не менее 6 символов";
-          } else if (!passwordPattern.test(password.value)) {
-            error +=
-              "<br>Пароль может содержать только латинские буквы и специальные символы";
-          }
-
-          if (error) {
-            // Отображаем ошибки
-            document.getElementById(
-              "result"
-            ).innerHTML = `<p style="color: red;">${error}</p>`;
-            return;
-          }
-
-          let form = event.target;
-          let formData = new FormData(form);
-
-          // Send the form data to the server using fetch
-          fetch("/login", {
-            method: "POST",
-            body: formData,
-          })
-            .then((response) => response.json()) // Parse the JSON response
-            .then((data) => {
-              // Clear previous error message
-              document.getElementById("result").innerHTML = "";
-
-              if (data.error) {
-                // Display error if exists
-                document.getElementById(
-                  "result"
-                ).innerHTML = `<p style="color: red;">${data.error}</p>`;
-              } else if (data.success) {
-                // Redirect on successful login
-                window.location.href = "/";
-              }
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              document.getElementById("result").innerHTML =
-                '<p style="color: red;">An error occurred. Please try again.</p>';
-            });
-        });
-    </script>
+    <script type="module" src="/js/login-validation.js"></script>
   </body>
 </html>

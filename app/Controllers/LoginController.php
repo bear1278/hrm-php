@@ -1,12 +1,9 @@
 <?php
 // app/Controllers/LoginController.php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../Models/UserModel.php';
 require_once __DIR__ . '/../Helpers/AuthHelper.php';
-
+require_once __DIR__ . '/../Helpers/ErrorHelper.php';
 
 
 class LoginController {
@@ -29,10 +26,17 @@ class LoginController {
                
                 echo json_encode(['error' => 'Пожалуйста, заполните все поля']);
             }
-
-            // Check user credentials
-            $userModel = new UserModel();
-            $user = $userModel->findUserByUsername($email);
+            try{
+                
+                $userModel = new UserModel();
+                $user = $userModel->findUserByUsername($email);
+            }catch(Exception $e){
+                if($user){
+                http_response_code(500);
+                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
+                exit();
+                }
+            }
 
 
             if ($user && password_verify($password,$user['password'])) {

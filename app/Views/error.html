@@ -1,0 +1,24 @@
+<?php
+// Пример страницы error.php
+
+// Получаем сообщение об ошибке из GET-параметра
+$message = isset($_GET['message']) ? urldecode($_GET['message']) : 'Неизвестная ошибка';
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/error.css" />
+    <title>Error</title>
+  </head>
+  <body>
+    <h1>Произошла ошибка</h1>
+    <p>
+        <p><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
+    </p>
+    <a href="/">Вернуться на главную</a>
+  </body>
+</html>

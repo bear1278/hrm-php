@@ -31,6 +31,7 @@ class SignUpController{
                 return;      
             }
             
+            try{
 
             $userModel = new UserModel();
             $user = $userModel->findUserByUsername($email);
@@ -43,6 +44,14 @@ class SignUpController{
             $hashedPassword = password_hash($password,PASSWORD_DEFAULT);
 
             $result=$userModel->createUser($firstname,$lastname,$email,$hashedPassword);
+            }
+            catch (Exception $e){
+                http_response_code(500);
+                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
+                exit();
+            }
+                
+            
 
             if ($result) {
                 // Set session and log in user
