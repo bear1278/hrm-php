@@ -1,15 +1,20 @@
 document.querySelector("form").addEventListener("submit", function (event) {
   event.preventDefault(); // Предотвращаем отправку формы
-  let firstnmae = document.querySelector('input[name="firstname"]');
+  let role = document.querySelector('input[name="role"]:checked');
+  let firstname = document.querySelector('input[name="firstname"]');
   let lastname = document.querySelector('input[name="lastname"]');
   let email = document.querySelector('input[name="email"]');
   let password = document.querySelector('input[name="password"]');
-  let confirmPpassword = document.querySelector(
+  let confirmPassword = document.querySelector(
     'input[name="confirmPassword"]'
   );
   let error = "";
 
-  if (!firstnmae.value || !lastname.value) {
+  if (!role) {
+    error = "Пожалуйста, выберете свою роль";
+  }
+
+  if (!firstname.value || !lastname.value) {
     error = "Пожалуйста, введите свое имя и фамилию";
   }
 
@@ -26,7 +31,7 @@ document.querySelector("form").addEventListener("submit", function (event) {
       "<br>Пароль может содержать только латинские буквы и специальные символы";
   }
 
-  if (password.value != confirmPpassword.value) {
+  if (password.value != confirmPassword.value) {
     error += "<br>Пароли не совпадают";
   }
 

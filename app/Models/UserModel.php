@@ -26,11 +26,11 @@ class UserModel {
         }
     }
 
-    public function createUser($firstname,$lastname,$email,$password){
+    public function createUser($firstname,$lastname,$email,$password,$role){
         try {
         
         $stmt = $this->pdo->prepare("INSERT INTO users (first_name, last_name, email, password,role_ID) VALUES (:firstname, :lastname, :email, :password, :role_ID)");
-        $role=4;
+
         // Bind parameters to the SQL query
         $stmt->bindParam(':firstname', $firstname);
         $stmt->bindParam(':lastname', $lastname);
@@ -43,7 +43,6 @@ class UserModel {
         
         return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
-            
             throw new Exception("Ошибка при регистрации пользователя: " . $e->getMessage());
         }
     }

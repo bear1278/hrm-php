@@ -1,5 +1,4 @@
 <?php
-// public/index.php
 session_start();
 
 
@@ -7,11 +6,8 @@ session_start();
 $request_uri = $_SERVER['REQUEST_URI'];
 $request_uri = explode('?', $request_uri)[0];
 
-// Разбиваем URI на части
 $parts = explode('/', trim($request_uri, '/')); 
 
-
-// Include the routes logic
 switch ($parts[0]) {
     case 'login':
         require_once __DIR__ . '/../app/Controllers/LoginController.php';
@@ -30,11 +26,10 @@ switch ($parts[0]) {
             header('Location: /login');
             exit();
         }
-        
-        // if ($_SESSION['role']==4){
-        //     header('Location: /profile');
-        //     exit();
-        else /*if ($_SESSION['role']=2)*/ {
+         if ($_SESSION['role']==4){
+             $dashboardController->showDasboard();
+         }
+        elseif ($_SESSION['role']=2){
             $dashboardController->showDasboard();
         }
         
@@ -71,6 +66,14 @@ switch ($parts[0]) {
         $dashboardController= new DashboardController();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
             $dashboardController->addVacancy(); 
+        }
+        break;
+
+    case 'edit': 
+        require_once __DIR__ . '/../app/Controllers/DashboardController.php';
+        $dashboardController= new DashboardController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
+            $dashboardController->editVacancy(); 
         }
         break;
 

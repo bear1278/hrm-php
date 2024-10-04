@@ -58,6 +58,44 @@ class VacancyModel {
         }
     }
 
+    public function updateVacancy($id,$name, $department_ID, $description,$experience_required,$salary,$posting_date,$status)
+    {
+        try{
+            $sql = "CALL UpdateVacancy(:Id, :Name ,:department, :newdescription, :newexperience_required, :newsalary, :newposting_date, :newstatus)";
+
+           
+            $stmt = $this->pdo->prepare($sql);
+            $postingDate = new DateTime($posting_date);
+
+            // Привязываем параметры
+            $stmt->bindParam(':Id', $id, PDO::PARAM_INT);
+            $stmt->bindParam(':Name', $name, PDO::PARAM_STR);
+            $stmt->bindParam(':department', $department_ID, PDO::PARAM_INT);
+            $stmt->bindParam(':newdescription', $description, PDO::PARAM_STR);
+            $stmt->bindParam(':newexperience_required', $experience_required, PDO::PARAM_INT);
+            $stmt->bindParam(':newsalary', $salary, PDO::PARAM_INT);
+            $stmt->bindParam(':newposting_date', $posting_date);
+            $stmt->bindParam(':newstatus', $status, PDO::PARAM_INT);
+
+            // Выполнение запроса
+            return $stmt->execute();
+        }
+        catch (PDOException $e) {
+            throw new Exception("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function getVacancyByID($id) {
+        try{
+        $sql = "SELECT * FROM vacancies WHERE vacancy_ID=?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+        }catch (PDOException $e) {
+            throw new Exception("Ошибка: " . $e->getMessage());
+        }
+    }
+
     public function deleteVacancyFromDB($vacancyID){
         try{
         $sql = "DELETE FROM vacancies WHERE vacancy_ID = :vacancy_ID";

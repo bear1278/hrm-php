@@ -13,6 +13,7 @@ class SignUpController{
     public function SignUp() {
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $role = trim($_POST['role']);
             $firstname = trim($_POST['firstname']);
             $lastname = trim($_POST['lastname']);
             $email = trim($_POST['email']);
@@ -21,7 +22,7 @@ class SignUpController{
 
             
             // Validate inputs
-            if (empty($firstname) ||  empty($lastname) || empty($password) || empty($email) || empty($confirmPassword)) {
+            if (empty($role) || empty($firstname) ||  empty($lastname) || empty($password) || empty($email) || empty($confirmPassword)) {
                 echo json_encode(['error' => 'Пожалуйста, заполните все поля']);
                 return;
             }
@@ -43,19 +44,16 @@ class SignUpController{
 
             $hashedPassword = password_hash($password,PASSWORD_DEFAULT);
 
-            $result=$userModel->createUser($firstname,$lastname,$email,$hashedPassword);
+            $result=$userModel->createUser($firstname,$lastname,$email,$hashedPassword,$role);
             }
             catch (Exception $e){
                 http_response_code(500);
                 echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
                 exit();
             }
-                
-            
 
             if ($result) {
-                // Set session and log in user
-                AuthHelper::login($result,$firstname,$lastname, $email,1);
+                AuthHelper::login($result,$firstname,$lastname, $email,$role);
                 echo json_encode(['success' => true]);
                 exit();
             } else {

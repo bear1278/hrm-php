@@ -51,7 +51,13 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
       <div>
         <div id="result"></div>
         <form id="add-form" class="add-form" action="/add" method="POST">
-          <input class="input-add" type="text" placeholder="Name" name="name" />
+          <input
+            class="input-add"
+            type="text"
+            placeholder="Name"
+            name="name"
+            required
+          />
           <input
             class="input-add"
             type="number"
@@ -95,6 +101,66 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
           <button class="button" type="submit">Добавить</button>
         </form>
         <script type="module" src="/js/vacancy-add.js"></script>
+
+        <form id="edit-form" class="add-form" action="/edit" method="POST">
+          <input
+            class="input-add"
+            type="number"
+            placeholder="ID"
+            name="ID"
+            min="1"
+          />
+          <input
+            class="input-add"
+            type="text"
+            placeholder="Name"
+            name="name"
+            required
+          />
+          <input
+            class="input-add"
+            type="number"
+            placeholder="Department"
+            name="department_ID"
+            min="1"
+          />
+          <input
+            class="input-add"
+            type="text"
+            placeholder="Description"
+            name="description"
+          />
+          <input
+            class="input-add"
+            type="number"
+            placeholder="Experience"
+            name="experience_required"
+            min="0"
+            required
+          />
+          <input
+            class="input-add"
+            type="number"
+            placeholder="Salary"
+            name="salary"
+            min="1"
+          />
+          <input
+            class="input-add"
+            type="date"
+            placeholder="Posting date"
+            name="posting_date"
+          />
+          <input
+            class="input-add"
+            type="number"
+            placeholder="Status"
+            name="status"
+            min="1"
+          />
+          <button class="button" type="submit">Редактировать</button>
+        </form>
+        <script type="module" src="/js/vacancy-edit.js"></script>
       </div>
 
       <div class="table-container">
