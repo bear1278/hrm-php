@@ -33,6 +33,12 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
   <body>
     <header>
       <div class="header-container">
+        <nav class="navigation">
+          <ul>
+            <li><a class="a" href="http://localhost/">Вакансии</a></li>
+            <li><a class="a" href="http://localhost/applications">Отклики</a></li>
+          </ul>
+        </nav>
         <form id="search-form" action="/search" method="POST">
           <input
             class="input"
@@ -48,127 +54,98 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
       </div>
     </header>
     <main>
-      <div>
-        <div id="result"></div>
-        <form id="add-form" class="add-form" action="/add" method="POST">
-          <input
-            class="input-add"
-            type="text"
-            placeholder="Name"
-            name="name"
-            required
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Department"
-            name="department_ID"
-            min="1"
-          />
-          <input
-            class="input-add"
-            type="text"
-            placeholder="Description"
-            name="description"
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Experience"
-            name="experience_required"
-            min="0"
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Salary"
-            name="salary"
-            min="1"
-          />
-          <input
-            class="input-add"
-            type="date"
-            placeholder="Posting date"
-            name="posting_date"
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Status"
-            name="status"
-            min="1"
-          />
-          <button class="button" type="submit">Добавить</button>
-        </form>
+      <div class="main-container">
+        <button id="button-add" class="button" type="submit">Добавить вакансию</button>
         <script type="module" src="/js/vacancy-add.js"></script>
 
-        <form id="edit-form" class="add-form" action="/edit" method="POST">
-          <input
-            class="input-add"
-            type="number"
-            placeholder="ID"
-            name="ID"
-            min="1"
-          />
-          <input
-            class="input-add"
-            type="text"
-            placeholder="Name"
-            name="name"
-            required
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Department"
-            name="department_ID"
-            min="1"
-          />
-          <input
-            class="input-add"
-            type="text"
-            placeholder="Description"
-            name="description"
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Experience"
-            name="experience_required"
-            min="0"
-            required
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Salary"
-            name="salary"
-            min="1"
-          />
-          <input
-            class="input-add"
-            type="date"
-            placeholder="Posting date"
-            name="posting_date"
-          />
-          <input
-            class="input-add"
-            type="number"
-            placeholder="Status"
-            name="status"
-            min="1"
-          />
-          <button class="button" type="submit">Редактировать</button>
-        </form>
-        <script type="module" src="/js/vacancy-edit.js"></script>
-      </div>
+        <div id="vacancyModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Добавить вакансию</h2>
+            <form id="vacancy-form" action="/add" method="POST" class="modal-form">
+              <label for="vacancy-title">Название вакансии</label>
+              <input class="input-modal" type="text" id="vacancy-title" name="name" required />
 
+              <label for="vacancy-department">Отдел</label>
+              <select class="input-modal" id="vacancy-department" name="department_ID">
+                <?php foreach ($departments as $department): ?>
+                <option value="<?php echo htmlspecialchars($department['department_id']); ?>">
+                  <?php echo htmlspecialchars($department['name']); ?>
+                </option>
+                <?php endforeach; ?>
+              </select>
+
+              <label for="vacancy-description">Описание вакансии</label>
+              <textarea class="input-modal" id="vacancy-description" name="description" required></textarea>
+
+              <label for="vacancy-skills">Необходимые навыки</label>
+              <select class="input-modal skills-select" id="vacancy-skills" name="skills[]" multiple size="5" >
+                <?php foreach ($skills as $skill): ?>
+                <option value="<?php echo htmlspecialchars($skill['skill_ID']); ?>">
+                  <?php echo htmlspecialchars($skill['name']); ?>
+                </option>
+                <?php endforeach; ?>
+              </select>
+
+              <label for="vacancy-experience">Требуемый опыт</label>
+              <input class="input-modal" type="number" min="0" id="vacancy-experience" name="experience_required" required />
+
+              <label for="vacancy-salary">Зарплата</label>
+              <input class="input-modal" min="1" type="number" id="vacancy-salary" name="salary" required />
+
+              <button id="button-save" class="button" type="submit">Сохранить</button>
+            </form>
+          </div>
+        </div>
+
+        <div id="editModal" class="modal">
+          <div class="modal-content">
+            <span id="edit-close" class="close">&times;</span>
+            <h2>Редактировать вакансию</h2>
+            <form id="vacancy-form-edit" action="/edit" method="POST" class="modal-form">
+              <input type="hidden" name="vacancy_ID" id="vacancy_ID">
+              <label for="vacancy-title1">Название вакансии</label>
+              <input class="input-modal" type="text" id="vacancy-title1" name="name" required />
+
+              <label for="vacancy-department1">Отдел</label>
+              <select class="input-modal" id="vacancy-department1" name="department_ID">
+                <?php foreach ($departments as $department): ?>
+                <option value="<?php echo htmlspecialchars($department['department_id']); ?>">
+                  <?php echo htmlspecialchars($department['name']); ?>
+                </option>
+                <?php endforeach; ?>
+              </select>
+
+              <label for="vacancy-description1">Описание вакансии</label>
+              <textarea class="input-modal" id="vacancy-description1" name="description" required></textarea>
+
+              <label for="vacancy-skills1">Необходимые навыки</label>
+              <select class="input-modal skills-select" id="vacancy-skills1" name="skills[]" multiple size="5" >
+                <?php foreach ($skills as $skill): ?>
+                <option value="<?php echo htmlspecialchars($skill['skill_ID']); ?>">
+                  <?php echo htmlspecialchars($skill['name']); ?>
+                </option>
+                <?php endforeach; ?>
+              </select>
+
+              <label for="vacancy-experience1">Требуемый опыт</label>
+              <input class="input-modal" type="number" min="0" id="vacancy-experience1" name="experience_required" required />
+
+              <label for="vacancy-salary1">Зарплата</label>
+              <input class="input-modal" min="1" type="number" id="vacancy-salary1" name="salary" required />
+
+              <button id="button-edit" class="button" type="submit">Сохранить</button>
+            </form>
+          </div>
+        </div>
+      </div>
       <div class="table-container">
         <table border="1">
           <tr>
             <?php foreach ($columns as $column): ?>
             <th><?php echo htmlspecialchars($column); ?></th>
             <?php endforeach; ?>
+            <th></th>
             <th></th>
           </tr>
 
@@ -189,6 +166,16 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
               </button>
               <script type="module" src="/js/vacancy-delete.js"></script>
             </td>
+            <td>
+              <button
+                      class="edit-button"
+                      type="button"
+                      value="<?php echo htmlspecialchars($row['vacancy_ID']); ?>"
+              >
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+
+            </td>
           </tr>
 
           <?php endforeach; ?>
@@ -203,5 +190,6 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
         </table>
       </div>
     </main>
+    <script type="module" src="/js/vacancy-edit.js"></script>
   </body>
 </html>

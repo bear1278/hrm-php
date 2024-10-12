@@ -82,7 +82,11 @@ document.querySelector("form").addEventListener("submit", function (event) {
         ).innerHTML = `<p style="color: red;">${data.error}</p>`;
       } else if (data.success) {
         // Redirect on successful login
-        window.location.href = "/";
+        if (role.value==4){
+          window.location.href = "/resume";
+        }else{
+          window.location.href = "/";
+        }
       }
     })
     .catch((error) => {

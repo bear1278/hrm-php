@@ -33,15 +33,29 @@ class CandidateModel {
         $stmt->bindParam(':resume', $resume);
         $stmt->bindParam(':experience_year', $exp);
         $stmt->bindParam(':location', $location);
+        return $stmt->execute();
+        } catch (Exception $e) {
+            throw new Exception("Ошибка при регистрации пользователя: " . $e->getMessage());
+        }
+    }
 
-        // Execute the query
-        $stmt->execute();
-        
-        return $this->pdo->lastInsertId();
-        } catch (PDOException $e) {
-            // Handle any errors
-            echo "Error: " . $e->getMessage();
-            return false;
+    public function updateCandidate($id, $number, $resume, $exp, $location)
+    {
+        try {
+            // Prepare an SQL statement to insert the user data into the "users" table
+            $stmt = $this->pdo->prepare("UPDATE candidates 
+            SET phone_number=:phone_number, resume=:resume,experience_years=:experience_year, location=:location
+            WHERE candidate_ID=:user_ID");
+            $role=4;
+            // Bind parameters to the SQL query
+            $stmt->bindParam(':user_ID', $id);
+            $stmt->bindParam(':phone_number', $number);
+            $stmt->bindParam(':resume', $resume);
+            $stmt->bindParam(':experience_year', $exp);
+            $stmt->bindParam(':location', $location);
+            return $stmt->execute();
+        } catch (Exception $e) {
+            throw new Exception("Ошибка при регистрации пользователя: " . $e->getMessage());
         }
     }
 }

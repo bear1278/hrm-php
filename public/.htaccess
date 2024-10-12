@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Exclude specific routes like /login and /dashboard from being redirected to index.php
+ 
+
+# Redirect all other requests to index.php except actual files and directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

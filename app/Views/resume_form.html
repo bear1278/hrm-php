@@ -12,16 +12,14 @@
 <body>
     <main>
         <div class="circle"></div>
-        <?php if (isset($error)): ?>
-            <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
-        <?php endif; ?>
         <form class="register-form-container" action='/resume' method='POST'>
+            <div id="result"></div>
             <h1 class="form-title">
                 Резюме
             </h1>
             <div class="form-fields">
                 <div class="form-field">
-                    <input type="tel" placeholder="Phone number" name="phone_number" pattern="+[0-9]{3}-[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}>
+                    <input type="tel" placeholder="Phone number" name="phone_number">
                 </div>
                 <div class="form-field">
                     <input type="text" placeholder="Resume" name="resume">
@@ -39,6 +37,6 @@
             </div>
         </form>
     </main>
-    <script type="module" src="/js/sign-up.js"></script>
+    <script type="module" src="/js/resume-add.js"></script>
 </body>
 </html>

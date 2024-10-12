@@ -14,11 +14,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const formData = new FormData(vacancyForm);
 
-        fetch('/edit', {
+        fetch('/role', {
             method: 'POST',
             body: formData
         })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка выполнения запроса');
+                }
+                return response.text();
+            })
             .then(data => {
                 console.log('Success:', data);
                 modal.style.display = 'none'; // Закрытие модального окна
@@ -27,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch((error) => {
                 console.error('Error:', error);
             });
+
     });
 
     const closeModal = () => {
@@ -46,20 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // При нажатии на кнопку "Редактировать"
     editButtons.forEach((button) => {
         button.addEventListener('click', function () {
-            const vacancyRow = this.closest('tr');
-            const vacancyData = {
-                name: vacancyRow.querySelector('td:nth-child(1)').textContent,
-                description: vacancyRow.querySelector('td:nth-child(3)').textContent,
-                experience: vacancyRow.querySelector('td:nth-child(4)').textContent,
-                salary: vacancyRow.querySelector('td:nth-child(5)').textContent,
-            };
 
-            // Заполнить форму модального окна
-            document.getElementById('vacancy_ID').value = this.value;
-            document.getElementById('vacancy-title1').value = vacancyData.name;
-            document.getElementById('vacancy-description1').value = vacancyData.description;
-            document.getElementById('vacancy-experience1').value = vacancyData.experience;
-            document.getElementById('vacancy-salary1').value = vacancyData.salary;
+            document.getElementById('user_ID').value = this.value;
 
             openModal(); // Открыть модальное окно
         });

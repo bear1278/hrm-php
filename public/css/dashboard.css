@@ -5,17 +5,21 @@
 }
 body {
   font-family: "Roboto", sans-serif;
+  background-color: #f0f2f5;
 }
 
 .header-container {
-  margin-top: 50px;
   margin-bottom: 50px;
   max-width: 100%;
-  height: 50px;
+  height: 100px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
+  background-color: #fff;
+  padding: 10px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
 }
 
 .input {
@@ -49,15 +53,19 @@ body {
   line-height: 45px;
   cursor: pointer;
   border: none;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 .button:hover {
   background-color: #0d6cf2;
 }
 
+
+
 .trash-button {
   background-color: transparent;
-  transition: color 0.5s ease;
+  transition: color 0.25s ease;
   border: none;
   cursor: pointer;
   width: 15px;
@@ -66,6 +74,19 @@ body {
 
 .trash-button:hover {
   color: darkred;
+}
+
+.edit-button{
+  background-color: transparent;
+  transition: color 0.25s ease;
+  border: none;
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+}
+
+.edit-button:hover {
+  color: green;
 }
 
 .table-container {
@@ -131,5 +152,93 @@ td {
   max-width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.navigation ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navigation a {
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 27px;
+  color: #247FFF;
+}
+
+
+a:hover{
+  color: #013fa8;
+}
+
+
+/* Стили для модального окна */
+.modal {
+  display: none; /* Скрываем по умолчанию */
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  overflow: auto;
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+}
+
+.modal-form{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover, .close:focus {
+  color: black;
+  cursor: pointer;
+}
+
+.input-modal{
+  min-width: 400px;
+  height: 35px;
+  color: #3b5983;
+  font-size: 14px;
+  line-height: 16px;
+  border: 2px solid #e9f2ff;
+  border-radius: 5px;
+  padding-left: 25px;
+}
+
+.input-modal:focus {
+  outline: none;
+  border: 2px solid #c1d9fd;
+}
+
+.skills-select{
+  height: 90px;
+}
+
+.main-container{
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }

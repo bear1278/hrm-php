@@ -16,29 +16,56 @@ class DashboardController {
 
     public function displaySearchResult() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $search = trim($_POST['search']);
-            if (empty($search)){
-                $this->showDasboard();
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
+            $search = $data['search'];
+            if (empty($search)) {
+                http_response_code(301);
                 return;
             }
-            try{
-            $data = $this->model->getVacanciesWithParam($search);
-            $columns = $this->model->getTableColumns();
-            }
-            catch(Exception $e){
-                http_response_code(500);
-                $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
-                header("Location: /error?message=" . $errorMessage);
-                exit();
-            }
-            require_once __DIR__ . '/../Views/dashboard.html';
 
+            try {
+                // Получаем вакансии по параметрам поиска
+                $data = $this->model->getVacanciesWithParam($search);
+                $columns = $this->model->getTableColumns();
+                $columns_type = $this->model->getColumnsType();
+            } catch (Exception $e) {
+                http_response_code(500);
+                $this->sendJsonResponse([
+                    'error' => 'Ошибка подключения к базе данных: ' . $e->getMessage()
+                ]);
+                return;
+            }
+
+            // Формируем ответ в зависимости от роли пользователя
+            if ($_SESSION['role'] == 4) {
+                // Для роли 4 - выполняем специфический поиск
+                $data = $this->GetSearchForCandidate($search, $_SESSION['user_id']);
+            }
+
+            // Отправляем JSON-ответ с данными
+            $this->sendJsonResponse([
+                'data' => $data,
+                'columns' => $columns,
+                'columns_type' => $columns_type
+            ]);
         }
     }
+
+// Вспомогательный метод для отправки JSON-ответа
+    private function sendJsonResponse($response) {
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
+    }
+
     public function showDasboard() {
         try{
-        $data = $this->model->getVacancies();
+        $data = $this->model->getVacancies($_SESSION['user_id']);
         $columns = $this->model->getTableColumns();
+        $columns_type = $this->model->getColumnsType();
+        $departments = $this->model->SelectAllDepartments();
+        $skills =$this->model->SelectAllSkills();
         }
         catch(Exception $e){
                 http_response_code(500);
@@ -46,7 +73,52 @@ class DashboardController {
                 header("Location: /error?message=" . $errorMessage);
                 exit();
             }
-        require_once __DIR__ . '/../Views/dashboard.html';
+        if($_SESSION['role']==4){
+            $data = $this->GetVacanciesForCandidate($_SESSION['user_id']);
+            require_once __DIR__ . '/../Views/dashboardCandidate.html';
+        }elseif($_SESSION['role']==2){
+            require_once __DIR__ . '/../Views/dashboard.html';
+        }elseif ($_SESSION['role']==1){
+            try{
+                $data = $this->model->SelectAllUsers($_SESSION['user_id']);
+            $columns=array_keys($data[0]);
+            $columns=array_diff($columns,['user_ID']);
+            $roles = $this->model->SelectRoles();
+            }catch(Exception $e){
+                http_response_code(500);
+                $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
+                header("Location: /error?message=" . $errorMessage);
+                exit();
+            }
+            require_once __DIR__ . '/../Views/admin.html';
+        }
+
+    }
+
+    public function GetVacanciesForCandidate($id)
+    {
+        try{
+            return $this->model->SelectVacanciesForCandidate($id);
+        }
+        catch(Exception $e){
+            http_response_code(500);
+            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+            exit();
+        }
+    }
+
+    public function GetSearchForCandidate($search,$id)
+    {
+        try{
+            return $this->model->getVacanciesWithParamForCandidate($search,$id);
+        }
+        catch(Exception $e){
+            http_response_code(500);
+            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+            exit();
+        }
     }
 
     public function deleteVacancy($id){
@@ -71,19 +143,17 @@ class DashboardController {
     public function editVacancy(){
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $ID=trim($_POST['ID']);
+            $ID=trim($_POST['vacancy_ID']);
             $name = trim($_POST['name']);
             $department_ID = trim($_POST['department_ID']);
             $description = trim($_POST['description']);
             $experience_required = trim($_POST['experience_required']);
             $salary= trim($_POST['salary']);
-            $posting_date =trim($_POST['posting_date']);
-            $status =trim($_POST['status']);
+            $status =1;
+            $skills = $_POST['skills'];
 
-            
-            // Validate inputs
             if (empty($ID)) {
-                echo json_encode(['error' => 'Пожалуйста, заполните поле ID']);
+                echo json_encode(['error' => 'Ошибка']);
                 return;
             }
             try{
@@ -136,33 +206,18 @@ class DashboardController {
                 return;      
             }
 
-            try {
-                $postingDate = new DateTime($posting_date);
-            } catch (Exception $e) {
-                echo json_encode(['error' => 'Невалидное значение posting_date']);
-                return;
-            }
-
-            $maxDate = new DateTime('2050-12-31');
-            if ($postingDate > $maxDate) {
-                echo json_encode(['error' => 'Дата не должна превышать 2050-12-31']);
-                return; 
-            }
-
 
             if ($salary<0 || $salary>$maxIntValue) {
                 echo json_encode(['error' => 'Невалидное значение salary']);
                 return;      
             }
 
-            
-
             if ($status<1 || $status>$maxIntValue) {
                 echo json_encode(['error' => 'Невалидное значение status']);
                 return;      
             }
             try{
-            $result=$this->model->UpdateVacancy($ID,$name,$department_ID,$description,$experience_required,$salary,$posting_date,$status);
+            $result=$this->model->UpdateVacancyAndSkills($ID,$name,$department_ID,$description,$experience_required,$salary,$posting_date,$status,$skills);
             }catch(Exception $e){
                 http_response_code(500);
                 echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
@@ -170,7 +225,6 @@ class DashboardController {
             }
 
             if ($result) {
-                
                 echo json_encode(['success' => true]);
                 exit();
             } else {
@@ -188,10 +242,15 @@ class DashboardController {
             $department_ID = trim($_POST['department_ID']);
             $description = trim($_POST['description']);
             $experience_required = trim($_POST['experience_required']);
+            $skills=$_POST['skills'];
             $salary= trim($_POST['salary']);
-            $posting_date =trim($_POST['posting_date']);
-            $status =trim($_POST['status']);
+            $posting_date =date("Y-m-d H:i:s");
+            $status =1;
 
+            if (empty($skills)){
+                echo json_encode(['error' => 'Пожалуйста, выберите хотя бы один навык']);
+                return;
+            }
             
             // Validate inputs
             if (empty($name) ||  empty($department_ID) || empty($description) || empty($salary) || empty($posting_date) || empty($status)) {
@@ -218,41 +277,19 @@ class DashboardController {
                 return;      
             }
 
-            try {
-                $postingDate = new DateTime($posting_date);
-            } catch (Exception $e) {
-                echo json_encode(['error' => 'Невалидное значение posting_date']);
-                return;
-            }
-
-            $maxDate = new DateTime('2050-12-31');
-            if ($postingDate > $maxDate) {
-                echo json_encode(['error' => 'Дата не должна превышать 2050-12-31']);
-                return; 
-            }
-
-
             if ($salary<0 || $salary>$maxIntValue) {
                 echo json_encode(['error' => 'Невалидное значение salary']);
                 return;      
             }
 
-            
-
-            if ($status<1 || $status>$maxIntValue) {
-                echo json_encode(['error' => 'Невалидное значение status']);
-                return;      
-            }
             try{
-            $result=$this->model->Insert($name,$department_ID,$description,$experience_required,$salary,$posting_date,$status);
+            $result=$this->model->InsertNewVacancy($name,$department_ID,$description,$experience_required,$salary,$posting_date,$status,$_SESSION['user_id'],$skills);
             }catch(Exception $e){
                 http_response_code(500);
                 echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
                 exit();
             }
-
             if ($result) {
-                
                 echo json_encode(['success' => true]);
                 exit();
             } else {
