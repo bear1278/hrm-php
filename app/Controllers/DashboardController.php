@@ -15,6 +15,17 @@ class DashboardController {
     }
 
     public function displaySearchResult() {
+        if($_SESSION['role']===2){
+            $search=$_POST['search'];
+            if (empty($search)){
+                $this->showDasboard();
+                return;
+            }
+            $data = $this->model->getVacanciesSearchManager($_SESSION['user_id'],$search);
+            $columns = $this->model->getTableColumns();
+            require_once __DIR__ . '/../Views/dashboard.html';
+            return;
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $json = file_get_contents('php://input');
             $data = json_decode($json, true);
@@ -25,7 +36,6 @@ class DashboardController {
             }
 
             try {
-                // Получаем вакансии по параметрам поиска
                 $data = $this->model->getVacanciesWithParam($search);
                 $columns = $this->model->getTableColumns();
                 $columns_type = $this->model->getColumnsType();

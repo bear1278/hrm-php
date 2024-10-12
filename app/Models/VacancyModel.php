@@ -54,6 +54,26 @@ class VacancyModel {
         }
     }
 
+    public function getVacanciesSearchManager($id,$search) {
+        try{
+            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
+                FROM vacancies as V 
+                INNER JOIN departments as D 
+                ON V.department_ID=D.department_ID
+                INNER JOIN status as S
+                ON S.status_ID=V.status 
+                WHERE author = :id AND V.name LIKE :search";
+            $search = "%".$search."%";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id',$id);
+            $stmt->bindParam(':search',$search);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Ошибка: " . $e->getMessage());
+        }
+    }
+
     public function SelectVacanciesForCandidate($id)
     {
         try{
@@ -117,6 +137,8 @@ class VacancyModel {
             throw new Exception("Ошибка: " . $e->getMessage());
         }
     }
+
+
 
 
     public function getVacanciesWithParam($data) {
