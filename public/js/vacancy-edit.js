@@ -22,9 +22,11 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then((data) => {
+                        throw new Error(data.error || "Произошла ошибка");
+                    });
                 }
-                return response.json(); // Обработка ответа как JSON
+                return response.json();
             })
             .then(data => {
                 if (data.error) {
@@ -39,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch((error) => {
                 console.error('Error:', error);
-                errorMessageDiv.textContent = 'Произошла ошибка при обработке запроса.'; // Сообщение о внутренней ошибке
+                errorMessageDiv.textContent = `${error}`; // Сообщение о внутренней ошибке
                 errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
             });
     });
@@ -72,8 +74,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Заполнить форму модального окна
             document.getElementById('vacancy_ID').value = this.value;
-            document.getElementById('vacancy-title1').value = vacancyData.name;
-            document.getElementById('vacancy-description1').value = vacancyData.description;
+            document.getElementById('vacancy-title1').value = vacancyData.name.trim();
+            document.getElementById('vacancy-description1').value = vacancyData.description.trim();
             document.getElementById('vacancy-experience1').value = parseInt(vacancyData.experience);
             document.getElementById('vacancy-salary1').value = parseInt(vacancyData.salary);
 

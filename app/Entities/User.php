@@ -53,7 +53,7 @@ class User
     public function setFirstName($first_name)
     {
         if (empty($first_name)) {
-            throw new InvalidArgumentException('First name cannot be empty');
+            throw new InvalidArgumentException('Имя не может быть пустым');
         }
         if (!is_string($first_name)) {
             throw new InvalidArgumentException('First name must be a string');
@@ -75,7 +75,7 @@ class User
     public function setLastName($last_name)
     {
         if (empty($last_name)) {
-            throw new InvalidArgumentException('Last name cannot be empty');
+            throw new InvalidArgumentException('Фамилия не может быть пустой строкой');
         }
         if (!is_string($last_name)) {
             throw new InvalidArgumentException('Last name must be a string');
@@ -97,10 +97,10 @@ class User
     public function setPassword($password)
     {
         if (empty($password)) {
-            throw new InvalidArgumentException('Password cannot be empty');
+            throw new InvalidArgumentException('Пароль не может быть пустым');
         }
         if (strlen($password) < 6) {
-            throw new InvalidArgumentException('Password must be at least 6 characters long');
+            throw new InvalidArgumentException('Пароль не может быть меньше 6 символов');
         }
         $this->password = $password;
     }
@@ -119,10 +119,10 @@ class User
     public function setEmail($email)
     {
         if (empty($email)) {
-            throw new InvalidArgumentException('Email cannot be empty');
+            throw new InvalidArgumentException('Почта не может быть пустой');
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException('Invalid email format');
+            throw new InvalidArgumentException('Неверный формат почты');
         }
         $this->email = $email;
     }

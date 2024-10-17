@@ -112,7 +112,7 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
                     <input class="input-modal" type="text" id="vacancy-title1" name="name" required/>
 
                     <label for="vacancy-department1">Отдел</label>
-                    <select class="input-modal" id="vacancy-department1" name="department_ID">
+                    <select class="input-modal" id="vacancy-department1" name="department_ID" required>
                         <?php foreach ($departments as $department): ?>
                         <option value="<?php echo htmlspecialchars($department['department_id']); ?>">
                             <?php echo htmlspecialchars($department['name']); ?>
@@ -124,7 +124,7 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
                     <textarea class="input-modal" id="vacancy-description1" name="description" required></textarea>
 
                     <label for="vacancy-skills1">Необходимые навыки</label>
-                    <select class="input-modal skills-select" id="vacancy-skills1" name="skills[]" multiple size="5">
+                    <select class="input-modal skills-select" id="vacancy-skills1" name="skills[]" multiple size="5" required>
                         <?php foreach ($skills as $skill): ?>
                         <option value="<?php echo htmlspecialchars($skill['skill_ID']); ?>">
                             <?php echo htmlspecialchars($skill['name']); ?>

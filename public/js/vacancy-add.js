@@ -36,7 +36,9 @@ export function add() {
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then((data) => {
+                        throw new Error(data.error || "Произошла ошибка");
+                    });
                 }
                 return response.json(); // Обрабатываем ответ как JSON
             })
@@ -53,7 +55,7 @@ export function add() {
             })
             .catch((error) => {
                 console.error('Error:', error);
-                errorMessageDiv.textContent = 'Произошла ошибка при обработке запроса.'; // Сообщение о внутренней ошибке
+                errorMessageDiv.textContent = `${error}`; // Сообщение о внутренней ошибке
                 errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
             });
     });

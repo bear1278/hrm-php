@@ -60,24 +60,18 @@ document.querySelector("form").addEventListener("submit", function (event) {
             }
         }) // Parse the JSON response
         .then((data) => {
-            // Clear previous error message
             document.getElementById("result").innerHTML = "";
-
             if (data.error) {
-                // Display error if exists
                 document.getElementById(
                     "result"
                 ).innerHTML = `<p style="color: red;">${data.error}</p>`;
             } else if (data.success) {
-                // Redirect on successful login
-
                     window.location.href = "/";
-
             }
         })
         .catch((error) => {
             console.error("Error:", error);
             document.getElementById("result").innerHTML =
-                '<p style="color: red;">An error occurred. Please try again.</p>';
+                `<p style="color: red;">${error}</p>`;
         });
 });

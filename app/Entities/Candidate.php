@@ -177,7 +177,7 @@ class Candidate extends User
 
     private function validateExperience($experience)
     {
-        return is_numeric($experience) && $experience >= 0;
+        return is_numeric($experience) && $experience >= 0 && $experience<=2147483647;
     }
 
     private function validateLocation($location)

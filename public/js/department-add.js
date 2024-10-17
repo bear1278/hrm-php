@@ -17,6 +17,7 @@ form.addEventListener('submit', function (e) {
             if (response.status===302) {
                 window.location.href='/department'
             }
+            return response.json();
         })
         .then(data => {
             if (data.error) {
@@ -30,7 +31,7 @@ form.addEventListener('submit', function (e) {
         })
         .catch((error) => {
             console.error('Error:', error);
-            errorMessageDiv.textContent = 'Произошла ошибка при обработке запроса.'; // Сообщение о внутренней ошибке
+            errorMessageDiv.textContent = `${error}`; // Сообщение о внутренней ошибке
             errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
         });
 });
