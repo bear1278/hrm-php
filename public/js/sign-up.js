@@ -56,7 +56,6 @@ document.querySelector("form").addEventListener("submit", function (event) {
         // Если статус ответа 200-299
         return response.json(); // Получаем тело ответа
       } else if (response.status === 500) {
-        // Если статус ответа 500, перенаправляем на страницу ошибки
         return response.json().then((data) => {
           const errorMessage =
             data.error || "Произошла внутренняя ошибка сервера";
@@ -72,16 +71,13 @@ document.querySelector("form").addEventListener("submit", function (event) {
       }
     }) // Parse the JSON response
     .then((data) => {
-      // Clear previous error message
-      document.getElementById("result").innerHTML = "";
 
+      document.getElementById("result").innerHTML = "";
       if (data.error) {
-        // Display error if exists
         document.getElementById(
           "result"
         ).innerHTML = `<p style="color: red;">${data.error}</p>`;
       } else if (data.success) {
-        // Redirect on successful login
         if (role.value==4){
           window.location.href = "/resume";
         }else{
@@ -92,6 +88,6 @@ document.querySelector("form").addEventListener("submit", function (event) {
     .catch((error) => {
       console.error("Error:", error);
       document.getElementById("result").innerHTML =
-        '<p style="color: red;">An error occurred. Please try again.</p>';
+        `<p style="color: red;">${error}</p>`;
     });
 });

@@ -1,4 +1,7 @@
 <?php
+
+use app\Entities\Vacancy;
+
 // Start the session to access session variables
 
 // Check if the user is logged in
@@ -83,7 +86,14 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
       <?php foreach ($data as $row): ?>
       <tr>
         <?php foreach ($columns as $column): ?>
-        <td><?php echo htmlspecialchars($row[$column]); ?></td>
+        <td><?php
+        if ($column == 'posting date')
+        {
+        echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}()->format('Y-m-d'));
+        }else{
+          echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}());
+          }
+         ?></td>
 
         <?php endforeach; ?>
 
@@ -91,7 +101,7 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
           <button
                   class="button-apply"
                   type="button"
-                  value="<?php echo htmlspecialchars($row['vacancy_ID']); ?>"
+                  value="<?php echo htmlspecialchars($row->getId()); ?>"
           >
             <i class="fa-solid fa-check"></i>
           </button>

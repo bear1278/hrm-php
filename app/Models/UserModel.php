@@ -1,49 +1,58 @@
 <?php
-// app/Models/UserModel.php
+
+namespace app\Models;
+
+use app\Entities\User;
+use Exception;
+use PDO;
+use PDOException;
 
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../app/Entities/User.php';
 
-
-
-class UserModel {
-    
+class UserModel
+{
     protected $pdo;
 
-    // Constructor to initialize the database connection
-    public function __construct() {
+    public function __construct()
+    {
         global $pdo;
         $this->pdo = $pdo;
     }
 
-    public function findUserByUsername($email) {
-        try{
-            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+    /**
+     * @throws Exception
+     */
+    public function findUserByEmail($email)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$userData){
+            return false;
         }
-        catch(PDOException $e){
-            throw new Exception("Ошибка при входе пользователя: " . $e->getMessage());
-        }
+        return new User($userData['user_ID'],
+            $userData['role_ID'],
+            $userData['email'],
+            $userData['password'],
+            $userData['last_name'],
+            $userData['first_name']);
     }
 
-    public function createUser($firstname,$lastname,$email,$password,$role){
-        try {
-        
+    public function createUser(User $user)
+    {
         $stmt = $this->pdo->prepare("INSERT INTO users (first_name, last_name, email, password,role_ID) VALUES (:firstname, :lastname, :email, :password, :role_ID)");
-
-        // Bind parameters to the SQL query
+        $firstname = $user->getFirstName();
+        $lastname = $user->getLastName();
+        $email = $user->getEmail();
+        $password = $user->getPassword();
+        $role = $user->getRole();
         $stmt->bindParam(':firstname', $firstname);
         $stmt->bindParam(':lastname', $lastname);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $password);
         $stmt->bindParam(':role_ID', $role);
-
-        // Execute the query
         $stmt->execute();
-        
         return $this->pdo->lastInsertId();
-        } catch (PDOException $e) {
-            throw new Exception("Ошибка при регистрации пользователя: " . $e->getMessage());
-        }
     }
 }

@@ -1,65 +1,68 @@
 <?php
-// app/Controllers/LoginController.php
+
+namespace app\Controllers;
 
 require_once __DIR__ . '/../Models/UserModel.php';
-require_once __DIR__ . '/../Helpers/AuthHelper.php'; 
+require_once __DIR__ . '/../Helpers/AuthHelper.php';
 
-class SignUpController{
+use app\Entities\User;
+use app\Helpers\AuthHelper;
+use app\Models\UserModel;
+use Exception;
+use PDOException;
 
-    public function ShowRegistration(){
+class SignUpController
+{
+    private $model;
+
+    public function __construct()
+    {
+        $this->model = new UserModel();
+    }
+
+    public function ShowRegistration()
+    {
         require_once __DIR__ . '/../Views/signup_form.html';
     }
 
-    public function SignUp() {
-        header('Content-Type: application/json');
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $role = trim($_POST['role']);
-            $firstname = trim($_POST['firstname']);
-            $lastname = trim($_POST['lastname']);
-            $email = trim($_POST['email']);
-            $password = trim($_POST['password']);
+    public function signUp()
+    {
+        try {
+            header('Content-Type: application/json');
+            $user = new User(null, (int)trim($_POST['role']),
+                trim($_POST['email']),
+                trim($_POST['password']),
+                trim($_POST['lastname']),
+                trim($_POST['firstname']));
             $confirmPassword = trim($_POST['confirmPassword']);
-
-            
-            // Validate inputs
-            if (empty($role) || empty($firstname) ||  empty($lastname) || empty($password) || empty($email) || empty($confirmPassword)) {
-                echo json_encode(['error' => 'Пожалуйста, заполните все поля']);
-                return;
+            if (empty($confirmPassword)) {
+                throw new Exception('пожалуйста, заполните все поля');
             }
-
-            if ($password!=$confirmPassword) {
-                echo json_encode(['error' => 'Пароли не совпадают']);
-                return;      
+            if ($user->getPassword() != $confirmPassword) {
+                throw new Exception('пароли не совпадают');
             }
-            
-            try{
-
-            $userModel = new UserModel();
-            $user = $userModel->findUserByUsername($email);
-
-            if ($user){
-                echo json_encode(['error' => 'Аккаунт уже существует']);
-                exit();
-            }
-
-            $hashedPassword = password_hash($password,PASSWORD_DEFAULT);
-
-            $result=$userModel->createUser($firstname,$lastname,$email,$hashedPassword,$role);
-            }
-            catch (Exception $e){
-                http_response_code(500);
-                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
-                exit();
-            }
-
+            $result = $this->model->findUserByEmail($user->getEmail());
             if ($result) {
-                AuthHelper::login($result,$firstname,$lastname, $email,$role);
+                throw new Exception('существует аккаунт с данной почтой');
+            }
+            $user->setPassword(password_hash($user->getPassword(), PASSWORD_DEFAULT));
+            $result = $this->model->createUser($user);
+            if ($result) {
+                $user->setId($result);
+                AuthHelper::login($user);
                 echo json_encode(['success' => true]);
-                exit();
             } else {
                 echo json_encode(['error' => 'Database error']);
-                exit();
             }
+            exit();
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
+            exit();
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['error' => $e->getMessage()]);
+            exit();
         }
     }
 }

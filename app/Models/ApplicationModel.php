@@ -1,7 +1,11 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
 
+namespace app\Models;
 
+use app\Entities\Application;
+use Exception;
+use PDO;
+use PDOException;
 
 class ApplicationModel
 {
@@ -17,7 +21,7 @@ class ApplicationModel
     public function selectApplications($id)
     {
         try{
-            $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `postingdate`,
+            $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
@@ -33,16 +37,32 @@ class ApplicationModel
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $applications = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $applications[] = new Application(
+                    $row['application_ID'],
+                    null,
+                    $row['application date'],
+                    $row['application status'],
+                    $row['name'],
+                    $row['department'],
+                    $row['description'],
+                    $row['experience'],
+                    $row['salary'],
+                    $row['posting date'],
+                    $row['vacancy status']
+                );
+            }
+            return $applications;
         } catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
     public function SelectAllApplicationManager($id)
     {
         try{
-            $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `postingdate`,
+            $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
@@ -60,15 +80,31 @@ class ApplicationModel
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $applications = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $applications[] = new Application(
+                    $row['application_ID'],
+                    $row['candidate'],
+                    $row['application date'],
+                    $row['application status'],
+                    $row['name'],
+                    $row['department'],
+                    $row['description'],
+                    $row['experience'],
+                    $row['salary'],
+                    $row['posting date'],
+                    $row['vacancy status']
+                );
+            }
+            return $applications;
         } catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
     public function getTableColumns() {
         try{
-            $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,V.name,D.name as department,description,experience_required as experience,salary,posting_date as `postingdate`,
+            $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             V.status as `vacancy status`,application_date as `application date`,A.status as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
@@ -104,7 +140,7 @@ class ApplicationModel
             $stmt->bindParam(':status', $status);
             return $stmt->execute();
         } catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
@@ -117,14 +153,14 @@ class ApplicationModel
             $stmt->bindParam(':id', $id);
             return $stmt->execute();
         }catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
     public function SelectApplicationsWithParam($id,$search)
     {
         try {
-            $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `postingdate`,
+            $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
@@ -142,16 +178,32 @@ class ApplicationModel
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':search', $search,PDO::PARAM_STR);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $applications = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $applications[] = new Application(
+                    $row['application_ID'],
+                    null,
+                    $row['application date'],
+                    $row['application status'],
+                    $row['name'],
+                    $row['department'],
+                    $row['description'],
+                    $row['experience'],
+                    $row['salary'],
+                    $row['posting date'],
+                    $row['vacancy status']
+                );
+            }
+            return $applications;
         } catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
     public function SelectApplicationsManagerWithParam($id,$search)
     {
         try {
-            $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `postingdate`,
+            $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
@@ -171,9 +223,25 @@ class ApplicationModel
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':search', $search,PDO::PARAM_STR);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $applications = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $applications[] = new Application(
+                    $row['application_ID'],
+                    $row['candidate'],
+                    $row['application date'],
+                    $row['application status'],
+                    $row['name'],
+                    $row['department'],
+                    $row['description'],
+                    $row['experience'],
+                    $row['salary'],
+                    $row['posting date'],
+                    $row['vacancy status']
+                );
+            }
+            return $applications;
         } catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
@@ -188,7 +256,7 @@ class ApplicationModel
             $stmt->bindParam(':status',$status);
             return $stmt->execute();
         } catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 }

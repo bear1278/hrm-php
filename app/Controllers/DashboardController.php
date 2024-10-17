@@ -1,313 +1,218 @@
 <?php
-// app/Controllers/LoginController.php
+
+namespace app\Controllers;
+
+use app\Entities\Vacancy;
+use app\Helpers\AuthHelper;
+use app\Models\VacancyModel;
+use Exception;
+use PDOException;
+
 
 require_once __DIR__ . '/../Models/VacancyModel.php';
 require_once __DIR__ . '/../Helpers/AuthHelper.php';
 
 
-
-class DashboardController {
-    
+class DashboardController
+{
     private $model;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->model = new VacancyModel();
     }
 
-    public function displaySearchResult() {
-        if($_SESSION['role']===2){
-            $search=$_POST['search'];
-            if (empty($search)){
-                $this->showDasboard();
-                return;
-            }
-            $data = $this->model->getVacanciesSearchManager($_SESSION['user_id'],$search);
+    public function showDashboard()
+    {
+        try {
             $columns = $this->model->getTableColumns();
-            require_once __DIR__ . '/../Views/dashboard.html';
-            return;
-        }
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $json = file_get_contents('php://input');
-            $data = json_decode($json, true);
-            $search = $data['search'];
-            if (empty($search)) {
-                http_response_code(301);
-                return;
+            $columns_type = $this->model->getColumnsType();
+            $departments = $this->model->SelectAllDepartments();
+            $skills = $this->model->SelectAllSkills();
+            if (AuthHelper::isCandidate()) {
+                $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id']);
+                require_once __DIR__ . '/../Views/dashboardCandidate.html';
+                exit();
+            } elseif (AuthHelper::isManager()) {
+                $data = $this->model->getVacancies($_SESSION['user_id']);
+                require_once __DIR__ . '/../Views/dashboard.html';
+                exit();
+            } elseif (AuthHelper::isAdmin()) { // ToDo: think about store many models and implement it
+                $data = $this->model->SelectAllUsers($_SESSION['user_id']);
+                $columns = array_keys($data[0]);
+                $columns = array_diff($columns, ['user_ID']);
+                $roles = $this->model->SelectRoles();
+                require_once __DIR__ . '/../Views/admin.html';
+                exit();
             }
-
-            try {
-                $data = $this->model->getVacanciesWithParam($search);
-                $columns = $this->model->getTableColumns();
-                $columns_type = $this->model->getColumnsType();
-            } catch (Exception $e) {
-                http_response_code(500);
-                $this->sendJsonResponse([
-                    'error' => 'Ошибка подключения к базе данных: ' . $e->getMessage()
-                ]);
-                return;
-            }
-
-            // Формируем ответ в зависимости от роли пользователя
-            if ($_SESSION['role'] == 4) {
-                // Для роли 4 - выполняем специфический поиск
-                $data = $this->GetSearchForCandidate($search, $_SESSION['user_id']);
-            }
-
-            // Отправляем JSON-ответ с данными
-            $this->sendJsonResponse([
-                'data' => $data,
-                'columns' => $columns,
-                'columns_type' => $columns_type
-            ]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+            exit();
+        } catch (Exception $e) {
+            http_response_code(400);
+            $errorMessage = urlencode($e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+            exit();
         }
     }
 
-// Вспомогательный метод для отправки JSON-ответа
-    private function sendJsonResponse($response) {
+    public function displaySearchResult()
+    {
+        try {
+            $columns = $this->model->getTableColumns();
+            $columns_type = $this->model->getColumnsType();
+            if (AuthHelper::isManager()) {
+                $search = $_POST['search'];
+                if (empty($search)) {
+                    $this->showDashboard();
+                    return;
+                }
+                $data = $this->model->getVacanciesSearchManager($_SESSION['user_id'], $search);
+                require_once __DIR__ . '/../Views/dashboard.html';
+                return;
+            }
+            if (AuthHelper::isCandidate()) {
+                $json = file_get_contents('php://input');
+                $data = json_decode($json, true);
+                $search = $data['search'];
+                if (empty($search)) {
+                    http_response_code(301);
+                    return;
+                }
+                $data = $this->model->getVacanciesWithParamForCandidate($search, $_SESSION['user_id']);
+                $this->sendJsonResponse([
+                    'data' => $this->serializeData($data),
+                    'columns' => $columns,
+                    'columns_type' => $columns_type
+                ]);
+            }
+        } catch (PDOException $e) {
+            http_response_code(500);
+            $this->sendJsonResponse([
+                'error' => 'Ошибка подключения к базе данных: ' . $e->getMessage()
+            ]);
+            return;
+        } catch (Exception $e) {
+            http_response_code(400);
+            $this->sendJsonResponse([
+                'error' => $e->getMessage()
+            ]);
+            exit();
+        }
+    }
+
+    public function serializeData($data): array
+    {
+        return array_map(function ($vacancy) {
+            $dataArray = [];
+            foreach (Vacancy::fieldMapping as $key => $method) {
+                if (method_exists($vacancy, $method)) {
+                    $value = $vacancy->$method();
+                    if ($method === 'getPostingDate') {
+                        $value = $value->format('Y-m-d');
+                    }
+                    $dataArray[$key] = $value;
+                }
+            }
+            return $dataArray;
+        }, $data);
+    }
+
+    private function sendJsonResponse($response)
+    {
         header('Content-Type: application/json');
         echo json_encode($response);
         exit();
     }
 
-    public function showDasboard() {
-        try{
-        $data = $this->model->getVacancies($_SESSION['user_id']);
-        $columns = $this->model->getTableColumns();
-        $columns_type = $this->model->getColumnsType();
-        $departments = $this->model->SelectAllDepartments();
-        $skills =$this->model->SelectAllSkills();
-        }
-        catch(Exception $e){
-                http_response_code(500);
-                $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
-                header("Location: /error?message=" . $errorMessage);
-                exit();
-            }
-        if($_SESSION['role']==4){
-            $data = $this->GetVacanciesForCandidate($_SESSION['user_id']);
-            require_once __DIR__ . '/../Views/dashboardCandidate.html';
-        }elseif($_SESSION['role']==2){
-            require_once __DIR__ . '/../Views/dashboard.html';
-        }elseif ($_SESSION['role']==1){
-            try{
-                $data = $this->model->SelectAllUsers($_SESSION['user_id']);
-            $columns=array_keys($data[0]);
-            $columns=array_diff($columns,['user_ID']);
-            $roles = $this->model->SelectRoles();
-            }catch(Exception $e){
-                http_response_code(500);
-                $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
-                header("Location: /error?message=" . $errorMessage);
-                exit();
-            }
-            require_once __DIR__ . '/../Views/admin.html';
-        }
-
-    }
-
-    public function GetVacanciesForCandidate($id)
+    public function deleteVacancy($id)
     {
-        try{
-            return $this->model->SelectVacanciesForCandidate($id);
-        }
-        catch(Exception $e){
+        header('Content-Type: application/json');
+        try {
+            $result = $this->model->deleteVacancyFromDB($id);
+            if ($result) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Ошибка при удалении']);
+            }
+        } catch (PDOException $e) {
             http_response_code(500);
-            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
-            header("Location: /error?message=" . $errorMessage);
+            echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
+            exit();
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['error' => $e->getMessage()]);
             exit();
         }
     }
 
-    public function GetSearchForCandidate($search,$id)
+    public function editVacancy()
     {
-        try{
-            return $this->model->getVacanciesWithParamForCandidate($search,$id);
-        }
-        catch(Exception $e){
+        header('Content-Type: application/json');
+        try {
+            $vacancy = new Vacancy((int)trim($_POST['vacancy_ID']),
+                trim($_POST['name']),
+                trim($_POST['department_ID']),
+                trim($_POST['description']),
+                (int)trim($_POST['experience_required']),
+                trim($_POST['salary']),
+                null,
+                2,
+                $_SESSION['user_id'],
+                $_POST['skills']);
+            $oldVacancy = $this->model->getVacancyByID($vacancy->getId());
+            $vacancy->copy($oldVacancy[0]);
+            $result = $this->model->UpdateVacancyAndSkills($vacancy);
+            if ($result) {
+                echo json_encode(['success' => true]);
+                exit();
+            } else {
+                throw new Exception('Ошибка записи в базу данных');
+            }
+        } catch (PDOException $e) {
             http_response_code(500);
-            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
-            header("Location: /error?message=" . $errorMessage);
+            echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
+            exit();
+        }
+        catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
             exit();
         }
     }
 
-    public function deleteVacancy($id){
+    public
+    function addVacancy()
+    {
         header('Content-Type: application/json');
-        try{
-        $result= $this->model->deleteVacancyFromDB($id);
-        }catch(Exception $e){
-                http_response_code(500);
-                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
-                exit();
-            }
-        if ($result){
-            echo json_encode(['success' => true]);
-        }else{
-            echo json_encode(['success' => false, 'message' => 'Ошибка при удалении']);
-        }
-    }
-
-
-
-
-    public function editVacancy(){
-        header('Content-Type: application/json');
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $ID=trim($_POST['vacancy_ID']);
-            $name = trim($_POST['name']);
-            $department_ID = trim($_POST['department_ID']);
-            $description = trim($_POST['description']);
-            $experience_required = trim($_POST['experience_required']);
-            $salary= trim($_POST['salary']);
-            $status =1;
-            $skills = $_POST['skills'];
-
-            if (empty($ID)) {
-                echo json_encode(['error' => 'Ошибка']);
-                return;
-            }
-            try{
-                $vacancy=$this->model->getVacancyByID($ID);
-                if (empty($name)){
-                    $name=$vacancy['name'];
-                }
-                if (empty($department_ID)){
-                    $department_ID=$vacancy['department_ID'];
-                }
-                if (empty($description)){
-                    $description=$vacancy['description'];
-                }
-                if (empty($experience_required )){
-                    $experience_required=$vacancy['experience_required'];
-                }
-                if (empty($salary)){
-                    $salary=$vacancy['salary'];
-                }
-                if (empty($posting_date)){
-                    $posting_date=$vacancy['posting_date'];
-                }
-                if (empty($status)){
-                    $status=$vacancy['status'];
-                }
-            }catch(Exception $e){
-                http_response_code(500);
-                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
-                exit();
-            }
-
-            try{
-            $departmentCount = $this->model->getRowCount('departments');
-            }catch(Exception $e){
-                http_response_code(500);
-                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
-                exit();
-            }
-
-
-            if ($department_ID<1 || $department_ID>$departmentCount) {
-                echo json_encode(['error' => 'Невалидное значение department_ID']);
-                return;      
-            }
-
-            $maxIntValue = 2147483647;
-
-            if ($experience_required<0 || $experience_required>$maxIntValue) {
-                echo json_encode(['error' => 'Невалидное значение experience_required']);
-                return;      
-            }
-
-
-            if ($salary<0 || $salary>$maxIntValue) {
-                echo json_encode(['error' => 'Невалидное значение salary']);
-                return;      
-            }
-
-            if ($status<1 || $status>$maxIntValue) {
-                echo json_encode(['error' => 'Невалидное значение status']);
-                return;      
-            }
-            try{
-            $result=$this->model->UpdateVacancyAndSkills($ID,$name,$department_ID,$description,$experience_required,$salary,$posting_date,$status,$skills);
-            }catch(Exception $e){
-                http_response_code(500);
-                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
-                exit();
-            }
-
+        try {
+            $vacancy = new Vacancy(null, trim($_POST['name']),
+                trim($_POST['department_ID']),
+                trim($_POST['description']),
+                (int)trim($_POST['experience_required']),
+                trim($_POST['salary']),
+                date("Y-m-d H:i:s"),
+                1,
+                $_SESSION['user_id'],
+                $_POST['skills']);
+            $result = $this->model->InsertNewVacancy($vacancy);
             if ($result) {
                 echo json_encode(['success' => true]);
                 exit();
             } else {
-                echo json_encode(['error' => 'Database error']);
-                exit();
+                throw new Exception('Ошибка при записи в базу данных');
             }
-        }
-    }
-    
-
-    public function addVacancy(){
-        header('Content-Type: application/json');
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = trim($_POST['name']);
-            $department_ID = trim($_POST['department_ID']);
-            $description = trim($_POST['description']);
-            $experience_required = trim($_POST['experience_required']);
-            $skills=$_POST['skills'];
-            $salary= trim($_POST['salary']);
-            $posting_date =date("Y-m-d H:i:s");
-            $status =1;
-
-            if (empty($skills)){
-                echo json_encode(['error' => 'Пожалуйста, выберите хотя бы один навык']);
-                return;
-            }
-            
-            // Validate inputs
-            if (empty($name) ||  empty($department_ID) || empty($description) || empty($salary) || empty($posting_date) || empty($status)) {
-                echo json_encode(['error' => 'Пожалуйста, заполните все поля']);
-                return;
-            }
-            try{
-            $departmentCount = $this->model->getRowCount('departments');
-            }catch(Exception $e){
-                http_response_code(500);
-                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
-                exit();
-            }
-
-            if ($department_ID<1 || $department_ID>$departmentCount) {
-                echo json_encode(['error' => 'Невалидное значение department_ID']);
-                return;      
-            }
-
-            $maxIntValue = 2147483647;
-
-            if ($experience_required<0 || $experience_required>$maxIntValue) {
-                echo json_encode(['error' => 'Невалидное значение experience_required']);
-                return;      
-            }
-
-            if ($salary<0 || $salary>$maxIntValue) {
-                echo json_encode(['error' => 'Невалидное значение salary']);
-                return;      
-            }
-
-            try{
-            $result=$this->model->InsertNewVacancy($name,$department_ID,$description,$experience_required,$salary,$posting_date,$status,$_SESSION['user_id'],$skills);
-            }catch(Exception $e){
-                http_response_code(500);
-                echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
-                exit();
-            }
-            if ($result) {
-                echo json_encode(['success' => true]);
-                exit();
-            } else {
-                echo json_encode(['error' => 'Database error']);
-                exit();
-            }
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
+            exit();
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['error' => $e->getMessage()]);
+            exit();
         }
     }
 
-    
 }

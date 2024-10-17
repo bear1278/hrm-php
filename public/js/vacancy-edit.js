@@ -3,10 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeBtn = document.getElementById('edit-close');
     const editButtons = document.querySelectorAll('.edit-button');
     const vacancyForm = document.getElementById('vacancy-form-edit');
+    const errorMessageDiv = document.getElementById('error-message-edit'); // Элемент для ошибок
 
     // Функция для открытия модального окна
     const openModal = () => {
         modal.style.display = 'block';
+        errorMessageDiv.style.display = 'none'; // Скрываем сообщение об ошибке при открытии
     };
 
     vacancyForm.addEventListener('submit', function (e) {
@@ -18,19 +20,33 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             body: formData
         })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Обработка ответа как JSON
+            })
             .then(data => {
-                console.log('Success:', data);
-                modal.style.display = 'none'; // Закрытие модального окна
-                window.location.href='/';
+                if (data.error) {
+                    // Если есть ошибка, показываем ее
+                    errorMessageDiv.textContent = data.error; // Устанавливаем текст ошибки
+                    errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
+                } else {
+                    console.log('Success:', data);
+                    modal.style.display = 'none'; // Закрытие модального окна
+                    window.location.href = '/'; // Перенаправление
+                }
             })
             .catch((error) => {
                 console.error('Error:', error);
+                errorMessageDiv.textContent = 'Произошла ошибка при обработке запроса.'; // Сообщение о внутренней ошибке
+                errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
             });
     });
 
     const closeModal = () => {
         modal.style.display = 'none';
+        errorMessageDiv.style.display = 'none'; // Скрываем сообщение об ошибке при закрытии
     };
 
     // Закрыть модальное окно по клику на кнопку закрытия
@@ -50,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const vacancyData = {
                 name: vacancyRow.querySelector('td:nth-child(1)').textContent,
                 description: vacancyRow.querySelector('td:nth-child(3)').textContent,
-                experience: vacancyRow.querySelector('td:nth-child(4)').textContent,
+                experience: vacancyRow.querySelector('td:nth-child(4)').textContent.value,
                 salary: vacancyRow.querySelector('td:nth-child(5)').textContent,
             };
 
@@ -58,8 +74,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('vacancy_ID').value = this.value;
             document.getElementById('vacancy-title1').value = vacancyData.name;
             document.getElementById('vacancy-description1').value = vacancyData.description;
-            document.getElementById('vacancy-experience1').value = vacancyData.experience;
-            document.getElementById('vacancy-salary1').value = vacancyData.salary;
+            document.getElementById('vacancy-experience1').value = parseInt(vacancyData.experience);
+            document.getElementById('vacancy-salary1').value = parseInt(vacancyData.salary);
 
             openModal(); // Открыть модальное окно
         });

@@ -1,5 +1,7 @@
 <?php
 // Start the session to access session variables
+use app\Entities\Candidate;
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: /login');
     exit();
@@ -40,12 +42,13 @@ $columns = isset($columns) ? $columns : [];
 </header>
 
 <main>
+
     <h1>Профиль пользователя</h1>
     <div class="profile-info">
-        <?php if ($data): ?>
+        <?php if ($candidate): ?>
         <ul>
             <?php foreach ($columns as $column): ?>
-            <li class="profile-details"><strong><?= htmlspecialchars($column) ?>:</strong> <?= htmlspecialchars($data[$column]) ?></li>
+            <li class="profile-details"><strong><?= htmlspecialchars($column) ?>:</strong> <?= htmlspecialchars($candidate->{Candidate::fieldMapping[$column]}()) ?></li>
             <?php endforeach; ?>
         </ul>
         <?php else: ?>

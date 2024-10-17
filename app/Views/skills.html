@@ -55,7 +55,8 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
         <div id="vacancyModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <h2>Добавить статус</h2>
+                <h2>Добавить навык</h2>
+                <div id="error-message-edit" style="color: red; display: none;"></div>
                 <form id="vacancy-form" action="/skills/add" method="POST" class="modal-form">
                     <label for="vacancy-title">Название навыка</label>
                     <input class="input-modal" type="text" id="vacancy-title" name="name" required />
