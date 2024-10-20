@@ -4,6 +4,7 @@ use app\Controllers\AdminController;
 use app\Controllers\ApplicationController;
 use app\Controllers\DashboardController;
 use app\Controllers\LoginController;
+use app\Controllers\NotificationController;
 use app\Controllers\ProfileController;
 use app\Controllers\ResumeController;
 use app\Controllers\SignUpController;
@@ -21,6 +22,7 @@ $applicationController = new ApplicationController();
 $resumeController = new ResumeController();
 $profileController = new ProfileController();
 $adminController = new AdminController();
+$notificationController = new NotificationController();
 
 $request_uri = $_SERVER['REQUEST_URI'];
 $request_uri = explode('?', $request_uri)[0];
@@ -246,6 +248,20 @@ switch ($parts[0]) {
         } else {
             header('Location: /');
             exit();
+        }
+        break;
+
+    case 'get-notifications':
+        AuthHelper::ensureLoggedIn();
+        if ($_SERVER['REQUEST_METHOD'] == "GET") {
+            $notificationController->getNotifications();
+        }
+        break;
+
+    case 'update-notification-status':
+        AuthHelper::ensureLoggedIn();
+        if ($_SERVER['REQUEST_METHOD'] == "POST") {
+            $notificationController->updateNotificationStatus();
         }
         break;
 

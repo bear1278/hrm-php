@@ -43,7 +43,7 @@ class Candidate extends User
      */
     public function setFirstName($first_name)
     {
-        if($first_name!=null) {
+        if ($first_name != null) {
             if (empty($first_name)) {
                 throw new InvalidArgumentException('First name cannot be empty');
             }
@@ -177,7 +177,7 @@ class Candidate extends User
 
     private function validateExperience($experience)
     {
-        return is_numeric($experience) && $experience >= 0 && $experience<=2147483647;
+        return is_numeric($experience) && $experience >= 0 && $experience <= 2147483647;
     }
 
     private function validateLocation($location)

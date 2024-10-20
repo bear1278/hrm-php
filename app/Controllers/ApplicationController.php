@@ -4,6 +4,7 @@ namespace app\Controllers;
 
 use app\Helpers\AuthHelper;
 use app\Models\ApplicationModel;
+use app\Models\NotificationModel;
 use Exception;
 use PDOException;
 
@@ -12,9 +13,12 @@ class ApplicationController
 
     private $model;
 
+    private $notificationModel;
+
     public function __construct()
     {
         $this->model = new ApplicationModel();
+        $this->notificationModel = new NotificationModel();
     }
 
     public function ShowApplicationsForCandidate()
@@ -73,8 +77,7 @@ class ApplicationController
             http_response_code(500);
             echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
             exit();
-        }
-        catch (Exception $e){
+        } catch (Exception $e) {
             http_response_code(400);
             echo json_encode(['error' => 'Ошибка: ' . $e->getMessage()]);
             exit();
@@ -112,6 +115,13 @@ class ApplicationController
         try {
             $result = $this->model->UpdateApplication($id, $status);
             if ($result) {
+                $application = $this->model->selectApplicationById($id);
+                $userId = (int)$application->getCandidateName();
+
+                $message = $status === 6 ? 'Ваша заявка была принята' : 'Ваша заявка была отклонена';
+
+                $this->notificationModel->createNotification($userId, $id, $message, $status);
+
                 http_response_code(200);
                 header("Location: /applications");
             } else {

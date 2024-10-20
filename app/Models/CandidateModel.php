@@ -7,16 +7,19 @@ use Exception;
 use PDO;
 use PDOException;
 
-class CandidateModel {
-    
+class CandidateModel
+{
+
     protected $pdo;
 
-    public function __construct() {
+    public function __construct()
+    {
         global $pdo;
         $this->pdo = $pdo;
     }
 
-    public function findCandidateById($user_ID) {
+    public function findCandidateById($user_ID)
+    {
         try {
             $stmt = $this->pdo->prepare("SELECT * FROM candidates WHERE candidate_ID = ?");
             $stmt->execute([$user_ID]);
@@ -35,27 +38,28 @@ class CandidateModel {
                 );
             }
             return $candidate;
-        }catch (PDOException $e){
-            throw new PDOException("Ошибка базы данных: " . $e->getMessage());
-        }
-    }
-
-    public function createCandidate($user_ID,$phone_number,$resume,$exp,$location,$status){
-        try {
-        $stmt = $this->pdo->prepare("INSERT INTO candidates (candidate_ID, phone_number, resume,experience_years, location,status) VALUES (:user_ID, :phone_number, :resume, :experience_year, :location,:status)");
-        $stmt->bindParam(':user_ID', $user_ID);
-        $stmt->bindParam(':phone_number', $phone_number);
-        $stmt->bindParam(':resume', $resume);
-        $stmt->bindParam(':experience_year', $exp);
-        $stmt->bindParam(':location', $location);
-        $stmt->bindParam(':status', $status);
-        return $stmt->execute();
         } catch (PDOException $e) {
             throw new PDOException("Ошибка базы данных: " . $e->getMessage());
         }
     }
 
-    public function updateCandidate($id, $number, $resume, $exp, $location,$status)
+    public function createCandidate($user_ID, $phone_number, $resume, $exp, $location, $status)
+    {
+        try {
+            $stmt = $this->pdo->prepare("INSERT INTO candidates (candidate_ID, phone_number, resume,experience_years, location,status) VALUES (:user_ID, :phone_number, :resume, :experience_year, :location,:status)");
+            $stmt->bindParam(':user_ID', $user_ID);
+            $stmt->bindParam(':phone_number', $phone_number);
+            $stmt->bindParam(':resume', $resume);
+            $stmt->bindParam(':experience_year', $exp);
+            $stmt->bindParam(':location', $location);
+            $stmt->bindParam(':status', $status);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка базы данных: " . $e->getMessage());
+        }
+    }
+
+    public function updateCandidate($id, $number, $resume, $exp, $location, $status)
     {
         try {
             $stmt = $this->pdo->prepare("UPDATE candidates 

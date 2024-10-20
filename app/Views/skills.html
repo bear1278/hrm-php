@@ -15,95 +15,95 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Dashboard</title>
-    <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-            rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/css/dashboard.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard</title>
+  <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/css/dashboard.css"/>
 </head>
 <body>
 <header>
-    <div class="header-container">
-        <nav class="navigation">
-            <ul>
-                <li><a class="a" href="http://localhost/">Пользователи</a></li>
-                <li><a class="a" href="http://localhost/status">Статусы</a></li>
-                <li><a class="a" href="http://localhost/department">Отделы</a></li>
-                <li><a class="a" href="http://localhost/skills">Навыки</a></li>
-            </ul>
-        </nav>
-        <form action="/logout" method="POST">
-            <button class="button" type="submit">Выйти</button>
-        </form>
-    </div>
+  <div class="header-container">
+    <nav class="navigation">
+      <ul>
+        <li><a class="a" href="http://localhost/">Пользователи</a></li>
+        <li><a class="a" href="http://localhost/status">Статусы</a></li>
+        <li><a class="a" href="http://localhost/department">Отделы</a></li>
+        <li><a class="a" href="http://localhost/skills">Навыки</a></li>
+      </ul>
+    </nav>
+    <form action="/logout" method="POST">
+      <button class="button" type="submit">Выйти</button>
+    </form>
+  </div>
 </header>
 <main>
 
-    <div class="main-container">
-        <button id="button-add" class="button" type="submit">Добавить навык</button>
-        <script type="module" src="/js/skill-add.js"></script>
+  <div class="main-container">
+    <button id="button-add" class="button" type="submit">Добавить навык</button>
+    <script type="module" src="/js/skill-add.js"></script>
 
-        <div id="vacancyModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Добавить навык</h2>
-                <div id="error-message-edit" style="color: red; display: none;"></div>
-                <form id="vacancy-form" action="/skills/add" method="POST" class="modal-form">
-                    <label for="vacancy-title">Название навыка</label>
-                    <input class="input-modal" type="text" id="vacancy-title" name="name" required />
-                    <button id="button-save" class="button" type="submit">Сохранить</button>
-                </form>
-            </div>
-        </div>
-        <div class="table-container">
-            <table border="1">
-                <tr>
-                    <?php foreach ($columns as $column): ?>
-                    <th><?php echo htmlspecialchars($column); ?></th>
-                    <?php endforeach; ?>
-                    <th></th>
-                </tr>
-
-                <?php if (!empty($data)) { ?>
-                <?php foreach ($data as $row): ?>
-                <tr>
-                    <?php foreach ($columns as $column): ?>
-                    <td><?php echo htmlspecialchars($row[$column]); ?></td>
-
-                    <?php endforeach; ?>
-                    <td>
-                        <button
-                                class="trash-button"
-                                type="button"
-                                value="<?php echo htmlspecialchars($row['skill_ID']); ?>"
-                        >
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-
-                    </td>
-                </tr>
-
-                <?php endforeach; ?>
-
-                <?php } else { ?>
-                <tr>
-                    <td colspan="<?php echo count($columns); ?>">
-                        Нет данных для отображения
-                    </td>
-                </tr>
-                <?php } ?>
-            </table>
-        </div>
+    <div id="vacancyModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Добавить навык</h2>
+        <div id="error-message-edit" style="color: red; display: none;"></div>
+        <form id="vacancy-form" action="/skills/add" method="POST" class="modal-form">
+          <label for="vacancy-title">Название навыка</label>
+          <input class="input-modal" type="text" id="vacancy-title" name="name" required/>
+          <button id="button-save" class="button" type="submit">Сохранить</button>
+        </form>
+      </div>
     </div>
+    <div class="table-container">
+      <table border="1">
+        <tr>
+          <?php foreach ($columns as $column): ?>
+          <th><?php echo htmlspecialchars($column); ?></th>
+          <?php endforeach; ?>
+          <th></th>
+        </tr>
+
+        <?php if (!empty($data)) { ?>
+        <?php foreach ($data as $row): ?>
+        <tr>
+          <?php foreach ($columns as $column): ?>
+          <td><?php echo htmlspecialchars($row[$column]); ?></td>
+
+          <?php endforeach; ?>
+          <td>
+            <button
+                class="trash-button"
+                type="button"
+                value="<?php echo htmlspecialchars($row['skill_ID']); ?>"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+
+          </td>
+        </tr>
+
+        <?php endforeach; ?>
+
+        <?php } else { ?>
+        <tr>
+          <td colspan="<?php echo count($columns); ?>">
+            Нет данных для отображения
+          </td>
+        </tr>
+        <?php } ?>
+      </table>
+    </div>
+  </div>
 </main>
 <script type="module" src="/js/skill-delete.js"></script>
 </body>

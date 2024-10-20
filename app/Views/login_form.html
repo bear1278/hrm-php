@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
       rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/css/loginForm.css" />
-    <title>Auth</title>
-  </head>
-  <body>
-    <header>
-      <main>
-        <div class="circle"></div>
+  />
+  <link rel="stylesheet" href="/css/loginForm.css"/>
+  <title>Auth</title>
+</head>
+<body>
+<header>
+  <main>
+    <div class="circle"></div>
 
-        <!-- Added action and method to the form -->
-        <form class="register-form-container" action="/login" method="POST">
-          <div id="result"></div>
-          <h1 class="form-title">Вход</h1>
-          <div class="form-fields">
-            <div class="form-field">
-              <!-- Added 'required' for validation -->
-              <input type="email" placeholder="Email" name="email" />
-            </div>
-            <div class="form-field">
-              <!-- Added 'required' for validation -->
-              <input type="password" placeholder="Password" name="password" />
-            </div>
-            <div class="form-buttons">
-              <button class="button" type="submit">Войти</button>
-              <div class="divider">OR</div>
-              <a
-                style="text-decoration: none"
-                href="http://localhost/signup"
-                class="button button-signup"
-                >Регистрация</a
-              >
-            </div>
-          </div>
-        </form>
-      </main>
-    </header>
-    <script type="module" src="/js/login-validation.js"></script>
-  </body>
+    <!-- Added action and method to the form -->
+    <form class="register-form-container" action="/login" method="POST">
+      <div id="result"></div>
+      <h1 class="form-title">Вход</h1>
+      <div class="form-fields">
+        <div class="form-field">
+          <!-- Added 'required' for validation -->
+          <input type="email" placeholder="Email" name="email"/>
+        </div>
+        <div class="form-field">
+          <!-- Added 'required' for validation -->
+          <input type="password" placeholder="Password" name="password"/>
+        </div>
+        <div class="form-buttons">
+          <button class="button" type="submit">Войти</button>
+          <div class="divider">OR</div>
+          <a
+              style="text-decoration: none"
+              href="http://localhost/signup"
+              class="button button-signup"
+          >Регистрация</a
+          >
+        </div>
+      </div>
+    </form>
+  </main>
+</header>
+<script type="module" src="/js/login-validation.js"></script>
+</body>
 </html>

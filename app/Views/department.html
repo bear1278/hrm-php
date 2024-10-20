@@ -15,20 +15,20 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Dashboard</title>
   <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-          rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
   />
-  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/dashboard.css"/>
 </head>
 <body>
 <header>
@@ -59,7 +59,7 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
         <div id="error-message-edit" style="color: red; display: none;"></div>
         <form id="vacancy-form" action="/department/add" method="POST" class="modal-form">
           <label for="vacancy-title">Название Отдела</label>
-          <input class="input-modal" type="text" id="vacancy-title" name="name" required />
+          <input class="input-modal" type="text" id="vacancy-title" name="name" required/>
           <button id="button-save" class="button" type="submit">Сохранить</button>
         </form>
       </div>
@@ -82,9 +82,9 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
           <?php endforeach; ?>
           <td>
             <button
-                    class="trash-button"
-                    type="button"
-                    value="<?php echo htmlspecialchars($row['department_id']); ?>"
+                class="trash-button"
+                type="button"
+                value="<?php echo htmlspecialchars($row['department_id']); ?>"
             >
               <i class="fa-solid fa-trash"></i>
             </button>

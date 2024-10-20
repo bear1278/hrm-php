@@ -354,11 +354,11 @@ class VacancyModel
 
     public function deleteVacancyFromDB($vacancyID)
     {
-        try{
-        $sql = "DELETE FROM vacancies WHERE vacancy_ID = :vacancy_ID";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':vacancy_ID', $vacancyID, PDO::PARAM_INT);
-        return $stmt->execute();
+        try {
+            $sql = "DELETE FROM vacancies WHERE vacancy_ID = :vacancy_ID";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':vacancy_ID', $vacancyID, PDO::PARAM_INT);
+            return $stmt->execute();
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

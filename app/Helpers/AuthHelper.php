@@ -1,15 +1,18 @@
 <?php
+
 namespace app\Helpers;
 
 use app\Entities\User;
 
-class AuthHelper {
-    
-    public static function login(User $user) {
+class AuthHelper
+{
+
+    public static function login(User $user)
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
+
         $_SESSION['user_id'] = $user->getId();
         $_SESSION['firstname'] = $user->getFirstName();
         $_SESSION['lastname'] = $user->getLastName();
@@ -17,15 +20,18 @@ class AuthHelper {
         $_SESSION['role'] = $user->getRole();
     }
 
-    public static function logout() {
+    public static function logout()
+    {
         session_destroy();
     }
 
-    public static function isLoggedIn() {
+    public static function isLoggedIn()
+    {
         return isset($_SESSION['user_id']);
     }
 
-    public static function ensureLoggedIn() {
+    public static function ensureLoggedIn()
+    {
         if (!self::isLoggedIn()) {
             session_destroy();
             header('Location: /login');
@@ -35,7 +41,7 @@ class AuthHelper {
 
     public static function isCandidate()
     {
-        if($_SESSION['role']==4){
+        if ($_SESSION['role'] == 4) {
             return true;
         }
         return false;
@@ -43,7 +49,7 @@ class AuthHelper {
 
     public static function isManager()
     {
-        if($_SESSION['role']==2){
+        if ($_SESSION['role'] == 2) {
             return true;
         }
         return false;
@@ -51,7 +57,7 @@ class AuthHelper {
 
     public static function isAdmin()
     {
-        if($_SESSION['role']==1){
+        if ($_SESSION['role'] == 1) {
             return true;
         }
         return false;

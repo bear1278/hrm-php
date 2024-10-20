@@ -15,47 +15,51 @@ $columns = isset($columns) ? $columns : [];
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/profile.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+  <link rel="stylesheet" href="/css/profile.css"/>
 </head>
 <body>
 
 <header>
-    <div class="header-container" id="error">
-        <nav class="navigation">
-            <ul>
-                <li><a href="http://localhost/">Вакансии</a></li>
-                <li><a href="http://localhost/applications">Отклики</a></li>
-                <li><a href="http://localhost/profile">Профиль</a></li>
-            </ul>
-        </nav>
-        <form action="/logout" method="POST">
-            <button class="button" type="submit">Выйти</button>
-        </form>
-    </div>
+  <div class="header-container" id="error">
+    <nav class="navigation">
+      <ul>
+        <li><a href="http://localhost/">Вакансии</a></li>
+        <li><a href="http://localhost/applications">Отклики</a></li>
+        <li><a href="http://localhost/profile">Профиль</a></li>
+      </ul>
+    </nav>
+    <form action="/logout" method="POST">
+      <button class="button" type="submit">Выйти</button>
+    </form>
+  </div>
 </header>
 
 <main>
 
-    <h1>Профиль пользователя</h1>
-    <div class="profile-info">
-        <?php if ($candidate): ?>
-        <ul>
-            <?php foreach ($columns as $column): ?>
-            <li class="profile-details"><strong><?= htmlspecialchars($column) ?>:</strong> <?= htmlspecialchars($candidate->{Candidate::fieldMapping[$column]}()) ?></li>
-            <?php endforeach; ?>
-        </ul>
-        <?php else: ?>
-        <p>Информация о пользователе недоступна.</p>
-        <?php endif; ?>
-        <a class="button" href="http://localhost/resume">Изменить сведения</a>
-    </div>
+  <h1>Профиль пользователя</h1>
+  <div class="profile-info">
+    <?php if ($candidate): ?>
+    <ul>
+      <?php foreach ($columns as $column): ?>
+      <li class="profile-details"><strong><?= htmlspecialchars($column) ?>
+        :</strong> <?= htmlspecialchars($candidate->{Candidate::fieldMapping[$column]}()) ?>
+      </li>
+      <?php endforeach; ?>
+    </ul>
+    <?php else: ?>
+    <p>Информация о пользователе недоступна.</p>
+    <?php endif; ?>
+    <a class="button" href="http://localhost/resume">Изменить сведения</a>
+  </div>
 
 </main>
 

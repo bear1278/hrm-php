@@ -6,7 +6,7 @@ use Exception;
 use PDO;
 use PDOException;
 
-class AdminModel
+class   AdminModel
 {
 
     protected $pdo;

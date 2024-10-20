@@ -18,16 +18,16 @@ class Vacancy
     private $author;
     private $skills;
     const fieldMapping = [
-            'vacancy_ID' => 'getId',
-            'name' => 'getName',
-            'department' => 'getDepartment',
-            'description' => 'getDescription',
-            'experience' => 'getExperience',
-            'salary' => 'getSalary',
-            'posting date' => 'getPostingDate',
-            'status' => 'getStatus'
-        ];
-    const maxInt =2147483647;
+        'vacancy_ID' => 'getId',
+        'name' => 'getName',
+        'department' => 'getDepartment',
+        'description' => 'getDescription',
+        'experience' => 'getExperience',
+        'salary' => 'getSalary',
+        'posting date' => 'getPostingDate',
+        'status' => 'getStatus'
+    ];
+    const maxInt = 2147483647;
 
     public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills)
     {
@@ -45,26 +45,26 @@ class Vacancy
 
     public function copy(Vacancy $vacancy)
     {
-        if(empty($this->name)){
-            $this->name=$vacancy->getName();
+        if (empty($this->name)) {
+            $this->name = $vacancy->getName();
         }
-        if(empty($this->department)){
-            $this->department=$vacancy->getDepartment();
+        if (empty($this->department)) {
+            $this->department = $vacancy->getDepartment();
         }
-        if(empty($this->description)){
-            $this->description=$vacancy->getDescription();
+        if (empty($this->description)) {
+            $this->description = $vacancy->getDescription();
         }
-        if(empty($this->experience)){
-            $this->experience=$vacancy->getExperience();
+        if (empty($this->experience)) {
+            $this->experience = $vacancy->getExperience();
         }
-        if(empty($this->salary)){
-            $this->salary=$vacancy->getSalary();
+        if (empty($this->salary)) {
+            $this->salary = $vacancy->getSalary();
         }
-        if(empty($this->posting_date)){
-            $this->posting_date=$vacancy->getPostingDate();
+        if (empty($this->posting_date)) {
+            $this->posting_date = $vacancy->getPostingDate();
         }
-        if(empty($this->status)){
-            $this->status=$vacancy->getStatus();
+        if (empty($this->status)) {
+            $this->status = $vacancy->getStatus();
         }
     }
 
@@ -107,7 +107,7 @@ class Vacancy
 
     public function setSalary($salary)
     {
-        if (!is_numeric($salary) || $salary < 0 || $salary>self::maxInt) {
+        if (!is_numeric($salary) || $salary < 0 || $salary > self::maxInt) {
             throw new InvalidArgumentException('Невалидное значение зарплаты.');
         }
         $this->salary = $salary;
@@ -124,7 +124,7 @@ class Vacancy
                 throw new InvalidArgumentException('Дата размещения должна быть в формате YYYY-MM-DD или YYYY-MM-DD HH:MM:SS.');
             }
             $this->posting_date = $date;
-        }else{
+        } else {
             $this->posting_date = $posting_date;
         }
 
@@ -142,7 +142,7 @@ class Vacancy
 
     public function setSkills(array $skills)
     {
-        if ($skills!=null){
+        if ($skills != null) {
             if (empty($skills)) {
                 throw new InvalidArgumentException('Список навыков не может быть пустым.');
             }

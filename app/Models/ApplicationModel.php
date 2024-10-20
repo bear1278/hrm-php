@@ -18,9 +18,54 @@ class ApplicationModel
         $this->pdo = $pdo;
     }
 
+    public function selectApplicationById($applicationId)
+    {
+        try {
+            $sql = "SELECT application_ID, candidate_ID, V.name, D.name as department, description, experience_required as experience, 
+                salary, posting_date as `posting date`, S.name as `vacancy status`, 
+                application_date as `application date`, St.name as `application status`
+                FROM vacancies as V
+                INNER JOIN applications as A 
+                ON V.vacancy_ID = A.vacancy_ID
+                INNER JOIN departments as D
+                ON V.department_ID = D.department_id
+                INNER JOIN status as S
+                ON V.status = S.status_ID
+                INNER JOIN status as St
+                ON A.status = St.status_ID
+                WHERE A.application_ID = :applicationId";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':applicationId', $applicationId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row) {
+                return new Application(
+                    $row['application_ID'],
+                    $row['candidate_ID'],
+                    $row['application date'],
+                    $row['application status'],
+                    $row['name'],
+                    $row['department'],
+                    $row['description'],
+                    $row['experience'],
+                    $row['salary'],
+                    $row['posting date'],
+                    $row['vacancy status']
+                );
+            } else {
+                return null;
+            }
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
     public function selectApplications($id)
     {
-        try{
+        try {
             $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
             FROM vacancies as V 
@@ -61,7 +106,7 @@ class ApplicationModel
 
     public function SelectAllApplicationManager($id)
     {
-        try{
+        try {
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
             FROM vacancies as V 
@@ -102,8 +147,9 @@ class ApplicationModel
         }
     }
 
-    public function getTableColumns() {
-        try{
+    public function getTableColumns()
+    {
+        try {
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             V.status as `vacancy status`,application_date as `application date`,A.status as `application status` 
             FROM vacancies as V 
@@ -122,7 +168,7 @@ class ApplicationModel
             } else {
                 throw new Exception("No records found.");
             }
-        }catch (PDOException $e) {
+        } catch (PDOException $e) {
             throw new Exception("Ошибка: " . $e->getMessage());
         }
     }
@@ -146,18 +192,18 @@ class ApplicationModel
 
     public function DeleteApplication($id)
     {
-        try{
+        try {
             $sql = "DELETE FROM applications 
                     where application_ID= :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id);
             return $stmt->execute();
-        }catch (PDOException $e) {
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
-    public function SelectApplicationsWithParam($id,$search)
+    public function SelectApplicationsWithParam($id, $search)
     {
         try {
             $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
@@ -174,9 +220,9 @@ class ApplicationModel
             ON A.status = St.status_ID 
             Where candidate_ID= :id and V.name LIKE :search";
             $stmt = $this->pdo->prepare($sql);
-            $search = "%".$search."%";
+            $search = "%" . $search . "%";
             $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':search', $search,PDO::PARAM_STR);
+            $stmt->bindParam(':search', $search, PDO::PARAM_STR);
             $stmt->execute();
             $applications = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -200,7 +246,7 @@ class ApplicationModel
         }
     }
 
-    public function SelectApplicationsManagerWithParam($id,$search)
+    public function SelectApplicationsManagerWithParam($id, $search)
     {
         try {
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
@@ -219,9 +265,9 @@ class ApplicationModel
             ON U.user_ID=A.candidate_ID 
             Where author= :id and V.name LIKE :search";
             $stmt = $this->pdo->prepare($sql);
-            $search = "%".$search."%";
+            $search = "%" . $search . "%";
             $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':search', $search,PDO::PARAM_STR);
+            $stmt->bindParam(':search', $search, PDO::PARAM_STR);
             $stmt->execute();
             $applications = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -245,15 +291,15 @@ class ApplicationModel
         }
     }
 
-    public function UpdateApplication($id,$status)
+    public function UpdateApplication($id, $status)
     {
-        try{
-            $sql="UPDATE applications 
+        try {
+            $sql = "UPDATE applications 
             SET status= :status
             where applications.application_ID=:id";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':id',$id);
-            $stmt->bindParam(':status',$status);
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':status', $status);
             return $stmt->execute();
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
