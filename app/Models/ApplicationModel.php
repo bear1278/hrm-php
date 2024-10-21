@@ -196,7 +196,7 @@ class ApplicationModel
     public function DeleteApplication($id)
     {
         try{
-            $app = $this->SelectApplicationById($id);
+            $app = $this->SelectApplicationByIdForDelete($id);
             if (empty($app)){
                 throw new PDOException('Select by id with error');
             }
@@ -367,7 +367,7 @@ class ApplicationModel
         }
     }
 
-    public function SelectApplicationById($id)
+    public function SelectApplicationByIdForDelete($id)
     {
         try{
             $sql = "SELECT * FROM applications where application_ID = :id";
