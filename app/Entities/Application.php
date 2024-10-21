@@ -17,7 +17,7 @@ class Application extends Vacancy
         'salary' => 'getSalary',
         'posting date' => 'getPostingDate',
         'vacancy status' => 'getStatus',
-        'application date'=> 'getApplicationDate',
+        'application date' => 'getApplicationDate',
         'application status' => 'getApplicationStatus',
         'candidate' => 'getCandidateName'
     ];

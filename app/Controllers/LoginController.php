@@ -5,12 +5,13 @@ namespace app\Controllers;
 require_once __DIR__ . '/../Models/UserModel.php';
 
 use app\Helpers\AuthHelper;
+use app\Models\UserModel;
 use Exception;
 use PDOException;
-use app\Models\UserModel;
 
 
-class LoginController {
+class LoginController
+{
 
     private $model;
 
@@ -19,36 +20,33 @@ class LoginController {
         $this->model = new UserModel();
     }
 
-    public function showLoginForm() {
+    public function showLoginForm()
+    {
         require_once __DIR__ . '/../Views/login_form.html';
     }
 
-    public function login() {
+    public function login()
+    {
         try {
             header('Content-Type: application/json');
             $email = (trim($_POST['email']));
             $password = (trim($_POST['password']));
             $user = $this->model->findUserByEmail($email);
-            if (!$user){
+            if (!$user) {
                 throw new Exception('пользователя с данной почтой не существует');
             }
-            if (password_verify($password,$user->getPassword()))
-            {
+            if (password_verify($password, $user->getPassword())) {
                 AuthHelper::login($user);
                 echo json_encode(['success' => true]);
                 exit();
-            }
-            else
-            {
+            } else {
                 throw new Exception('неверный пароль');
             }
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
             exit();
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             http_response_code(400);
             echo json_encode(['error' => $e->getMessage()]);
             exit();
@@ -56,7 +54,8 @@ class LoginController {
 
     }
 
-    public function logout() {
+    public function logout()
+    {
         AuthHelper::logout();
         header('Location: /login');
         exit();

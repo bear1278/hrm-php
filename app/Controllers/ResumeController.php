@@ -3,7 +3,6 @@
 namespace app\Controllers;
 
 use app\Entities\Candidate;
-use app\Helpers\AuthHelper;
 use app\Models\CandidateModel;
 use Exception;
 use PDOException;

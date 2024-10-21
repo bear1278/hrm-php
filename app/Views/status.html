@@ -15,20 +15,20 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Dashboard</title>
   <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-          rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
   />
-  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/dashboard.css"/>
 </head>
 <body>
 <header>
@@ -60,50 +60,50 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
         <div id="error-message-edit" style="color: red; display: none;"></div>
         <form id="vacancy-form" action="/status/add" method="POST" class="modal-form">
           <label for="vacancy-title">Название статуса</label>
-          <input class="input-modal" type="text" id="vacancy-title" name="name" required />
+          <input class="input-modal" type="text" id="vacancy-title" name="name" required/>
           <button id="button-save" class="button" type="submit">Сохранить</button>
         </form>
       </div>
     </div>
-  <div class="table-container">
-    <table border="1">
-      <tr>
-        <?php foreach ($columns as $column): ?>
-        <th><?php echo htmlspecialchars($column); ?></th>
+    <div class="table-container">
+      <table border="1">
+        <tr>
+          <?php foreach ($columns as $column): ?>
+          <th><?php echo htmlspecialchars($column); ?></th>
+          <?php endforeach; ?>
+          <th></th>
+        </tr>
+
+        <?php if (!empty($data)) { ?>
+        <?php foreach ($data as $row): ?>
+        <tr>
+          <?php foreach ($columns as $column): ?>
+          <td><?php echo htmlspecialchars($row[$column]); ?></td>
+
+          <?php endforeach; ?>
+          <td>
+            <button
+                class="trash-button"
+                type="button"
+                value="<?php echo htmlspecialchars($row['status_ID']); ?>"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+
+          </td>
+        </tr>
+
         <?php endforeach; ?>
-        <th></th>
-      </tr>
 
-      <?php if (!empty($data)) { ?>
-      <?php foreach ($data as $row): ?>
-      <tr>
-        <?php foreach ($columns as $column): ?>
-        <td><?php echo htmlspecialchars($row[$column]); ?></td>
-
-        <?php endforeach; ?>
-        <td>
-          <button
-                  class="trash-button"
-                  type="button"
-                  value="<?php echo htmlspecialchars($row['status_ID']); ?>"
-          >
-            <i class="fa-solid fa-trash"></i>
-          </button>
-
-        </td>
-      </tr>
-
-      <?php endforeach; ?>
-
-      <?php } else { ?>
-      <tr>
-        <td colspan="<?php echo count($columns); ?>">
-          Нет данных для отображения
-        </td>
-      </tr>
-      <?php } ?>
-    </table>
-  </div>
+        <?php } else { ?>
+        <tr>
+          <td colspan="<?php echo count($columns); ?>">
+            Нет данных для отображения
+          </td>
+        </tr>
+        <?php } ?>
+      </table>
+    </div>
   </div>
 </main>
 <script type="module" src="/js/status-delete.js"></script>

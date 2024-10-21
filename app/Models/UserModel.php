@@ -5,7 +5,6 @@ namespace app\Models;
 use app\Entities\User;
 use Exception;
 use PDO;
-use PDOException;
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../app/Entities/User.php';
@@ -28,7 +27,7 @@ class UserModel
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $userData = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$userData){
+        if (!$userData) {
             return false;
         }
         return new User($userData['user_ID'],

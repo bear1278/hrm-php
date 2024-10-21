@@ -18,7 +18,7 @@ class ProfileModel
 
     public function SelectCandidate($id)
     {
-        try{
+        try {
             $sql = "SELECT first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
             resume, experience_years as `experience years`, location, C.status 
             FROM users as U
@@ -39,18 +39,18 @@ class ProfileModel
                     $row['resume'],
                     $row['experience years'],
                     $row['location'],
-                $row['status']
+                    $row['status']
                 );
             }
             return $candidate;
-        }catch (PDOException $e) {
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
     public function SelectColumns()
     {
-        try{
+        try {
             $sql = "SELECT first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
             resume, experience_years as `experience years`, location 
             FROM users as U
@@ -59,9 +59,9 @@ class ProfileModel
             LIMIT 1";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
-            $candidate =  $stmt->fetch(PDO::FETCH_ASSOC);
+            $candidate = $stmt->fetch(PDO::FETCH_ASSOC);
             return array_keys($candidate);
-        }catch (PDOException $e) {
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }

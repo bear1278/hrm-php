@@ -176,8 +176,7 @@ class DashboardController
             http_response_code(500);
             echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
             exit();
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             http_response_code(400);
             echo json_encode(['error' => $e->getMessage()]);
             exit();

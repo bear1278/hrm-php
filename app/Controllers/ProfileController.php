@@ -33,7 +33,7 @@ class ProfileController
                 'error' => 'Ошибка подключения к базе данных: ' . $e->getMessage()
             ]);
             exit();
-        }catch (Exception $e){
+        } catch (Exception $e) {
             http_response_code(400);
             echo json_encode(['error' => $e->getMessage()]);
             exit();

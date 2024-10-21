@@ -18,6 +18,51 @@ class ApplicationModel
         $this->pdo = $pdo;
     }
 
+    public function selectApplicationById($applicationId)
+    {
+        try {
+            $sql = "SELECT application_ID, candidate_ID, V.name, D.name as department, description, experience_required as experience, 
+                salary, posting_date as `posting date`, S.name as `vacancy status`, 
+                application_date as `application date`, St.name as `application status`
+                FROM vacancies as V
+                INNER JOIN applications as A 
+                ON V.vacancy_ID = A.vacancy_ID
+                INNER JOIN departments as D
+                ON V.department_ID = D.department_id
+                INNER JOIN status as S
+                ON V.status = S.status_ID
+                INNER JOIN status as St
+                ON A.status = St.status_ID
+                WHERE A.application_ID = :applicationId";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':applicationId', $applicationId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row) {
+                return new Application(
+                    $row['application_ID'],
+                    $row['candidate_ID'],
+                    $row['application date'],
+                    $row['application status'],
+                    $row['name'],
+                    $row['department'],
+                    $row['description'],
+                    $row['experience'],
+                    $row['salary'],
+                    $row['posting date'],
+                    $row['vacancy status']
+                );
+            } else {
+                return null;
+            }
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
     public function selectApplications($id)
     {
         try{
