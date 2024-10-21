@@ -50,21 +50,7 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 <main>
 
     <div class="main-container">
-        <button id="button-add" class="button" type="submit">Добавить навык</button>
-        <script type="module" src="/js/skill-add.js"></script>
 
-        <div id="vacancyModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Добавить навык</h2>
-                <div id="error-message-edit" style="color: red; display: none;"></div>
-                <form id="vacancy-form" action="/skills/add" method="POST" class="modal-form">
-                    <label for="vacancy-title">Название навыка</label>
-                    <input class="input-modal" type="text" id="vacancy-title" name="name" required />
-                    <button id="button-save" class="button" type="submit">Сохранить</button>
-                </form>
-            </div>
-        </div>
         <div class="table-container">
             <table border="1">
                 <tr>
@@ -85,7 +71,7 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
                         <button
                                 class="trash-button"
                                 type="button"
-                                value="<?php echo htmlspecialchars($row['skill_ID']); ?>"
+                                value="<?php echo htmlspecialchars($row['id']); ?>"
                         >
                             <i class="fa-solid fa-trash"></i>
                         </button>
@@ -106,6 +92,6 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
         </div>
     </div>
 </main>
-<script type="module" src="/js/skill-delete.js"></script>
+<script type="module" src="/js/history-delete.js"></script>
 </body>
 </html>

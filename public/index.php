@@ -249,6 +249,23 @@ switch ($parts[0]) {
         }
         break;
 
+    case 'history':
+        AuthHelper::ensureLoggedIn();
+        if (AuthHelper::isAdmin()) {
+            if ($_SERVER['REQUEST_METHOD'] == "GET") {
+                $adminController->ShowHistory();
+            }
+            if (isset($parts[1]) && $parts[1] === 'delete') {
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    $adminController->Delete('user_history', 'id');
+                }
+            }
+        } else {
+            header('Location: /');
+            exit();
+        }
+        break;
+
 
     default:
         http_response_code(404);

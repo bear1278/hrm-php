@@ -115,13 +115,53 @@ class VacancyModel
     public function SelectVacanciesForCandidate($id): array
     {
         try {
-            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
-            FROM vacancies as V 
-            INNER JOIN departments as D 
-            ON V.department_ID=D.department_ID 
-            INNER JOIN status as S
-            ON S.status_ID=V.status
-            WHERE vacancy_ID NOT IN (SELECT vacancy_ID FROM applications WHERE candidate_ID= :id)";
+            $sql = "SELECT DISTINCT VA.vacancy_ID, 
+                VA.name, 
+                D.name AS department, 
+                VA.description, 
+                VA.experience_required AS experience, 
+                VA.salary, 
+                VA.posting_date AS `posting date`, 
+                S.name AS status, 
+                F.relevance_score
+            FROM vacancies AS VA
+            INNER JOIN (
+                SELECT 
+                    V.vacancy_ID, 
+                    SUM(
+                        CASE WHEN V.department_ID = R.department_ID THEN 3 ELSE 0 END +
+                        CASE
+                            WHEN ABS(V.experience_required - R.experience_required) <= 1 THEN 2
+                            WHEN ABS(V.experience_required - R.experience_required) <= 3 THEN 1
+                            ELSE 0
+                        END +
+                        CASE
+                            WHEN V.salary BETWEEN R.salary * 0.9 AND R.salary * 1.1 THEN 2
+                            WHEN V.salary BETWEEN R.salary * 0.8 AND R.salary * 1.2 THEN 1
+                            ELSE 0
+                        END -
+                        CASE
+                            WHEN uh.action = 'unapply' THEN 10 * (Select count(*) from user_history) ELSE 0
+                        END
+                    ) AS relevance_score
+                FROM vacancies AS V
+                LEFT JOIN (
+                    SELECT department_ID, experience_required, salary 
+                    FROM vacancies 
+                    WHERE vacancy_ID IN (
+                        SELECT vacancy_ID 
+                        FROM user_history 
+                        WHERE user_ID = :id 
+                        AND action = 'apply'
+                    )
+                ) R ON 1 = 1 
+                LEFT JOIN user_history AS uh ON V.vacancy_ID = uh.vacancy_ID AND uh.user_ID = :id
+                GROUP BY V.vacancy_ID
+            ) AS F ON F.vacancy_ID = VA.vacancy_ID
+            INNER JOIN departments AS D ON VA.department_ID = D.department_ID 
+            INNER JOIN status AS S ON S.status_ID = VA.status
+            WHERE VA.vacancy_ID NOT IN (SELECT vacancy_ID FROM applications WHERE candidate_ID = :id)
+            ORDER BY F.relevance_score DESC";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
@@ -354,11 +394,11 @@ class VacancyModel
 
     public function deleteVacancyFromDB($vacancyID)
     {
-        try{
-        $sql = "DELETE FROM vacancies WHERE vacancy_ID = :vacancy_ID";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':vacancy_ID', $vacancyID, PDO::PARAM_INT);
-        return $stmt->execute();
+        try {
+            $sql = "DELETE FROM vacancies WHERE vacancy_ID = :vacancy_ID";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':vacancy_ID', $vacancyID, PDO::PARAM_INT);
+            return $stmt->execute();
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
@@ -481,12 +521,27 @@ class VacancyModel
         try {
             $sql = "SELECT * FROM roles
                 WHERE role_ID != 1";
-
             $stmt = $this->pdo->query($sql);
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function SelectNumberOfApps($id)
+    {
+        try {
+            $sql = "SELECT count(*) as count FROM applications as A
+                         INNER JOIN vacancies as V
+                         ON V.vacancy_ID=A.vacancy_ID
+                WHERE A.status = 1 AND V.author= :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 

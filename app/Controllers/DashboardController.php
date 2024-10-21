@@ -29,6 +29,7 @@ class DashboardController
             $columns_type = $this->model->getColumnsType();
             $departments = $this->model->SelectAllDepartments();
             $skills = $this->model->SelectAllSkills();
+            $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
             if (AuthHelper::isCandidate()) {
                 $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id']);
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';

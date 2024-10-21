@@ -52,6 +52,19 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
             <button class="button" type="submit">Выйти</button>
         </form>
     </div>
+    <div id="randomText">Число новых откликов <?php echo htmlspecialchars($number_of_app['count']);?> </div>
+    <script>
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        document.getElementById('randomText').style.color = getRandomColor();
+    </script>
 </header>
 <main>
     <div class="main-container">

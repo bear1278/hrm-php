@@ -44,7 +44,20 @@ class AdminModel
             $stmt = $this->pdo->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Если не было начала транзакции, rollBack не нужен
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function SelectHistory()
+    {
+        try {
+            $sql = "Select id, user_id, v.name as 'vacancy name' , action, creating_date 
+                    FROM user_history as uh
+                    INNER JOIN vacancies as V 
+                    ON uh.vacancy_ID = V.vacancy_ID";
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }

@@ -120,4 +120,16 @@ class AdminController
         require_once __DIR__ . '/../Views/skills.html';
 
     }
+
+    public function ShowHistory()
+    {
+        try {
+            $data = $this->model->SelectHistory();
+        } catch (Exception $e) {
+            $this->ErrorHandler($e->getMessage());
+            exit();
+        }
+        $columns = array_keys($data[0]);
+        require_once __DIR__ . '/../Views/history.html';
+    }
 }

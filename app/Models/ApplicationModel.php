@@ -123,11 +123,57 @@ class ApplicationModel
                 throw new Exception("No records found.");
             }
         }catch (PDOException $e) {
-            throw new Exception("Ошибка: " . $e->getMessage());
+            throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
     public function createApplication($vacancy_ID, $candidate_ID)
+    {
+        try{
+            $this->pdo->beginTransaction();
+            $result = $this->insertApplication($vacancy_ID, $candidate_ID);
+            if (!$result){
+                throw new PDOException('Insert application with error');
+            }
+            $result = $this->InsertHistory('apply',$vacancy_ID, $candidate_ID);
+            if (!$result){
+                throw new PDOException('Insert in history with error');
+            }
+            $this->pdo->commit();
+            return true;
+        }
+        catch (PDOException $e) {
+            $this->pdo->rollBack();
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function DeleteApplication($id)
+    {
+        try{
+            $app = $this->SelectApplicationById($id);
+            if (empty($app)){
+                throw new PDOException('Select by id with error');
+            }
+            $this->pdo->beginTransaction();
+            $result = $this->DeleteFromApplication($id);
+            if (!$result){
+                throw new PDOException('Insert application with error');
+            }
+            $result = $this->InsertHistory('unapply',$app['vacancy_ID'], $app['candidate_ID']);
+            if (!$result){
+                throw new PDOException('Insert in history with error');
+            }
+            $this->pdo->commit();
+            return true;
+        }
+        catch (PDOException $e) {
+            $this->pdo->rollBack();
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function insertApplication($vacancy_ID, $candidate_ID)
     {
         try {
             $sql = "INSERT INTO applications (vacancy_ID, candidate_ID, application_date,status) VALUES (:vacancy_ID, :candidate_ID, :application_date,:status)";
@@ -144,7 +190,23 @@ class ApplicationModel
         }
     }
 
-    public function DeleteApplication($id)
+    public function InsertHistory($action,$vacancy_ID,$candidate_ID)
+    {
+        try{
+            $sql = "INSERT INTO user_history (user_ID,vacancy_ID,action,creating_date) values (:user_ID,:vacancy_ID,:action,:date)";
+            $stmt = $this->pdo->prepare($sql);
+            $date = date("Y-m-d H:i:s");
+            $stmt->bindParam(':vacancy_ID', $vacancy_ID);
+            $stmt->bindParam(':user_ID', $candidate_ID);
+            $stmt->bindParam(':date', $date);
+            $stmt->bindParam(':action', $action);
+            return $stmt->execute();
+        }catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function DeleteFromApplication($id)
     {
         try{
             $sql = "DELETE FROM applications 
@@ -255,6 +317,19 @@ class ApplicationModel
             $stmt->bindParam(':id',$id);
             $stmt->bindParam(':status',$status);
             return $stmt->execute();
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function SelectApplicationById($id)
+    {
+        try{
+            $sql = "SELECT * FROM applications where application_ID = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
