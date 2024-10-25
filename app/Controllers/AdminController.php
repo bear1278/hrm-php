@@ -4,6 +4,7 @@ namespace app\Controllers;
 
 use app\Models\AdminModel;
 use Exception;
+use PDOException;
 
 class AdminController
 {
@@ -125,11 +126,35 @@ class AdminController
     {
         try {
             $data = $this->model->SelectHistory();
+            $values = $this->model->SelectRelevanceValues();
         } catch (Exception $e) {
             $this->ErrorHandler($e->getMessage());
             exit();
         }
         $columns = array_keys($data[0]);
         require_once __DIR__ . '/../Views/history.html';
+    }
+
+    public function changeRecommendationParameters()
+    {
+        try{
+            $id = $_POST['parameter_name'];
+            $value = $_POST['value'];
+            if ($value>100 || $value<-100){
+                throw new Exception("Значение должно быть между -100 и 100");
+            }
+            $result  = $this->model->UpdateRelevanceValues($id,$value);
+            if ($result) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Ошибка при изменении']);
+            }
+        }catch (PDOException $e) {
+            $this->ErrorHandler($e->getMessage());
+            exit();
+        }catch (Exception $e){
+            http_response_code(400);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
     }
 }

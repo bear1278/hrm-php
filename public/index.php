@@ -276,6 +276,12 @@ switch ($parts[0]) {
                     $adminController->Delete('user_history', 'id');
                 }
             }
+            if (isset($parts[1]) && $parts[1]==='change')
+            {
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    $adminController->changeRecommendationParameters();
+                }
+            }
         } else {
             header('Location: /');
             exit();

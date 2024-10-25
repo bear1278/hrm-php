@@ -1,0 +1,13 @@
+.values-list{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.list-elem{
+  margin-right: 10px;
+  background-color: #ffffff;
+  border: 2px solid #e9f2ff;
+  border-radius: 5px;
+  padding: 2px 2px 2px 2px;
+}

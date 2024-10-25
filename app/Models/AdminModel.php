@@ -85,4 +85,30 @@ class   AdminModel
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
+
+    public function SelectRelevanceValues()
+    {
+        try {
+            $sql = "Select  id,parameter_name, value From relevance_weights";
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function UpdateRelevanceValues($id, $value)
+    {
+        try {
+            $sql = "UPDATE relevance_weights 
+             SET value = :value
+             WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':value', $value);
+            $stmt->bindParam(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
 }

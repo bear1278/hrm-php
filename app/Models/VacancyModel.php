@@ -129,19 +129,19 @@ class VacancyModel
                 SELECT 
                     V.vacancy_ID, 
                     SUM(
-                        CASE WHEN V.department_ID = R.department_ID THEN 3 ELSE 0 END +
+                        CASE WHEN V.department_ID = R.department_ID THEN (SELECT value FROM relevance_weights Where parameter_name='department_match') ELSE 0 END +
                         CASE
-                            WHEN ABS(V.experience_required - R.experience_required) <= 1 THEN 2
-                            WHEN ABS(V.experience_required - R.experience_required) <= 3 THEN 1
+                            WHEN ABS(V.experience_required - R.experience_required) <= 1 THEN (SELECT value FROM relevance_weights Where parameter_name='experience_close')
+                            WHEN ABS(V.experience_required - R.experience_required) <= 3 THEN (SELECT value FROM relevance_weights Where parameter_name='experience_medium')
                             ELSE 0
                         END +
                         CASE
-                            WHEN V.salary BETWEEN R.salary * 0.9 AND R.salary * 1.1 THEN 2
-                            WHEN V.salary BETWEEN R.salary * 0.8 AND R.salary * 1.2 THEN 1
+                            WHEN V.salary BETWEEN R.salary * 0.9 AND R.salary * 1.1 THEN (SELECT value FROM relevance_weights Where parameter_name='salary_close')
+                            WHEN V.salary BETWEEN R.salary * 0.8 AND R.salary * 1.2 THEN (SELECT value FROM relevance_weights Where parameter_name='salary_medium')
                             ELSE 0
-                        END -
+                        END +
                         CASE
-                            WHEN uh.action = 'unapply' THEN 10 * (Select count(*) from user_history) ELSE 0
+                            WHEN uh.action = 'unapply' THEN (SELECT value FROM relevance_weights Where parameter_name='unapply_penalty') * (Select count(*) from user_history) ELSE 0
                         END
                     ) AS relevance_score
                 FROM vacancies AS V

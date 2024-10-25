@@ -50,6 +50,38 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 <main>
 
     <div class="main-container">
+        <div class="values-list">
+            <?php foreach ($values as $value): ?>
+            <div class="list-elem">
+                <?php echo htmlspecialchars($value['parameter_name']) . ": " . htmlspecialchars($value['value']) ; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <button id="button-add" class="button" type="submit">Изменит значения параметров</button>
+        <script type="module" src="/js/parameter-edit.js"></script>
+
+        <div id="vacancyModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Изменение значения параметров</h2>
+                <div id="error-message" style="color: red; display: none;"></div>
+                <form id="vacancy-form" action="/change" method="POST" class="modal-form">
+                    <label for="parameter">Параметер</label>
+                    <select class="input-modal" id="parameter" name="parameter_name" required>
+                        <?php foreach ($values as $value): ?>
+                        <option value="<?php echo htmlspecialchars($value['id']); ?>">
+                            <?php echo htmlspecialchars(trim($value['parameter_name'])); ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label for="value">Значение</label>
+                    <input class="input-modal" type="number" id="value" name="value"
+                           required/>
+                    <button id="button-save" class="button" type="submit">Сохранить</button>
+                </form>
+            </div>
+        </div>
 
         <div class="table-container">
             <table border="1">
