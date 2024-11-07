@@ -192,18 +192,14 @@ class VacancyModel
         try {
             $sql = "SELECT V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
             FROM vacancies as V 
-            INNER JOIN departments as D 
+            Left JOIN departments as D 
             ON V.department_ID=D.department_ID
-            INNER JOIN status as S
+            Left JOIN status as S
             ON S.status_ID=V.status
             LIMIT 1";
             $stmt = $this->pdo->query($sql);
             $columns = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($columns) {
-                return array_keys($columns);
-            } else {
-                return [];
-            }
+            return array_keys($columns);
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

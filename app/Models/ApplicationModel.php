@@ -152,21 +152,19 @@ class ApplicationModel
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
             V.status as `vacancy status`,application_date as `application date`,A.status as `application status` 
             FROM vacancies as V 
-            INNER JOIN applications as A 
+            LEFT JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
-            INNER JOIN
+            LEFT JOIN
             departments as D
             ON V.department_ID = D.department_id
-            INNER JOIN users as U
+            LEFT JOIN users as U
             ON U.user_ID=A.candidate_ID 
             LIMIT 1";
             $query = $this->pdo->query($sql);
             $result = $query->fetchAll(PDO::FETCH_ASSOC);
-            if ($result) {
-                return array_keys($result[0]);
-            } else {
-                throw new Exception("No records found.");
-            }
+
+            return array_keys($result[0]);
+
         }catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

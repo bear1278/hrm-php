@@ -20,7 +20,7 @@ class ProfileModel
     {
         try {
             $sql = "SELECT first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
-            resume, experience_years as `experience years`, location, C.status 
+            resume, experience_years as `experience years`, location,image, C.status 
             FROM users as U
             INNER JOIN candidates as C 
             ON U.user_ID = C.candidate_ID
@@ -39,7 +39,8 @@ class ProfileModel
                     $row['resume'],
                     $row['experience years'],
                     $row['location'],
-                    $row['status']
+                    $row['status'],
+                    $row['image']
                 );
             }
             return $candidate;
@@ -51,7 +52,7 @@ class ProfileModel
     public function SelectColumns()
     {
         try {
-            $sql = "SELECT first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
+            $sql = "SELECT image,first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
             resume, experience_years as `experience years`, location 
             FROM users as U
             INNER JOIN candidates as C 
@@ -61,6 +62,19 @@ class ProfileModel
             $stmt->execute();
             $candidate = $stmt->fetch(PDO::FETCH_ASSOC);
             return array_keys($candidate);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function UpdateImage($id,$image)
+    {
+        try {
+            $sql = "UPDATE candidates set image=:image where candidate_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':image', $image);
+            return $stmt->execute();
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

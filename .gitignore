@@ -2,3 +2,4 @@
 .idea
 hrm.sql
 .env
+/public/img/candidates/*

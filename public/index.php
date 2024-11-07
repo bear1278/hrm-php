@@ -164,7 +164,9 @@ switch ($parts[0]) {
     case 'profile':
         AuthHelper::ensureLoggedIn();
         if (AuthHelper::isCandidate()) {
-            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            if(isset($parts[1]) && $parts[1]==='edit' && $_SERVER['REQUEST_METHOD'] === 'POST'){
+                $profileController->SetNewProfileImage();
+            }elseif($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $profileController->ShowProfileForCandidate();
             }
         } else {

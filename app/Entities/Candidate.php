@@ -6,11 +6,11 @@ use InvalidArgumentException;
 
 class Candidate extends User
 {
-    private $phone;
-    private $resume;
-    private $experience;
-    private $location;
-    private $status;
+    const DEFAULT_IMAGE="/img/user.svg";
+    const DIR_IMAGES="/../../public/img/candidates/";
+    const DIR_IMG_FOR_VIEW = "/img/candidates/";
+    const ADDITION_TO_PATH = "/../../public";
+
     const fieldMapping = [
         'candidate_ID' => 'getId',
         'last name' => 'getLastName',
@@ -22,10 +22,35 @@ class Candidate extends User
         'salary' => 'getSalary',
         'experience years' => 'getExperience',
         'location' => 'getLocation',
-        'status' => 'getStatus'
+        'status' => 'getStatus',
+        'image' => 'getImage'
     ];
 
-    public function __construct($id, $email, $last_name, $first_name, $phone, $resume, $experience, $location, $status)
+    private $phone;
+    private $resume;
+    private $experience;
+    private $location;
+    private $status;
+    private $image;
+
+    /**
+     * @return mixed
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    /**
+     * @param mixed $image
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+    }
+
+
+    public function __construct($id, $email, $last_name, $first_name, $phone, $resume, $experience, $location, $status,$image)
     {
         $this->setId($id);
         $this->setEmail($email);
@@ -36,6 +61,7 @@ class Candidate extends User
         $this->setExperience($experience);
         $this->setLocation($location);
         $this->setStatus($status);
+        $this->setImage($image);
     }
 
     /**
