@@ -1,0 +1,93 @@
+<?php
+// Start the session to access session variables
+use app\Entities\Vacancy;
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login');
+    exit();
+}
+
+// Fetch the user information from the server-side function
+$user = isset($data) ? $data : null;
+$columns = isset($columns) ? $columns : [];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="/css/profile.css"/>
+</head>
+<body>
+
+<header>
+    <div class="header-container" id="error">
+        <nav class="navigation">
+            <ul>
+                <li><a href="http://localhost/">Вакансии</a></li>
+                <li><a href="http://localhost/applications">Отклики</a></li>
+                <li><a href="http://localhost/profile">Профиль</a></li>
+            </ul>
+        </nav>
+        <form action="/logout" method="POST">
+            <button class="button" type="submit">Выйти</button>
+        </form>
+    </div>
+</header>
+
+<main>
+
+    <div id="vacancyModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Изменить аватар</h2>
+            <div id="error-message" style="color: red; display: none;"></div>
+            <form id="vacancy-form" action="/add" method="POST" class="modal-form">
+                <input type="hidden" name="id" id="id" value="<?= $vacancy->getId()?>">
+                <label for="vacancy-title">Изображение</label>
+                <input alt="user" class="input-modal" type="file" id="vacancy-title" name="image" accept="image/*" required/>
+                <button id="button-save" class="button" type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <h1>Вакансия</h1>
+    <div class="profile-info">
+        <?php if ($vacancy): ?>
+        <ul>
+            <?php foreach ($columns as $column): ?>
+            <?php if($column == 'image'){ ?>
+            <li class="profile-details">
+                <button class="button-image-change" id="button-add">
+                    <img class="profile-image"
+                         src="<?= htmlspecialchars($vacancy->{Vacancy::fieldMapping[$column]}()) ?>"
+                         alt="<?= $errorImage ? $errorImage: 'user' ?>" >
+                    <span class="edit-text">Редактировать</span>
+                </button>
+            </li>
+            <?php } else { ?>
+            <li class="profile-details"><strong><?= htmlspecialchars($column) ?>:</strong>
+                <?php if($column == 'posting date'){ echo htmlspecialchars($vacancy->{Vacancy::fieldMapping[$column]}()->format('Y-m-d'));}else{ ?>
+                <?= htmlspecialchars($vacancy->{Vacancy::fieldMapping[$column]}()) ?>
+                <?php } ?>
+            </li>
+            <?php } ?>
+            <?php endforeach; ?>
+        </ul>
+        <?php else: ?>
+        <p>Информация о пользователе недоступна.</p>
+        <?php endif; ?>
+    </div>
+
+</main>
+<script type="module" src="/js/edit-vacancy-image.js"></script>
+</body>
+</html>

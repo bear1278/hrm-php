@@ -7,6 +7,19 @@ use InvalidArgumentException;
 
 class Vacancy
 {
+
+    const fieldMapping = [
+        'vacancy_ID' => 'getId',
+        'name' => 'getName',
+        'department' => 'getDepartment',
+        'description' => 'getDescription',
+        'experience' => 'getExperience',
+        'salary' => 'getSalary',
+        'posting date' => 'getPostingDate',
+        'status' => 'getStatus',
+        'image' => 'getImage'
+    ];
+    const maxInt = 2147483647;
     private $id;
     protected $name;
     protected $department;
@@ -17,19 +30,9 @@ class Vacancy
     protected $status;
     private $author;
     private $skills;
-    const fieldMapping = [
-        'vacancy_ID' => 'getId',
-        'name' => 'getName',
-        'department' => 'getDepartment',
-        'description' => 'getDescription',
-        'experience' => 'getExperience',
-        'salary' => 'getSalary',
-        'posting date' => 'getPostingDate',
-        'status' => 'getStatus'
-    ];
-    const maxInt = 2147483647;
+    private $image;
 
-    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills)
+    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills,$image)
     {
         $this->setId($id);
         $this->setName($name);
@@ -41,6 +44,17 @@ class Vacancy
         $this->setStatus($status);
         $this->setAuthor($author);
         $this->setSkills($skills);
+        $this->setImage($image);
+    }
+
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    public function setImage($image)
+    {
+        $this->image = $image;
     }
 
     public function copy(Vacancy $vacancy)
@@ -65,6 +79,9 @@ class Vacancy
         }
         if (empty($this->status)) {
             $this->status = $vacancy->getStatus();
+        }
+        if ($this->image==null && $vacancy->getImage()!=null){
+            $this->setImage($vacancy->getImage());
         }
     }
 

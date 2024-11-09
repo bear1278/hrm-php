@@ -67,7 +67,8 @@ class VacancyModel
                     $row['posting date'],
                     $row['status'],
                     null,
-                    []
+                    [],
+                    null
                 );
             }
             return $vacancies;
@@ -103,7 +104,8 @@ class VacancyModel
                     $row['posting date'],
                     $row['status'],
                     null,
-                    []
+                    [],
+                    null
                 );
             }
             return $vacancies;
@@ -177,7 +179,8 @@ class VacancyModel
                     $row['posting date'],
                     $row['status'],
                     null,
-                    []
+                    [],
+                    null
                 );
             }
             return $vacancies;
@@ -190,7 +193,7 @@ class VacancyModel
     public function getTableColumns(): array
     {
         try {
-            $sql = "SELECT V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
+            $sql = "SELECT image,V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
             FROM vacancies as V 
             Left JOIN departments as D 
             ON V.department_ID=D.department_ID
@@ -260,7 +263,8 @@ class VacancyModel
                     $row['posting date'],
                     $row['status'],
                     null,
-                    []
+                    [],
+                    null
                 );
             }
             return $vacancies;
@@ -361,15 +365,15 @@ class VacancyModel
         }
     }
 
-    public function getVacancyByID($id): array
+    public function getVacancyByID($id)
     {
         try {
             $sql = "SELECT * FROM vacancies WHERE vacancy_ID=?";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$id]);
-            $vacancies = [];
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $vacancies[] = new Vacancy(
+            $vacancy = null;
+            while ($row = $stmt->fetch()) {
+                $vacancy = new Vacancy(
                     $row['vacancy_ID'],
                     $row['name'],
                     $row['department_ID'],
@@ -379,10 +383,11 @@ class VacancyModel
                     $row['posting_date'],
                     $row['status'],
                     null,
-                    []
+                    [],
+                    $row['image']
                 );
             }
-            return $vacancies;
+            return $vacancy;
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
@@ -537,6 +542,19 @@ class VacancyModel
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function UpdateVacancyImage(int $id,$fileData)
+    {
+        try{
+            $sql = "UPDATE vacancies set image=:file_data where vacancy_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':file_data', $fileData, PDO::PARAM_LOB);
+            return $stmt->execute();
+        }catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }

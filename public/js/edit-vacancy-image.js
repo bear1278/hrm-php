@@ -5,6 +5,7 @@ export function add() {
     const closeButton = document.querySelector(".close");
     const form = document.getElementById('vacancy-form');
     const errorMessageDiv = document.getElementById('error-message'); // Элемент для ошибок
+    const id = document.getElementById('id');
 
     // Показать модальное окно при нажатии на кнопку "Добавить вакансию"
     addButton.addEventListener("click", function(event) {
@@ -30,7 +31,7 @@ export function add() {
 
         const formData = new FormData(form);
         const file = formData.get('image');
-        const maxSize = 2*1024*1024; // Максимальный размер в байтах (2MB)
+        const maxSize = 2 * 1024 * 1024; // Максимальный размер в байтах (2MB)
 
         // Проверка на наличие файла
         if (!file) {
@@ -63,7 +64,7 @@ export function add() {
             URL.revokeObjectURL(url); // Освобождаем память
 
             // Отправка формы после всех успешных проверок
-            fetch('/profile/edit', {
+            fetch('/vacancy/'+id.value+'/edit', {
                 method: 'POST',
                 body: formData
             })
@@ -82,7 +83,7 @@ export function add() {
                     } else {
                         console.log('Success:', data);
                         modal.style.display = 'none'; // Закрытие модального окна
-                        window.location.href = '/profile'; // Перенаправление
+                        window.location.href = '/vacancy/'+id.value; // Перенаправление
                     }
                 })
                 .catch((error) => {

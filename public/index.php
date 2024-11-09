@@ -9,6 +9,7 @@ use app\Controllers\ProfileController;
 use app\Controllers\ResumeController;
 use app\Controllers\SignUpController;
 use app\Helpers\AuthHelper;
+use app\Controllers\VacancyController;
 
 require_once '../autoload.php';
 require_once __DIR__ . '/../config/database.php';
@@ -23,6 +24,7 @@ $resumeController = new ResumeController();
 $profileController = new ProfileController();
 $adminController = new AdminController();
 $notificationController = new NotificationController();
+$vacancyController = new VacancyController();
 
 $request_uri = $_SERVER['REQUEST_URI'];
 $request_uri = explode('?', $request_uri)[0];
@@ -283,6 +285,21 @@ switch ($parts[0]) {
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $adminController->changeRecommendationParameters();
                 }
+            }
+        } else {
+            header('Location: /');
+            exit();
+        }
+        break;
+
+    case 'vacancy':
+        AuthHelper::ensureLoggedIn();
+        if (AuthHelper::isCandidate()) {
+            if ($_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1])) {
+                $vacancyController->ShowVacancyDetails((int)$parts[1]);
+            }
+            if($_SERVER['REQUEST_METHOD']==='POST' && isset($parts[1]) && isset($parts[2]) && $parts[2]=='edit'){
+                $vacancyController->SetNewImage((int)$parts[1]);
             }
         } else {
             header('Location: /');

@@ -175,7 +175,10 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
                   if ($column == 'posting date')
                   {
                     echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}()->format('Y-m-d'));
-                  }else{
+                  }elseif ($column == 'name'){
+                    ?> <a style="text-decoration: none" href="http://localhost/vacancy/<?= $row->getId()?>"><?= $row->{Vacancy::fieldMapping[$column]}() ?></a>
+                    <?php
+                    }else{
                     echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}());
                   }
                   ?>

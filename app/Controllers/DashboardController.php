@@ -26,6 +26,7 @@ class DashboardController
     {
         try {
             $columns = $this->model->getTableColumns();
+            $columns = array_diff($columns,["image"]);
             $columns_type = $this->model->getColumnsType();
             $departments = $this->model->SelectAllDepartments();
             $skills = $this->model->SelectAllSkills();
@@ -63,6 +64,7 @@ class DashboardController
     {
         try {
             $columns = $this->model->getTableColumns();
+            $columns = array_diff($columns,["image"]);
             $columns_type = $this->model->getColumnsType();
             if (AuthHelper::isManager()) {
                 $search = $_POST['search'];
@@ -162,7 +164,8 @@ class DashboardController
                 null,
                 2,
                 $_SESSION['user_id'],
-                $_POST['skills']);
+                $_POST['skills'],
+                null);
             $oldVacancy = $this->model->getVacancyByID($vacancy->getId());
             $vacancy->copy($oldVacancy[0]);
             $result = $this->model->UpdateVacancyAndSkills($vacancy);
@@ -196,7 +199,8 @@ class DashboardController
                 date("Y-m-d H:i:s"),
                 1,
                 $_SESSION['user_id'],
-                $_POST['skills']);
+                $_POST['skills'],
+                null);
             $result = $this->model->InsertNewVacancy($vacancy);
             if ($result) {
                 echo json_encode(['success' => true]);
