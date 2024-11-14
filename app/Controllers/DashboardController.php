@@ -77,14 +77,16 @@ class DashboardController
                 return;
             }
             if (AuthHelper::isCandidate()) {
-                $json = file_get_contents('php://input');
-                $data = json_decode($json, true);
-                $search = $data['search'];
-                if (empty($search)) {
+                if (!isset($_COOKIE['filtersData'])) {
                     http_response_code(301);
                     return;
                 }
-                $data = $this->model->getVacanciesWithParamForCandidate($search, $_SESSION['user_id']);
+                $data = json_decode($_COOKIE['filtersData'], true);
+                if (!$data) {
+                    http_response_code(301);
+                    return;
+                }
+                $data = $this->model->getVacanciesWithParamForCandidate($data, $_SESSION['user_id']);
                 $this->sendJsonResponse([
                     'data' => $this->serializeData($data),
                     'columns' => $columns,

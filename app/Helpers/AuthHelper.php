@@ -22,6 +22,7 @@ class AuthHelper
 
     public static function logout()
     {
+        setcookie('filtersData', '', time() - 3600, '/');   
         session_destroy();
     }
 

@@ -1,25 +1,25 @@
-import {SetApplyButtons} from './apply.js'
+import { SetApplyButtons } from './apply.js';
+
 document.getElementById('search-form').addEventListener('submit', function(event) {
     event.preventDefault(); // Отменяем отправку формы
     sendFilterData(); // Вызываем функцию для отправки фильтров
 });
 
-// Функция для отправки фильтров на сервер
-function sendUpdatedFiltersToServer(filtersData) {
+// Функция для отправки пустого запроса на сервер
+function sendEmptyPostRequest() {
     fetch('/search', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ search: filtersData })
+        body: JSON.stringify({}) // Пустое тело запроса
     })
         .then(response => {
             if (response.ok) {
                 return response.json(); // Получаем JSON-ответ
-            } else if (response.status===301){
-                window.location.href='/';
-            }else
-            {
+            } else if (response.status === 301) {
+                window.location.href = '/';
+            } else {
                 throw new Error('Ошибка при отправке данных');
             }
         })
@@ -32,50 +32,59 @@ function sendUpdatedFiltersToServer(filtersData) {
         });
 }
 
+// Функция для записи JSON-данных в cookies без кодирования
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))}${expires}; path=/`;
+}
+
+// Функция для получения JSON-значения из cookies
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+        return JSON.parse(decodeURIComponent(parts.pop().split(";").shift()));
+    }
+    return null;
+}
+
 // Функция для отправки фильтров на сервер при добавлении/изменении
 function sendFilterData() {
     const selectElement = document.getElementById('column-select');
     const inputElement = document.getElementById('search-input');
     const comparisonElement = document.getElementById('comparison-select');
-    let prefix='';
-    if (comparisonElement){
-        prefix=comparisonElement.value;
+    let prefix = '';
+    if (comparisonElement) {
+        prefix = comparisonElement.value;
     }
 
-    // Получаем текст внутри выбранного option и убираем лишние пробелы
     let key = selectElement ? selectElement.options[selectElement.selectedIndex].textContent.trim() : null;
-    const value = inputElement ? inputElement.value : null; // Берем значение из input, если есть
-    key= prefix+key;
-    // Получаем данные из localStorage по ключу "filtersData" или создаем пустой массив, если данных нет
-    let filtersData = JSON.parse(localStorage.getItem('filtersData')) || [];
+    const value = inputElement ? inputElement.value : null;
+    key = prefix + key;
+
+    // Получаем текущие фильтры из cookies
+    let filtersData = getCookie('filtersData') || {};
 
     if (!value) {
         showError('Поле ввода не должно быть пустым');
         return;
     }
 
-    // Если есть новые данные для добавления
     if (key && value) {
-        // Проверяем, существует ли уже фильтр с таким ключом и значением
-        const existingIndex = filtersData.findIndex(item => item.column === key && item.value === value);
+        // Добавляем или обновляем фильтр в виде ключ-значение (map)
+        filtersData[key] = { id: Date.now(), column: key, value: value };
 
-        if (existingIndex !== -1) {
-            // Если фильтр уже существует, обновляем его значение
-            filtersData[existingIndex].value = value;
-        } else {
-            // Если фильтра нет, добавляем новый с уникальным id
-            filtersData.push({ id: Date.now(), column: key, value: value });
-        }
-
-        // Сохраняем обновленный массив в localStorage под ключом "filtersData"
-        localStorage.setItem('filtersData', JSON.stringify(filtersData));
+        // Сохраняем обновленный объект в cookies
+        setCookie('filtersData', filtersData, 1);
     }
 
-    // Обновляем отображение фильтров
     renderFilters(filtersData);
-
-    // Отправляем обновленные фильтры на сервер
-    sendUpdatedFiltersToServer(filtersData);
+    sendEmptyPostRequest(); // Отправляем пустой POST-запрос
 }
 
 function showError(message) {
@@ -83,11 +92,7 @@ function showError(message) {
     const errorElement = document.createElement('div');
     errorElement.textContent = message;
     errorElement.classList.add('error-message');
-
-    // Добавляем сообщение об ошибке под input
     inputElement.insertAdjacentElement('afterend', errorElement);
-
-    // Удаляем сообщение об ошибке через 500 мс
     setTimeout(() => {
         errorElement.remove();
     }, 1500);
@@ -95,75 +100,57 @@ function showError(message) {
 
 function renderFilters(filtersData) {
     const filtersContainer = document.getElementById('filters');
-    filtersContainer.innerHTML = ''; // Очищаем контейнер перед добавлением новых данных
+    filtersContainer.innerHTML = '';
 
-    filtersData.forEach((item) => {
+    // Перебираем каждый элемент в объекте filtersData и добавляем его в DOM
+    Object.values(filtersData).forEach((item) => {
         const resultContainer = document.createElement('div');
         resultContainer.textContent = `${item.column}: ${item.value}`;
-        resultContainer.id = `filter-${item.id}`; // Присваиваем уникальный id контейнеру
+        resultContainer.id = `filter-${item.id}`;
         resultContainer.classList.add('filter');
 
-        // Создаем кнопку для удаления
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('button-delete-filter');
-        deleteButton.dataset.id = item.id; // Присваиваем уникальный id кнопке удаления
+        deleteButton.dataset.id = item.column; // Используем column в качестве идентификатора для удаления
 
-        // Создаем элемент <i> для иконки
         const icon = document.createElement('i');
-        icon.classList.add('fa-solid', 'fa-xmark'); // Добавляем классы для иконки
-
-        // Добавляем иконку в кнопку
+        icon.classList.add('fa-solid', 'fa-xmark');
         deleteButton.appendChild(icon);
-
-        // Добавляем кнопку удаления в контейнер
         resultContainer.appendChild(deleteButton);
         filtersContainer.appendChild(resultContainer);
     });
 
-    // Привязываем события удаления к каждой кнопке
     attachDeleteEvents();
 }
 
-// Функция привязки событий удаления к кнопкам
 function attachDeleteEvents() {
     const deleteButtons = document.querySelectorAll('.button-delete-filter');
-
     deleteButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const filterId = parseInt(button.dataset.id);
-            removeFilter(filterId);
+            const filterColumn = button.dataset.id;
+            removeFilter(filterColumn);
         });
     });
 }
 
-// Функция для удаления фильтра по id
-function removeFilter(id) {
-    let filtersData = JSON.parse(localStorage.getItem('filtersData')) || [];
-
-    // Удаляем фильтр с указанным id
-    filtersData = filtersData.filter(item => item.id !== id);
-
-    // Сохраняем обновленные фильтры в localStorage
-    localStorage.setItem('filtersData', JSON.stringify(filtersData));
-
-    // Обновляем отображение фильтров
+// Функция для удаления фильтра по column
+function removeFilter(column) {
+    let filtersData = getCookie('filtersData') || {};
+    delete filtersData[column]; // Удаляем фильтр по ключу column
+    setCookie('filtersData', filtersData, 1); // Обновляем cookies
     renderFilters(filtersData);
-
-    // Отправляем обновленные фильтры на сервер
-    sendUpdatedFiltersToServer(filtersData);
+    sendEmptyPostRequest(); // Отправляем пустой POST-запрос
 }
 
-
-// Функция для обновления таблицы с результатами (ранее написанная)
+// Функция для обновления таблицы с результатами
 function updateTable(responseData) {
     const table = document.querySelector('table');
 
     if (!table) {
         console.error('Таблица не найдена в DOM.');
-        return; // Прекращаем выполнение, если таблицы нет
+        return;
     }
 
-    // Проверяем наличие <thead> и <tbody> и создаем их, если они отсутствуют
     let tableHead = table.querySelector('thead');
     if (!tableHead) {
         tableHead = document.createElement('thead');
@@ -176,46 +163,45 @@ function updateTable(responseData) {
         table.appendChild(tableBody);
     }
 
-    // Очищаем текущее содержимое thead и tbody
     tableHead.innerHTML = '';
     tableBody.innerHTML = '';
 
-    // Создаем шапку таблицы (thead)
-    const headerRow = document.createElement('tr');
-    responseData.columns.forEach(column => {
-        const th = document.createElement('th');
-        th.textContent = column; // Добавляем название столбца
-        headerRow.appendChild(th);
-    });
+    const columns = Object.values(responseData.columns);
 
-    // Добавляем пустую колонку для кнопки действия
-    const actionTh = document.createElement('th');
-    actionTh.textContent = ''; // Пусть будет пустая ячейка
-    headerRow.appendChild(actionTh);
+    if (Array.isArray(columns) && columns.length > 0) {
+        const headerRow = document.createElement('tr');
+        columns.forEach(column => {
+            const th = document.createElement('th');
+            th.textContent = column;
+            headerRow.appendChild(th);
+        });
 
-    // Добавляем строку шапки в thead
-    tableHead.appendChild(headerRow);
+        const actionTh = document.createElement('th');
+        actionTh.textContent = '';
+        headerRow.appendChild(actionTh);
+        tableHead.appendChild(headerRow);
+    } else {
+        console.error("Ошибка: responseData.columns не является массивом");
+        return;
+    }
 
-    // Заполняем тело таблицы (tbody) данными
-    if (responseData.data && responseData.data.length > 0) {
+    if (Array.isArray(responseData.data) && responseData.data.length > 0) {
         responseData.data.forEach(row => {
             const tableRow = document.createElement('tr');
-
-            responseData.columns.forEach(column => {
+            columns.forEach(column => {
                 const td = document.createElement('td');
-                td.textContent = row[column] ? row[column] : ''; // Добавляем значение ячейки
+                td.textContent = row[column] ? row[column] : '';
                 tableRow.appendChild(td);
             });
 
-            // Добавляем кнопку действий для каждой строки
             const actionTd = document.createElement('td');
             const actionButton = document.createElement('button');
             const script = document.createElement('script');
-            script.type='module';
-            script.src='/js/apply.js';
+            script.type = 'module';
+            script.src = '/js/apply.js';
             actionButton.classList.add('button-apply');
-            actionButton.value = row['vacancy_ID']; // Передаем значение ID вакансии
-            actionButton.innerHTML = '<i class="fa-solid fa-check"></i>'; // Иконка
+            actionButton.value = row['vacancy_ID'];
+            actionButton.innerHTML = '<i class="fa-solid fa-check"></i>';
             actionTd.appendChild(actionButton);
             actionTd.appendChild(script);
             tableRow.appendChild(actionTd);
@@ -224,10 +210,9 @@ function updateTable(responseData) {
         });
         SetApplyButtons();
     } else {
-        // Если нет данных, добавляем сообщение "Нет данных для отображения"
         const noDataRow = document.createElement('tr');
         const noDataCell = document.createElement('td');
-        noDataCell.colSpan = responseData.columns.length + 1; // +1 для колонки с кнопкой
+        noDataCell.colSpan = columns.length + 1;
         noDataCell.textContent = 'Нет данных для отображения';
         noDataRow.appendChild(noDataCell);
         tableBody.appendChild(noDataRow);
@@ -235,12 +220,12 @@ function updateTable(responseData) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    let filtersData = JSON.parse(localStorage.getItem('filtersData')) || [];
-    if (filtersData.length > 0) {
+    let filtersData = getCookie('filtersData') || {};
+    if (Object.keys(filtersData).length > 0) {
         renderFilters(filtersData);
-        sendUpdatedFiltersToServer(filtersData);
+        sendEmptyPostRequest();
     } else {
-        renderFilters([]);
+        renderFilters({});
     }
     SetApplyButtons();
 });
