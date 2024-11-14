@@ -32,7 +32,7 @@ class ResumeController
                 trim($_POST['phone_number']),
                 trim($_POST['resume']),
                 (int)trim($_POST['experience_years']),
-                trim($_POST['location']), 1);
+                trim($_POST['location']), 1,null);
             $oldCandidate = $this->model->findCandidateById($candidate->getId());
             if ($oldCandidate) {
                 $result = $this->model->updateCandidate($candidate->getId(),
