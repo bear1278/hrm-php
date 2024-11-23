@@ -1,6 +1,6 @@
 const columnSelect = document.getElementById('column-select');
 const searchInput = document.getElementById('search-input');
-const columnInput = document.getElementById('delete-column');
+const columnInput = document.getElementById('column');
 let additionalSelect; // Для хранения нового select
 
 

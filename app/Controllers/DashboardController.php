@@ -34,7 +34,7 @@ class DashboardController
             $skills = $this->model->SelectAllSkills();
             $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
             if (AuthHelper::isCandidate()) {
-                if (isset($_COOKIE['filtersData']) && $_COOKIE['filtersData']) {
+                if (isset($_COOKIE['filtersData']) && $encryptedFilters = $_COOKIE['filtersData']) {
                     $encryptedFilters = $_COOKIE['filtersData'];
                     $decodedFilters = $this->decryptData($encryptedFilters);
                     $filters = json_decode($decodedFilters, true);
@@ -281,9 +281,14 @@ class DashboardController
                 }
             }
             unset($filters[$indexDelete]);
-            $updatedFilters = $this->encryptData(json_encode($filters));
-            setcookie('filtersData', $updatedFilters, time() + 3600 * 24, '/', '', true, true);
-
+            if (!empty($filters)){
+                $updatedFilters = $this->encryptData(json_encode($filters));
+                setcookie('filtersData', $updatedFilters, time() + 3600 * 24, '/', '', true, true);
+            }else{
+                setcookie('filtersData', "", time() + 3600 * 24, '/', '', true, true);
+            }
+            header("Location: http://localhost");
+            exit();
         }
     }
 }
