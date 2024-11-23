@@ -69,6 +69,11 @@ export function add() {
             })
                 .then(response => {
                     if (!response.ok) {
+                        if(response.status === 500){
+                            const redirectUrl = response.headers.get('Location');
+                            window.location.href = redirectUrl;
+                            return;
+                        }
                         return response.json().then((data) => {
                             throw new Error(data.error || "Произошла ошибка");
                         });

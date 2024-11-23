@@ -26,10 +26,8 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (Exception $e) {
-    http_response_code(500);
     $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
-    header("Location: /error?message=" . $errorMessage);
-    require_once __DIR__ . '/../app/Views/error.html';
+    header("Location: http://localhost/error?message=" . $errorMessage,true,500);
     exit();
 }
 
