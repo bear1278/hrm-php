@@ -76,8 +76,8 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
         <?php if (!empty($filters)){ ?>
         <?php foreach($filters as $filter){ ?>
         <div class="filter">
-            <?= $filter['column'] ?>: <?= $filter['value']?>
             <form method="post" action="/search/delete">
+                <?= $filter['column'] ?>: <?= $filter['value']?>
                 <input type="hidden"  value="<?= $filter['column'] ?>" name="delete-column">
                 <button type="submit" class="button-delete-filter"><i class="fa-solid fa-xmark"></i></button>
             </form>
