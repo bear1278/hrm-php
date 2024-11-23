@@ -1,9 +1,12 @@
 const columnSelect = document.getElementById('column-select');
 const searchInput = document.getElementById('search-input');
+const columnInput = document.getElementById('delete-column');
 let additionalSelect; // Для хранения нового select
+
 
 columnSelect.addEventListener('change', function() {
     const selectedType = this.value;
+    columnInput.value = this.options[this.selectedIndex].textContent.trim();
 
     if (additionalSelect) {
         additionalSelect.remove();
@@ -16,9 +19,9 @@ columnSelect.addEventListener('change', function() {
         additionalSelect.className = this.className;
         additionalSelect.id = 'comparison-select';
         const options = [
+            { value: '', text: 'равно' },
             { value: 'min', text: 'больше' },
-            { value: 'max', text: 'меньше' },
-            { value: '', text: 'равно' }
+            { value: 'max', text: 'меньше' }
         ];
 
         options.forEach(optionData => {
@@ -28,6 +31,9 @@ columnSelect.addEventListener('change', function() {
             additionalSelect.appendChild(option);
         });
         this.parentNode.insertBefore(additionalSelect, searchInput);
+        additionalSelect.addEventListener('change',function (){
+            columnInput.value = this.value.trim() + columnInput.value;
+        });
     } else if (selectedType === 'BLOB' || selectedType === 'VAR_STRING') {
         searchInput.type = 'text';
     }

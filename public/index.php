@@ -70,6 +70,9 @@ switch ($parts[0]) {
 
     case 'search':
         AuthHelper::ensureLoggedIn();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($parts[1]) && $parts[1]=='delete'){
+            $dashboardController->deleteColumnFromFilter();
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dashboardController->displaySearchResult();
         }
