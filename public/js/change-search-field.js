@@ -12,10 +12,8 @@ columnSelect.addEventListener('change', function() {
 
     if (selectedType === 'LONG' || selectedType === 'DATETIME') {
         searchInput.type = 'number';
-
-        // Создаем новый select с опциями "больше", "меньше", "равно"
         additionalSelect = document.createElement('select');
-        additionalSelect.className = this.className; // Используем тот же класс, что и у первого select
+        additionalSelect.className = this.className;
         additionalSelect.id = 'comparison-select';
         const options = [
             { value: 'min', text: 'больше' },
@@ -29,8 +27,6 @@ columnSelect.addEventListener('change', function() {
             option.textContent = optionData.text;
             additionalSelect.appendChild(option);
         });
-
-        // Вставляем новый select после первого select
         this.parentNode.insertBefore(additionalSelect, searchInput);
     } else if (selectedType === 'BLOB' || selectedType === 'VAR_STRING') {
         searchInput.type = 'text';
