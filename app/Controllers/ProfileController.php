@@ -54,8 +54,8 @@ class ProfileController
             $id=$_SESSION['user_id'];
             $file = $_FILES['image'];
             $imageName = basename($_FILES['image']['name']);
-            $filePathForDB = Candidate::DIR_IMG_FOR_VIEW . $id . '_' . $imageName;
-            $filePath = __DIR__ . Candidate::DIR_IMAGES . $id . '_' . $imageName;
+            $filePathForDB = Candidate::DIR_IMG_FOR_VIEW . $id . '_'.date("YmdHis"). "_"  . $imageName;
+            $filePath = __DIR__ . Candidate::DIR_IMAGES . $id . '_'.date("YmdHis"). "_" . $imageName;
             ErrorHelper::ImageFileErrorHandler($file);
             ErrorHelper::ImagePathErrorHandler($filePath);
             if($this->model->UpdateImage($id,$filePathForDB)){
