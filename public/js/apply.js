@@ -1,17 +1,22 @@
 export function SetApplyButtons() {
     const buttons = document.querySelectorAll(".button-apply"); // Находим все кнопки "Откликнуться"
 
-    buttons.forEach((button) => {
-        button.addEventListener("click", function () {
+    buttons.forEach(function(button) {
+        button.addEventListener("click", function(event) {
+            event.stopPropagation(); // Останавливаем всплытие события, чтобы ссылка не срабатывала
+            event.preventDefault(); // Останавливаем действие ссылки по умолчанию
+
             const vacancyID = this.value; // Получаем ID вакансии из значения кнопки
             const card = this.closest(".vacancy-item"); // Находим карточку вакансии, к которой относится эта кнопка
 
             // Подтверждение отклика
             if (confirm("Вы уверены, что хотите откликнуться на эту вакансию?")) {
                 fetch("/apply", {
-                    method: "POST", headers: {
+                    method: "POST",
+                    headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
-                    }, body: "vacancy_ID=" + encodeURIComponent(vacancyID),
+                    },
+                    body: "vacancy_ID=" + encodeURIComponent(vacancyID),
                 })
                     .then((response) => {
                         if (response.ok) {
