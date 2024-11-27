@@ -1,6 +1,7 @@
 <?php
 // Start the session to access session variables
 use app\Entities\Vacancy;
+use app\Helpers\AuthHelper;
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: /login');
@@ -53,7 +54,8 @@ $columns = isset($columns) ? $columns : [];
             <form id="vacancy-form" action="/add" method="POST" class="modal-form">
                 <input type="hidden" name="id" id="id" value="<?= $vacancy->getId()?>">
                 <label for="vacancy-title">Изображение</label>
-                <input alt="user" class="input-modal" type="file" id="vacancy-title" name="image" accept="image/*" required/>
+                <input alt="user" class="input-modal" type="file" id="vacancy-title" name="image" accept="image/*"
+                       required/>
                 <button id="button-save" class="button" type="submit">Сохранить</button>
             </form>
         </div>
@@ -66,16 +68,25 @@ $columns = isset($columns) ? $columns : [];
             <?php foreach ($columns as $column): ?>
             <?php if($column == 'image'){ ?>
             <li class="profile-details">
+                <?php if(AuthHelper::isManager()){ ?>
                 <button class="button-image-change" id="button-add">
+                    <?php }else{ ?>
+                    <div class="div-image-change" >
+                    <?php } ?>
                     <img class="profile-image"
                          src="<?= htmlspecialchars($vacancy->{Vacancy::fieldMapping[$column]}()) ?>"
-                         alt="<?= $errorImage ? $errorImage: 'user' ?>" >
+                         alt="<?= $errorImage ? $errorImage: 'user' ?>">
                     <span class="edit-text">Редактировать</span>
-                </button>
+                <?php if(AuthHelper::isManager()){ ?>
+                </div>
+                <?php }else{ ?>
+                </div>
+                <?php } ?>
             </li>
             <?php } else { ?>
             <li class="profile-details"><strong><?= htmlspecialchars($column) ?>:</strong>
-                <?php if($column == 'posting date'){ echo htmlspecialchars($vacancy->{Vacancy::fieldMapping[$column]}()->format('Y-m-d'));}else{ ?>
+                <?php if($column == 'posting date'){ echo htmlspecialchars($vacancy->
+                {Vacancy::fieldMapping[$column]}()->format('Y-m-d'));}else{ ?>
                 <?= htmlspecialchars($vacancy->{Vacancy::fieldMapping[$column]}()) ?>
                 <?php } ?>
             </li>

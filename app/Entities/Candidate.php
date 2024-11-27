@@ -8,6 +8,7 @@ class Candidate extends User
 {
     const DEFAULT_IMAGE="/img/user.svg";
     const DIR_IMAGES="/../../public/img/candidates/";
+    const DIR_IMG="/../../public/img/";
     const DIR_IMG_FOR_VIEW = "/img/candidates/";
     const ADDITION_TO_PATH = "/../../public";
 

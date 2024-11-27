@@ -27,11 +27,11 @@ class ErrorHelper
 
     public static function ImagePathErrorHandler($filePath)
     {
-        if (!is_dir(__DIR__ . Candidate::DIR_IMAGES)){
+        if (!is_dir(__DIR__ . Candidate::DIR_IMAGES) || !is_dir(__DIR__ . Candidate::DIR_IMG)){
             throw new Exception("Директория для хранения не найдена");
         }
 
-        if (!is_writable(__DIR__ . Candidate::DIR_IMAGES)){
+        if (!is_writable(__DIR__ . Candidate::DIR_IMAGES)  || !is_writable(__DIR__ . Candidate::DIR_IMG)){
             throw new Exception("Ограничен доступ к директории для хранения.");
         }
 
@@ -43,9 +43,13 @@ class ErrorHelper
     public static function ImageFileErrorHandlersToView($filepath)
     {
         $errorImage="";
-        if (!is_dir(__DIR__ . Candidate::DIR_IMAGES)) {
+        if (!is_dir(__DIR__ . Candidate::DIR_IMG)) {
             $errorImage = "Директория с файлами не найдена.";
-        } elseif (!is_readable(__DIR__ . Candidate::DIR_IMAGES)) {
+        }elseif (!is_readable(__DIR__ . Candidate::DIR_IMG)) {
+            $errorImage = "Ограничен доступ к директории с файлами.";
+        }elseif (!is_dir(__DIR__ . Candidate::DIR_IMAGES)) {
+            $errorImage = "Директория с файлами не найдена.";
+        }elseif (!is_readable(__DIR__ . Candidate::DIR_IMAGES)) {
             $errorImage = "Ограничен доступ к директории с файлами.";
         }elseif (!file_exists($filepath)) {
             $errorImage = "Файл не найден.";

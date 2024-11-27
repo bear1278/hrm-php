@@ -4,65 +4,58 @@ export function add() {
     const addButton = document.querySelector("#button-add");
     const closeButton = document.querySelector(".close");
     const form = document.getElementById('vacancy-form');
-    const errorMessageDiv = document.getElementById('error-message'); // Элемент для ошибок
+    const errorMessageDiv = document.getElementById('error-message');
 
-    // Показать модальное окно при нажатии на кнопку "Добавить вакансию"
     addButton.addEventListener("click", function(event) {
-        modal.style.display = "block"; // Показываем модальное окно
-        errorMessageDiv.style.display = 'none'; // Скрываем сообщение об ошибке при открытии формы
+        modal.style.display = "block";
+        errorMessageDiv.style.display = 'none';
     });
 
     closeButton.addEventListener("click", function() {
-        modal.style.display = "none"; // Скрываем модальное окно
-        errorMessageDiv.style.display = 'none'; // Скрываем сообщение об ошибке при закрытии
+        modal.style.display = "none";
+        errorMessageDiv.style.display = 'none';
     });
 
-    // Закрыть модальное окно при клике за его пределами
     window.addEventListener("click", function(event) {
         if (event.target === modal) {
             modal.style.display = "none";
-            errorMessageDiv.style.display = 'none'; // Скрываем сообщение об ошибке при закрытии
+            errorMessageDiv.style.display = 'none';
         }
     });
 
     form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Отключаем стандартное действие отправки формы
+        e.preventDefault();
 
         const formData = new FormData(form);
         const file = formData.get('image');
-        const maxSize = 2*1024*1024; // Максимальный размер в байтах (2MB)
+        const maxSize = 2*1024*1024;
 
-        // Проверка на наличие файла
         if (!file) {
             errorMessageDiv.innerText = "Выберите файл.";
             errorMessageDiv.style.display = 'block';
             return;
         }
 
-        // Проверка: является ли файл изображением
-        if (!file.type.startsWith("image/")) {
-            errorMessageDiv.innerText = "Файл не является изображением.";
-            errorMessageDiv.style.display = 'block';
-            return;
-        }
-
-        // Проверка: размер файла
         if (file.size > maxSize) {
             errorMessageDiv.innerText = "Файл слишком большой. Пожалуйста, выберите файл меньше 2MB.";
             errorMessageDiv.style.display = 'block';
             return;
         }
 
-        // Проверка: файл не битый
+        if (!file.type.startsWith("image/")) {
+            errorMessageDiv.innerText = "Файл не является изображением.";
+            errorMessageDiv.style.display = 'block';
+            return;
+        }
+
         const img = new Image();
         const url = URL.createObjectURL(file);
 
         img.onload = function() {
             console.log("Файл успешно загружен и не повреждён.");
-            errorMessageDiv.style.display = 'none'; // Очищаем сообщение об ошибке, если изображение загрузилось
-            URL.revokeObjectURL(url); // Освобождаем память
+            errorMessageDiv.style.display = 'none';
+            URL.revokeObjectURL(url);
 
-            // Отправка формы после всех успешных проверок
             fetch('/profile/edit', {
                 method: 'POST',
                 body: formData
@@ -82,28 +75,28 @@ export function add() {
                 })
                 .then(data => {
                     if (data.error) {
-                        errorMessageDiv.textContent = data.error; // Устанавливаем текст ошибки
-                        errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
+                        errorMessageDiv.textContent = data.error;
+                        errorMessageDiv.style.display = 'block';
                     } else {
                         console.log('Success:', data);
-                        modal.style.display = 'none'; // Закрытие модального окна
-                        window.location.href = '/profile'; // Перенаправление
+                        modal.style.display = 'none';
+                        window.location.href = '/profile';
                     }
                 })
                 .catch((error) => {
                     console.error('Error:', error);
-                    errorMessageDiv.textContent = `${error}`; // Сообщение о внутренней ошибке
-                    errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
+                    errorMessageDiv.textContent = `${error}`;
+                    errorMessageDiv.style.display = 'block';
                 });
         };
 
         img.onerror = function() {
             errorMessageDiv.innerText = "Файл повреждён или не может быть загружен.";
-            errorMessageDiv.style.display = 'block'; // Показываем сообщение об ошибке
-            URL.revokeObjectURL(url); // Освобождаем память
+            errorMessageDiv.style.display = 'block';
+            URL.revokeObjectURL(url);
         };
 
-        img.src = url; // Устанавливаем URL для загрузки изображения
+        img.src = url;
     });
 }
 
