@@ -56,7 +56,7 @@ class ErrorHelper
         } elseif (!is_readable($filepath)) {
             $errorImage = "Ограничен доступ к файлу.";
         } elseif (!is_file($filepath)) {
-            $errorImage = "Указанный путь не является файлом.";
+            $errorImage = "Файл поврежден или не является изображением.";
         } else {
             $imageInfo = @getimagesize($filepath);
             if ($imageInfo === false) {
