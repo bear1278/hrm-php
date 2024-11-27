@@ -34,8 +34,8 @@ class DashboardController
             $skills = $this->model->SelectAllSkills();
             $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
             if (AuthHelper::isCandidate()) {
-                if (isset($_COOKIE['filtersData']) && $encryptedFilters = $_COOKIE['filtersData']) {
-                    $encryptedFilters = $_COOKIE['filtersData'];
+                if (isset($_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) && $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) {
+                    $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])];
                     $decodedFilters = $this->decryptData($encryptedFilters);
                     $filters = json_decode($decodedFilters, true);
                     $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
@@ -45,6 +45,10 @@ class DashboardController
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';
                 exit();
             } elseif (AuthHelper::isManager()) {
+                $vacancy = null;
+                if(isset($_SESSION['vacancy'])){
+                    $vacancy = $_SESSION['vacancy'];
+                }
                 $data = $this->model->getVacancies($_SESSION['user_id']);
                 require_once __DIR__ . '/../Views/dashboard.html';
                 exit();
@@ -114,7 +118,7 @@ class DashboardController
                     exit();
                 }
                 $filters = [];
-                if (isset($_COOKIE['filtersData']) && ($encryptedFilters = $_COOKIE['filtersData'])) {
+                if (isset($_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) && ($encryptedFilters = $_COOKIE['filtersData'].base64_decode($_SESSION['user_id']))) {
                     $decodedFilters = $this->decryptData($encryptedFilters);
                     $filters = json_decode($decodedFilters, true);
                     $isNotThereSuchColumn = true;
@@ -128,13 +132,13 @@ class DashboardController
                         array_push($filters, $newFilter);
                     }
                     $updatedFilters = $this->encryptData(json_encode($filters));
-                    setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
+                    setcookie('filtersData'.base64_decode($_SESSION['user_id']), $updatedFilters, time() + 3600, '/', '', true, true);
                     header('Location: http://localhost');
                     exit();
                 } else {
                     array_push($filters, $newFilter);
                     $updatedFilters = $this->encryptData(json_encode($filters));
-                    setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
+                    setcookie('filtersData'.base64_decode($_SESSION['user_id']), $updatedFilters, time() + 3600, '/', '', true, true);
                 }
                 $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';
@@ -251,6 +255,7 @@ class DashboardController
                 null);
             $result = $this->model->InsertNewVacancy($vacancy);
             if ($result) {
+                $_SESSION['vacancy']=$vacancy;
                 echo json_encode(['success' => true]);
                 exit();
             } else {
@@ -270,7 +275,7 @@ class DashboardController
     public function deleteColumnFromFilter()
     {
         $column = trim($_POST['delete-column']);
-        if (isset($_COOKIE['filtersData']) && ($encryptedFilters = $_COOKIE['filtersData'])) {
+        if (isset($_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) && ($encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])])) {
             $decodedFilters = $this->decryptData($encryptedFilters);
             $filters = json_decode($decodedFilters, true);
             $indexDelete = null;
@@ -283,9 +288,9 @@ class DashboardController
             unset($filters[$indexDelete]);
             if (!empty($filters)){
                 $updatedFilters = $this->encryptData(json_encode($filters));
-                setcookie('filtersData', $updatedFilters, time() + 3600 * 24, '/', '', true, true);
+                setcookie('filtersData'.base64_decode($_SESSION['user_id']), $updatedFilters, time() + 3600 * 24, '/', '', true, true);
             }else{
-                setcookie('filtersData', "", time() + 3600 * 24, '/', '', true, true);
+                setcookie('filtersData'.base64_decode($_SESSION['user_id']), "", time() + 3600 * 24, '/', '', true, true);
             }
             header("Location: http://localhost");
             exit();
