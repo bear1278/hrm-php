@@ -52,12 +52,12 @@ $columns = isset($columns) ? $columns : [];
             <div id="error-message" style="color: red; display: none;"></div>
             <form id="vacancy-form" action="/add" method="POST" class="modal-form">
                 <label for="vacancy-title">Изображение</label>
-                <input alt="user" class="input-modal" type="file" id="vacancy-title" name="image" accept="image/*" required/>
+                <input alt="user" class="input-modal" type="file" id="vacancy-title" name="image" accept="image/*"
+                       required/>
                 <button id="button-save" class="button" type="submit">Сохранить</button>
             </form>
         </div>
     </div>
-
 
 
     <h1>Профиль пользователя</h1>
@@ -70,7 +70,7 @@ $columns = isset($columns) ? $columns : [];
                 <button class="button-image-change" id="button-add">
                     <img class="profile-image"
                          src="<?= htmlspecialchars($candidate->{Candidate::fieldMapping[$column]}()) ?>"
-                         alt="<?= $errorImage ? $errorImage: 'user' ?>" >
+                         alt="<?= $errorImage ? $errorImage: 'user' ?>">
                     <span class="edit-text">Редактировать</span>
                 </button>
             </li>
@@ -80,6 +80,16 @@ $columns = isset($columns) ? $columns : [];
             </li>
             <?php } ?>
             <?php endforeach; ?>
+            <li class="profile-details">
+                <strong>Skills:</strong>
+                <?php foreach($candidate->getSkills() as $key => $skill):
+                if ($key+1 == count($candidate->getSkills())){
+                    echo $skill['name'];
+                }else{
+                    echo $skill['name'].', ';
+                }
+                endforeach ?>
+            </li>
         </ul>
         <?php else: ?>
         <p>Информация о пользователе недоступна.</p>

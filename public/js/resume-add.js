@@ -1,5 +1,6 @@
 document.querySelector("form").addEventListener("submit", function (event) {
     event.preventDefault(); // Предотвращаем отправку формы
+    let position = document.querySelector('input[name="position"]');
     let phone_number = document.querySelector('input[name="phone_number"]');
     let resume = document.querySelector('input[name="resume"]');
     let experience_years = document.querySelector('input[name="experience_years"]');
@@ -7,7 +8,7 @@ document.querySelector("form").addEventListener("submit", function (event) {
 
     let error = "";
 
-    if (!phone_number.value || !resume.value || !experience_years.value || !location.value) {
+    if (!position.value || !phone_number.value || !resume.value || !experience_years.value || !location.value) {
         error = "Пожалуйста, заполните все поля";
     }
 

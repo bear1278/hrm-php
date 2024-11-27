@@ -42,7 +42,7 @@ if (!isset($_SESSION['user_id'])) {
             </ul>
         </nav>
         <form action="/logout" method="POST">
-            <button onclick="clearLocalStorage()" class="button-exit" type="submit">Выйти</button>
+            <button class="button-exit" type="submit">Выйти</button>
         </form>
     </div>
     <div class="search-container">
@@ -54,19 +54,30 @@ if (!isset($_SESSION['user_id'])) {
                 </option>
                 <?php endforeach; ?>
             </select>
+            <input id="column" type="hidden" name="column" value="name">
             <input
                     class="input-search"
                     type="text"
                     placeholder="Поиск"
-                    name="search"
+                    name="value"
                     id="search-input"
             />
             <button class="button-search" type="submit">Поиск</button>
         </form>
-        <script type="module" src="/js/filter.js"></script>
         <script type="module" src="/js/change-search-field.js"></script>
     </div>
-    <div id="filters" class="filter-container"></div>
+    <div id="filters" class="filter-container">
+        <?php if (!empty($filters)){ ?>
+        <?php foreach($filters as $filter){ ?>
+        <div class="filter">
+            <form method="post" action="/search/delete">
+                <?= $filter['column'] ?>: <?= $filter['value']?>
+                <input type="hidden"  value="<?= $filter['column'] ?>" name="delete-column">
+                <button type="submit" class="button-delete-filter"><i class="fa-solid fa-xmark"></i></button>
+            </form>
+        </div>
+        <?php }} ?>
+    </div>
 </header>
 <main>
     <?php if (!empty($data)) { ?>

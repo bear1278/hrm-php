@@ -12,6 +12,7 @@ class Candidate extends User
     const ADDITION_TO_PATH = "/../../public";
 
     const fieldMapping = [
+        'position'=>'getPosition',
         'candidate_ID' => 'getId',
         'last name' => 'getLastName',
         'first name' => 'getFirstName',
@@ -25,13 +26,67 @@ class Candidate extends User
         'status' => 'getStatus',
         'image' => 'getImage'
     ];
-
+    private $position;
     private $phone;
     private $resume;
     private $experience;
     private $location;
     private $status;
     private $image;
+    private ?array $skills ;
+
+
+
+    public function __construct($id, $email, $last_name, $first_name, $phone, $resume,
+                                $experience, $location, $status,$image,$position, $skills)
+    {
+        $this->setId($id);
+        $this->setEmail($email);
+        $this->setLastName($last_name);
+        $this->setFirstName($first_name);
+        $this->setPhone($phone);
+        $this->setResume($resume);
+        $this->setExperience($experience);
+        $this->setLocation($location);
+        $this->setStatus($status);
+        $this->setImage($image);
+        $this->setPosition($position);
+        $this->setSkills($skills);
+    }
+
+    public function getSkills(): ?array
+    {
+        return $this->skills;
+    }
+
+    public function setSkills(?array $skills): void
+    {
+        $this->skills = $skills;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param mixed $positon
+     */
+    public function setPosition($position)
+    {
+        if ($position != null) {
+            if (empty($position)) {
+                throw new InvalidArgumentException('Position cannot be empty');
+            }
+            if (!is_string($position)) {
+                throw new InvalidArgumentException('Position must be a string');
+            }
+        }
+        $this->position = $position;
+    }
 
     /**
      * @return mixed
@@ -47,21 +102,6 @@ class Candidate extends User
     public function setImage($image)
     {
         $this->image = $image;
-    }
-
-
-    public function __construct($id, $email, $last_name, $first_name, $phone, $resume, $experience, $location, $status,$image)
-    {
-        $this->setId($id);
-        $this->setEmail($email);
-        $this->setLastName($last_name);
-        $this->setFirstName($first_name);
-        $this->setPhone($phone);
-        $this->setResume($resume);
-        $this->setExperience($experience);
-        $this->setLocation($location);
-        $this->setStatus($status);
-        $this->setImage($image);
     }
 
     /**

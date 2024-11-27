@@ -4,6 +4,7 @@ namespace app\Controllers;
 
 use app\Entities\Candidate;
 use app\Models\CandidateModel;
+use app\Models\VacancyModel;
 use Exception;
 use PDOException;
 
@@ -11,14 +12,17 @@ class ResumeController
 {
 
     private $model;
+    private $vacancyModel;
 
     public function __construct()
     {
         $this->model = new CandidateModel();
+        $this->vacancyModel = new VacancyModel();
     }
 
     public function ShowResume()
     {
+        $skills = $this->vacancyModel->SelectAllSkills();
         require_once __DIR__ . '/../Views/resume_form.html';
     }
 
@@ -32,7 +36,7 @@ class ResumeController
                 trim($_POST['phone_number']),
                 trim($_POST['resume']),
                 (int)trim($_POST['experience_years']),
-                trim($_POST['location']), 1,null);
+                trim($_POST['location']), 1,null,trim($_POST['position']),$_POST['skills']);
             $oldCandidate = $this->model->findCandidateById($candidate->getId());
             if ($oldCandidate) {
                 $result = $this->model->updateCandidate($candidate->getId(),
@@ -40,14 +44,18 @@ class ResumeController
                     $candidate->getResume(),
                     $candidate->getExperience(),
                     $candidate->getLocation(),
-                    $candidate->getStatus());
+                    $candidate->getStatus(),
+                    $candidate->getPosition(),
+                    $candidate->getSkills());
             } else {
                 $result = $this->model->createCandidate($candidate->getId(),
                     $candidate->getPhone(),
                     $candidate->getResume(),
                     $candidate->getExperience(),
                     $candidate->getLocation(),
-                    $candidate->getStatus());
+                    $candidate->getStatus(),
+                    $candidate->getPosition(),
+                    $candidate->getSkills());
             }
             if ($result) {
                 echo json_encode(['success' => true]);

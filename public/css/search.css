@@ -60,6 +60,33 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.filter-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.filter{
+    margin-right: 10px;
+    border: 2px solid #e9f2ff;
+    border-radius: 5px;
+    padding: 2px 2px 2px 2px;
+}
+
+.button-delete-filter {
+    background-color: transparent;
+    transition: color 0.5s ease;
+    border: none;
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+}
+
+.button-delete-filter:hover {
+    color: darkred;
+}
+
 @media (max-width: 768px) {
     .search-container {
         flex-direction: column;

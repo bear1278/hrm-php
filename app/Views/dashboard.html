@@ -8,8 +8,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// You can access session variables like the username or user ID
-$username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 ?>
 
 <!DOCTYPE html>
@@ -32,39 +30,50 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 </head>
 <body>
 <header>
-    <div class="header-container">
+    <div class="header-container" id="error">
         <nav class="navigation">
             <ul>
                 <li><a class="a" href="http://localhost/">Вакансии</a></li>
-                <li><a class="a" href="http://localhost/applications">Отклики</a></li>
+                <li><a class="a" href="http://localhost/applications">Отклики</a></li>  
             </ul>
         </nav>
-        <form id="search-form" action="/search" method="POST">
-            <input
-                    class="input"
-                    type="search"
-                    placeholder="Поиск"
-                    name="search"
-            />
-            <button class="button" type="submit">Поиск</button>
-        </form>
         <form action="/logout" method="POST">
-            <button class="button" type="submit">Выйти</button>
+            <button class="button-exit" type="submit">Выйти</button>
         </form>
     </div>
-    <div id="randomText">Число новых откликов <?php echo htmlspecialchars($number_of_app['count']);?> </div>
-    <script>
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-
-        document.getElementById('randomText').style.color = getRandomColor();
-    </script>
+    <div class="search-container">
+        <form id="search-form" action="/search" method="POST">
+            <select id="column-select" name="column" class="input-choose_column">
+                <?php foreach ($columns as $column): ?>
+                <option value="<?php echo htmlspecialchars($columns_type[ltrim($column)]); ?>">
+                    <?php echo htmlspecialchars($column); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+            <input id="column" type="hidden" name="column" value="name">
+            <input
+                    class="input-search"
+                    type="text"
+                    placeholder="Поиск"
+                    name="value"
+                    id="search-input"
+            />
+            <button class="button-search" type="submit">Поиск</button>
+        </form>
+        <script type="module" src="/js/change-search-field.js"></script>
+    </div>
+    <div id="filters" class="filter-container">
+        <?php if (!empty($filters)){ ?>
+        <?php foreach($filters as $filter){ ?>
+        <div class="filter">
+            <form method="post" action="/search/delete">
+                <?= $filter['column'] ?>: <?= $filter['value']?>
+                <input type="hidden"  value="<?= $filter['column'] ?>" name="delete-column">
+                <button type="submit" class="button-delete-filter"><i class="fa-solid fa-xmark"></i></button>
+            </form>
+        </div>
+        <?php }} ?>
+    </div>
 </header>
 <main>
     <div class="main-container">

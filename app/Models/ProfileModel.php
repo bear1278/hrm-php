@@ -19,7 +19,7 @@ class ProfileModel
     public function SelectCandidate($id)
     {
         try {
-            $sql = "SELECT first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
+            $sql = "SELECT position, first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
             resume, experience_years as `experience years`, location,image, C.status 
             FROM users as U
             INNER JOIN candidates as C 
@@ -40,7 +40,9 @@ class ProfileModel
                     $row['experience years'],
                     $row['location'],
                     $row['status'],
-                    $row['image']
+                    $row['image'],
+                    $row['position'],
+                    null
                 );
             }
             return $candidate;
@@ -52,7 +54,7 @@ class ProfileModel
     public function SelectColumns()
     {
         try {
-            $sql = "SELECT image,first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
+            $sql = "SELECT image,position,first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
             resume, experience_years as `experience years`, location 
             FROM users as U
             INNER JOIN candidates as C 
@@ -75,6 +77,21 @@ class ProfileModel
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':image', $image);
             return $stmt->execute();
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function selectSkillForCandidate($id)
+    {
+        try{
+            $sql="SELECT name FROM candidate_skills c
+            inner join hrm.skills s on c.skill_ID = s.skill_ID
+            where candidate_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

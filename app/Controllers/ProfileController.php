@@ -23,6 +23,7 @@ class ProfileController
         $id = $_SESSION['user_id'];
         try {
             $candidate = $this->model->SelectCandidate($id);
+            $candidate->setSkills($this->model->selectSkillForCandidate($id));
             $errorImage = "";
             if ($candidate->getImage()==null){
                 $candidate->setImage(Candidate::DEFAULT_IMAGE);
