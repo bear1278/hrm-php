@@ -15,6 +15,8 @@ require_once __DIR__ . '/../Helpers/AuthHelper.php';
 
 class DashboardController
 {
+    const SECRET_KEY = 'kjnvkernvejnvenocms';
+    const METHOD = 'aes-256-cbc';
     private $model;
 
     public function __construct()
@@ -26,13 +28,20 @@ class DashboardController
     {
         try {
             $columns = $this->model->getTableColumns();
-            $columns = array_diff($columns,["image"]);
+            $columns = array_diff($columns, ["image"]);
             $columns_type = $this->model->getColumnsType();
             $departments = $this->model->SelectAllDepartments();
             $skills = $this->model->SelectAllSkills();
             $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
             if (AuthHelper::isCandidate()) {
-                $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id']);
+                if (isset($_COOKIE['filtersData']) && $encryptedFilters = $_COOKIE['filtersData']) {
+                    $encryptedFilters = $_COOKIE['filtersData'];
+                    $decodedFilters = $this->decryptData($encryptedFilters);
+                    $filters = json_decode($decodedFilters, true);
+                    $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
+                } else {
+                    $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id']);
+                }
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';
                 exit();
             } elseif (AuthHelper::isManager()) {
@@ -60,11 +69,28 @@ class DashboardController
         }
     }
 
+    private function encryptData(string $data): string
+    {
+        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::METHOD));
+        $encrypted = openssl_encrypt($data, self::METHOD, self::SECRET_KEY, 0, $iv);
+        return base64_encode($iv . $encrypted);
+    }
+
+    private function decryptData(string $encrypted)
+    {
+        $data = base64_decode($encrypted);
+        $ivLength = openssl_cipher_iv_length(self::METHOD);
+        $iv = substr($data, 0, $ivLength);
+        $ciphertext = substr($data, $ivLength);
+        $decrypted = openssl_decrypt($ciphertext, self::METHOD, self::SECRET_KEY, 0, $iv);
+        return $decrypted === false ? null : $decrypted;
+    }
+
     public function displaySearchResult()
     {
         try {
             $columns = $this->model->getTableColumns();
-            $columns = array_diff($columns,["image"]);
+            $columns = array_diff($columns, ["image"]);
             $columns_type = $this->model->getColumnsType();
             if (AuthHelper::isManager()) {
                 $search = $_POST['search'];
@@ -77,21 +103,41 @@ class DashboardController
                 return;
             }
             if (AuthHelper::isCandidate()) {
-                if (!isset($_COOKIE['filtersData'])) {
-                    http_response_code(301);
-                    return;
+                $column = trim($_POST['column']);
+                $value = trim($_POST['value']);
+                $newFilter = [
+                    'column' => $column,
+                    'value' => $value
+                ];
+                if ($value == "") {
+                    header('Location: http://localhost');
+                    exit();
                 }
-                $data = json_decode($_COOKIE['filtersData'], true);
-                if (!$data) {
-                    http_response_code(301);
-                    return;
+                $filters = [];
+                if (isset($_COOKIE['filtersData']) && ($encryptedFilters = $_COOKIE['filtersData'])) {
+                    $decodedFilters = $this->decryptData($encryptedFilters);
+                    $filters = json_decode($decodedFilters, true);
+                    $isNotThereSuchColumn = true;
+                    foreach ($filters as $index => $filter) {
+                        if ($filter['column'] == $column) {
+                            $filters[$index]['value'] = $value;
+                            $isNotThereSuchColumn = false;
+                        }
+                    }
+                    if ($isNotThereSuchColumn) {
+                        array_push($filters, $newFilter);
+                    }
+                    $updatedFilters = $this->encryptData(json_encode($filters));
+                    setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
+                    header('Location: http://localhost');
+                    exit();
+                } else {
+                    array_push($filters, $newFilter);
+                    $updatedFilters = $this->encryptData(json_encode($filters));
+                    setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
                 }
-                $data = $this->model->getVacanciesWithParamForCandidate($data, $_SESSION['user_id']);
-                $this->sendJsonResponse([
-                    'data' => $this->serializeData($data),
-                    'columns' => $columns,
-                    'columns_type' => $columns_type
-                ]);
+                $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
+                require_once __DIR__ . '/../Views/dashboardCandidate.html';
             }
         } catch (PDOException $e) {
             http_response_code(500);
@@ -221,4 +267,28 @@ class DashboardController
         }
     }
 
+    public function deleteColumnFromFilter()
+    {
+        $column = trim($_POST['delete-column']);
+        if (isset($_COOKIE['filtersData']) && ($encryptedFilters = $_COOKIE['filtersData'])) {
+            $decodedFilters = $this->decryptData($encryptedFilters);
+            $filters = json_decode($decodedFilters, true);
+            $indexDelete = null;
+            foreach ($filters as $index => $filter) {
+                if ($filter['column'] == $column) {
+                    $indexDelete = $index;
+                    break;
+                }
+            }
+            unset($filters[$indexDelete]);
+            if (!empty($filters)){
+                $updatedFilters = $this->encryptData(json_encode($filters));
+                setcookie('filtersData', $updatedFilters, time() + 3600 * 24, '/', '', true, true);
+            }else{
+                setcookie('filtersData', "", time() + 3600 * 24, '/', '', true, true);
+            }
+            header("Location: http://localhost");
+            exit();
+        }
+    }
 }

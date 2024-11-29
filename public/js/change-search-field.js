@@ -1,9 +1,12 @@
 const columnSelect = document.getElementById('column-select');
 const searchInput = document.getElementById('search-input');
+const columnInput = document.getElementById('column');
 let additionalSelect; // Для хранения нового select
+
 
 columnSelect.addEventListener('change', function() {
     const selectedType = this.value;
+    columnInput.value = this.options[this.selectedIndex].textContent.trim();
 
     if (additionalSelect) {
         additionalSelect.remove();
@@ -12,15 +15,13 @@ columnSelect.addEventListener('change', function() {
 
     if (selectedType === 'LONG' || selectedType === 'DATETIME') {
         searchInput.type = 'number';
-
-        // Создаем новый select с опциями "больше", "меньше", "равно"
         additionalSelect = document.createElement('select');
-        additionalSelect.className = this.className; // Используем тот же класс, что и у первого select
+        additionalSelect.className = this.className;
         additionalSelect.id = 'comparison-select';
         const options = [
+            { value: '', text: 'равно' },
             { value: 'min', text: 'больше' },
-            { value: 'max', text: 'меньше' },
-            { value: '', text: 'равно' }
+            { value: 'max', text: 'меньше' }
         ];
 
         options.forEach(optionData => {
@@ -29,9 +30,10 @@ columnSelect.addEventListener('change', function() {
             option.textContent = optionData.text;
             additionalSelect.appendChild(option);
         });
-
-        // Вставляем новый select после первого select
         this.parentNode.insertBefore(additionalSelect, searchInput);
+        additionalSelect.addEventListener('change',function (){
+            columnInput.value = this.value.trim() + columnInput.value;
+        });
     } else if (selectedType === 'BLOB' || selectedType === 'VAR_STRING') {
         searchInput.type = 'text';
     }

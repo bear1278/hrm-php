@@ -28,7 +28,7 @@ class ErrorHelper
     public static function ImagePathErrorHandler($filePath)
     {
         if (!is_dir(__DIR__ . Candidate::DIR_IMAGES)){
-            throw new Exception("Ошибка загрузки на сервер");
+            throw new Exception("Директория для хранения не найдена");
         }
 
         if (!is_writable(__DIR__ . Candidate::DIR_IMAGES)){
@@ -43,8 +43,12 @@ class ErrorHelper
     public static function ImageFileErrorHandlersToView($filepath)
     {
         $errorImage="";
-        if (!file_exists($filepath)) {
-            $errorImage = "Файл не найден или к нему ограничен доступ.";
+        if (!is_dir(__DIR__ . Candidate::DIR_IMAGES)) {
+            $errorImage = "Директория с файлами не найдена.";
+        } elseif (!is_readable(__DIR__ . Candidate::DIR_IMAGES)) {
+            $errorImage = "Ограничен доступ к директории с файлами.";
+        }elseif (!file_exists($filepath)) {
+            $errorImage = "Файл не найден.";
         } elseif (!is_readable($filepath)) {
             $errorImage = "Ограничен доступ к файлу.";
         } elseif (!is_file($filepath)) {

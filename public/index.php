@@ -12,10 +12,21 @@ use app\Helpers\AuthHelper;
 use app\Controllers\VacancyController;
 
 require_once '../autoload.php';
-require_once __DIR__ . '/../config/database.php';
+
 
 session_start();
 
+$request_uri = $_SERVER['REQUEST_URI'];
+$request_uri = explode('?', $request_uri)[0];
+
+$parts = explode('/', trim($request_uri, '/'));
+
+if($parts[0]==='error'){
+    $errorMessage = isset($_GET['message']) ? $_GET['message'] : 'Произошла неизвестная ошибка';
+    require_once __DIR__ . '/../app/Views/error.html';
+    exit();
+}
+require_once __DIR__ . '/../config/database.php';
 $loginController = new LoginController();
 $signUpController = new SignUpController();
 $dashboardController = new DashboardController();
@@ -26,17 +37,8 @@ $adminController = new AdminController();
 $notificationController = new NotificationController();
 $vacancyController = new VacancyController();
 
-$request_uri = $_SERVER['REQUEST_URI'];
-$request_uri = explode('?', $request_uri)[0];
-
-$parts = explode('/', trim($request_uri, '/'));
-
 switch ($parts[0]) {
 
-    case 'error':
-        $errorMessage = isset($_GET['message']) ? $_GET['message'] : 'Произошла неизвестная ошибка';
-        require_once __DIR__ . '/../app/Views/error.html';
-        break;
 
     case 'login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -68,6 +70,9 @@ switch ($parts[0]) {
 
     case 'search':
         AuthHelper::ensureLoggedIn();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($parts[1]) && $parts[1]=='delete'){
+            $dashboardController->deleteColumnFromFilter();
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dashboardController->displaySearchResult();
         }
