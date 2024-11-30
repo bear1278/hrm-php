@@ -34,7 +34,7 @@ if (!isset($_SESSION['user_id'])) {
         <nav class="navigation">
             <ul>
                 <li><a class="a" href="http://localhost/">Вакансии</a></li>
-                <li><a class="a" href="http://localhost/applications">Отклики</a></li>  
+                <li><a class="a" href="http://localhost/applications">Отклики</a></li>
             </ul>
         </nav>
         <form action="/logout" method="POST">
@@ -42,7 +42,7 @@ if (!isset($_SESSION['user_id'])) {
         </form>
     </div>
     <div class="search-container">
-        <form id="search-form" action="/search" method="POST">
+        <form class="search-form" id="search-form" action="/search" method="POST">
             <select id="column-select" name="column" class="input-choose_column">
                 <?php foreach ($columns as $column): ?>
                 <option value="<?php echo htmlspecialchars($columns_type[ltrim($column)]); ?>">
@@ -68,7 +68,7 @@ if (!isset($_SESSION['user_id'])) {
         <div class="filter">
             <form method="post" action="/search/delete">
                 <?= $filter['column'] ?>: <?= $filter['value']?>
-                <input type="hidden"  value="<?= $filter['column'] ?>" name="delete-column">
+                <input type="hidden" value="<?= $filter['column'] ?>" name="delete-column">
                 <button type="submit" class="button-delete-filter"><i class="fa-solid fa-xmark"></i></button>
             </form>
         </div>
@@ -77,9 +77,10 @@ if (!isset($_SESSION['user_id'])) {
 </header>
 <main>
     <div class="main-container">
-        <button id="button-add" class="button" type="submit">Добавить вакансию</button>
-        <script type="module" src="/js/vacancy-add.js"></script>
-
+        <div class="button-container">
+            <button id="button-add" class="button-add-vacancy" type="submit">Добавить вакансию</button>
+            <script type="module" src="/js/vacancy-add.js"></script>
+        </div>
         <div id="vacancyModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -146,7 +147,8 @@ if (!isset($_SESSION['user_id'])) {
                     <textarea class="input-modal" id="vacancy-description1" name="description" required></textarea>
 
                     <label for="vacancy-skills1">Необходимые навыки</label>
-                    <select class="input-modal skills-select" id="vacancy-skills1" name="skills[]" multiple size="5" required>
+                    <select class="input-modal skills-select" id="vacancy-skills1" name="skills[]" multiple size="5"
+                            required>
                         <?php foreach ($skills as $skill): ?>
                         <option value="<?php echo htmlspecialchars($skill['skill_ID']); ?>">
                             <?php echo htmlspecialchars($skill['name']); ?>
@@ -166,67 +168,77 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
     </div>
-    <div class="table-container">
-        <table border="1">
-            <tr>
-                <?php foreach ($columns as $column): ?>
-                <th><?php echo htmlspecialchars($column); ?></th>
-                <?php endforeach; ?>
-                <th></th>
-                <th></th>
-            </tr>
-
-            <?php if (!empty($data)) { ?>
-            <?php foreach ($data as $row): ?>
-            <tr>
-                <?php foreach ($columns as $column): ?>
-                <td><?php
-                  if ($column == 'posting date')
-                  {
-                    echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}()->format('Y-m-d'));
-                  }elseif ($column == 'name'){
-                    ?> <a style="text-decoration: none" href="http://localhost/vacancy/<?= $row->getId()?>"><?= $row->{Vacancy::fieldMapping[$column]}() ?></a>
-                    <?php
-                    }else{
-                    echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}());
-                  }
-                  ?>
-                </td>
-                <?php endforeach; ?>
-                <td>
+    <?php if (!empty($data)) { ?>
+    <ul class="vacancy-list">
+        <?php foreach ($data as $row): ?>
+        <a href="http://localhost/vacancy/<?= $row->getId() ?>" class="vacancy-link">
+            <li class="vacancy-item">
+                <div class="vacancy-container">
+                    <h3 class="vacancy-title"><?= $row->getName() ?></h3>
+                    <div class="vacancy-content-container">
+                        <div class="vacancy-content">
+                            <p class="vacancy-department"><strong>Отдел: </strong><?= $row->getDepartment() ?></p>
+                            <p><strong>Опыт:</strong> <?= $row->getExperience() ?> года</p>
+                        </div>
+                        <div class="vacancy-content">
+                            <p><strong>Зарплата:</strong> <?= $row->getSalary() ?> $</p>
+                            <p><strong>Дата публикации:</strong> <?=$row->getPostingDate()->format('Y-m-d') ?></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-container">
+                    <button
+                            class="edit-button"
+                            type="button"
+                            value="<?= $row->getId() ?>"
+                    >
+                        <i class="fa-solid fa-pen-to-square "></i>
+                    </button>
                     <button
                             class="trash-button"
                             type="button"
-                            value="<?php echo htmlspecialchars($row->getID()); ?>"
+                            value="<?= $row->getId() ?>"
                     >
                         <i class="fa-solid fa-trash"></i>
                     </button>
                     <script type="module" src="/js/vacancy-delete.js"></script>
-                </td>
-                <td>
-                    <button
-                            class="edit-button"
-                            type="button"
-                            value="<?php echo htmlspecialchars($row->getID()); ?>"
-                    >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-
-                </td>
-            </tr>
-
-            <?php endforeach; ?>
-
-            <?php } else { ?>
-            <tr>
-                <td colspan="<?php echo count($columns); ?>">
-                    Нет данных для отображения
-                </td>
-            </tr>
-            <?php } ?>
-        </table>
-    </div>
+                </div>
+            </li>
+        </a>
+        <?php endforeach; ?>
+    </ul>
+    <?php } else { ?>
+    <h2>Нет данных для отображения</h2>
+    <?php } ?>
 </main>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>О нас</h4>
+            <p>Мы предлагаем лучший сервис для поиска вакансий и откликов на них. Наша цель — сделать процесс поиска
+                работы удобным и эффективным.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Контакты</h4>
+            <ul class="footer-links">
+                <li>Email: support@gmail.com</li>
+                <li>Телефон: +375 33 1456 789</li>
+                <li>Адрес: ул. Толковая, 12</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Социальные сети</h4>
+            <ul class="social-links">
+                <li><a href="#"><i class="fa-brands fa-facebook"></i> Facebook</a></li>
+                <li><a href="#"><i class="fa-brands fa-twitter"></i> Twitter</a></li>
+                <li><a href="#"><i class="fa-brands fa-linkedin"></i> LinkedIn</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 RemZona. Все права защищены.</p>
+    </div>
+</footer>
 <script type="module" src="/js/vacancy-edit.js"></script>
 </body>
 </html>

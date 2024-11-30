@@ -46,7 +46,7 @@ if (!isset($_SESSION['user_id'])) {
         </form>
     </div>
     <div class="search-container">
-        <form id="search-form" action="/search" method="POST">
+        <form class="search-form" id="search-form" action="/search" method="POST">
             <select id="column-select" name="column" class="input-choose_column">
                 <?php foreach ($columns as $column): ?>
                 <option value="<?php echo htmlspecialchars($columns_type[ltrim($column)]); ?>">
@@ -55,16 +55,19 @@ if (!isset($_SESSION['user_id'])) {
                 <?php endforeach; ?>
             </select>
             <input id="column" type="hidden" name="column" value="name">
-            <input
-                    class="input-search"
-                    type="text"
-                    placeholder="Поиск"
-                    name="value"
-                    id="search-input"
-            />
-            <button class="button-search" type="submit">Поиск</button>
+            <div class="search">
+                <input
+                        class="input-search"
+                        type="text"
+                        placeholder="Поиск"
+                        name="value"
+                        id="search-input"
+                />
+                <button class="button-search" type="submit">Поиск</button>
+            </div>
+            <script type="module" src="/js/change-search-field.js"></script>
         </form>
-        <script type="module" src="/js/change-search-field.js"></script>
+
     </div>
     <div id="filters" class="filter-container">
         <?php if (!empty($filters)){ ?>
@@ -72,7 +75,7 @@ if (!isset($_SESSION['user_id'])) {
         <div class="filter">
             <form method="post" action="/search/delete">
                 <?= $filter['column'] ?>: <?= $filter['value']?>
-                <input type="hidden"  value="<?= $filter['column'] ?>" name="delete-column">
+                <input type="hidden" value="<?= $filter['column'] ?>" name="delete-column">
                 <button type="submit" class="button-delete-filter"><i class="fa-solid fa-xmark"></i></button>
             </form>
         </div>

@@ -30,7 +30,7 @@ columnSelect.addEventListener('change', function() {
             option.textContent = optionData.text;
             additionalSelect.appendChild(option);
         });
-        this.parentNode.insertBefore(additionalSelect, searchInput);
+        this.parentNode.insertBefore(additionalSelect, searchInput.parentNode);
         additionalSelect.addEventListener('change',function (){
             columnInput.value = this.value.trim() + columnInput.value;
         });

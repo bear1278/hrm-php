@@ -77,7 +77,7 @@ class VacancyModel
         }
     }
 
-    public function getVacanciesSearchManager($id, $search): array
+    public function getVacanciesForManagerWithParams($id, $data): array
     {
         try {
             $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
@@ -86,11 +86,15 @@ class VacancyModel
             ON V.department_ID=D.department_ID
             INNER JOIN status as S
             ON S.status_ID=V.status 
-            WHERE author = :id AND V.name LIKE :search";
-            $search = "%" . $search . "%";
+            WHERE author = :id AND ";
+            $conditions = $this->handleCondition($data);
+            $params = $this->handleParams($data);
+            $sql .= implode(' AND ', $conditions);
             $stmt = $this->pdo->prepare($sql);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value, PDO::PARAM_STR);
+            }
             $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':search', $search);
             $stmt->execute();
             $vacancies = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

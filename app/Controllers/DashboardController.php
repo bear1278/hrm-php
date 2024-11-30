@@ -45,7 +45,14 @@ class DashboardController
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';
                 exit();
             } elseif (AuthHelper::isManager()) {
-                $data = $this->model->getVacancies($_SESSION['user_id']);
+                if (isset($_COOKIE['filtersData']) && $encryptedFilters = $_COOKIE['filtersData']) {
+                    $encryptedFilters = $_COOKIE['filtersData'];
+                    $decodedFilters = $this->decryptData($encryptedFilters);
+                    $filters = json_decode($decodedFilters, true);
+                    $data = $this->model->getVacanciesForManagerWithParams($_SESSION['user_id'], $filters);
+                } else {
+                    $data = $this->model->getVacancies($_SESSION['user_id']);
+                }
                 require_once __DIR__ . '/../Views/dashboard.html';
                 exit();
             } elseif (AuthHelper::isAdmin()) { // ToDo: think about store many models and implement it
@@ -92,53 +99,43 @@ class DashboardController
             $columns = $this->model->getTableColumns();
             $columns = array_diff($columns, ["image"]);
             $columns_type = $this->model->getColumnsType();
-            if (AuthHelper::isManager()) {
-                $search = $_POST['search'];
-                if (empty($search)) {
-                    $this->showDashboard();
-                    return;
-                }
-                $data = $this->model->getVacanciesSearchManager($_SESSION['user_id'], $search);
-                require_once __DIR__ . '/../Views/dashboard.html';
-                return;
+
+            $column = trim($_POST['column']);
+            $value = trim($_POST['value']);
+            $newFilter = [
+                'column' => $column,
+                'value' => $value
+            ];
+            if ($value == "") {
+                header('Location: http://localhost');
+                exit();
             }
-            if (AuthHelper::isCandidate()) {
-                $column = trim($_POST['column']);
-                $value = trim($_POST['value']);
-                $newFilter = [
-                    'column' => $column,
-                    'value' => $value
-                ];
-                if ($value == "") {
-                    header('Location: http://localhost');
-                    exit();
+            $filters = [];
+            if (isset($_COOKIE['filtersData']) && ($encryptedFilters = $_COOKIE['filtersData'])) {
+                $decodedFilters = $this->decryptData($encryptedFilters);
+                $filters = json_decode($decodedFilters, true);
+                $isNotThereSuchColumn = true;
+                foreach ($filters as $index => $filter) {
+                    if ($filter['column'] == $column) {
+                        $filters[$index]['value'] = $value;
+                        $isNotThereSuchColumn = false;
+                    }
                 }
-                $filters = [];
-                if (isset($_COOKIE['filtersData']) && ($encryptedFilters = $_COOKIE['filtersData'])) {
-                    $decodedFilters = $this->decryptData($encryptedFilters);
-                    $filters = json_decode($decodedFilters, true);
-                    $isNotThereSuchColumn = true;
-                    foreach ($filters as $index => $filter) {
-                        if ($filter['column'] == $column) {
-                            $filters[$index]['value'] = $value;
-                            $isNotThereSuchColumn = false;
-                        }
-                    }
-                    if ($isNotThereSuchColumn) {
-                        array_push($filters, $newFilter);
-                    }
-                    $updatedFilters = $this->encryptData(json_encode($filters));
-                    setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
-                    header('Location: http://localhost');
-                    exit();
-                } else {
+                if ($isNotThereSuchColumn) {
                     array_push($filters, $newFilter);
-                    $updatedFilters = $this->encryptData(json_encode($filters));
-                    setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
                 }
-                $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
-                require_once __DIR__ . '/../Views/dashboardCandidate.html';
+                $updatedFilters = $this->encryptData(json_encode($filters));
+                setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
+                header('Location: http://localhost');
+                exit();
+            } else {
+                array_push($filters, $newFilter);
+                $updatedFilters = $this->encryptData(json_encode($filters));
+                setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
             }
+            $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
+            require_once __DIR__ . '/../Views/dashboardCandidate.html';
+
         } catch (PDOException $e) {
             http_response_code(500);
             $this->sendJsonResponse([
@@ -281,10 +278,10 @@ class DashboardController
                 }
             }
             unset($filters[$indexDelete]);
-            if (!empty($filters)){
+            if (!empty($filters)) {
                 $updatedFilters = $this->encryptData(json_encode($filters));
                 setcookie('filtersData', $updatedFilters, time() + 3600 * 24, '/', '', true, true);
-            }else{
+            } else {
                 setcookie('filtersData', "", time() + 3600 * 24, '/', '', true, true);
             }
             header("Location: http://localhost");
