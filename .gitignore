@@ -3,3 +3,4 @@
 hrm.sql
 .env
 /public/img/candidates/*
+/public/.osp
