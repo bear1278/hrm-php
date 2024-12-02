@@ -209,7 +209,6 @@ class DashboardController
                 2,
                 $_SESSION['user_id'],
                 $_POST['skills'],
-                null,
                 null);
             $oldVacancy = $this->model->getVacancyByID($vacancy->getId());
             $vacancy->copy($oldVacancy);
@@ -250,7 +249,6 @@ class DashboardController
                 1,
                 $_SESSION['user_id'],
                 $inputData['skills'],
-                null,
                 $inputData['processes']
             );
             $result = $this->model->InsertNewVacancy($vacancy);

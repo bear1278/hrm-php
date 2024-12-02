@@ -68,7 +68,6 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
-                    null,
                     null
                 );
             }
@@ -110,7 +109,6 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
-                    null,
                     null
                 );
             }
@@ -186,7 +184,6 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
-                    null,
                     null
                 );
             }
@@ -271,7 +268,6 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
-                    null,
                     null
                 );
             }
@@ -392,7 +388,6 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
-                    $row['image'],
                     null
                 );
             }
@@ -610,6 +605,56 @@ class VacancyModel
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function selectSkillForVacancy($id)
+    {
+        try{
+            $sql="SELECT name FROM vacancy_skills vs
+            inner join skills s on vs.skill_ID = s.skill_ID
+            where vacancy_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function selectProcessesForVacancy(int $id)
+    {
+        try{
+            $sql="SELECT type, description,orderable FROM processes_vacancy pv
+            inner join processes p on p.process_ID = pv.process_ID
+            where vacancy_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function SelectApplicationByVacancy(int $id, $user_id)
+    {
+        try{
+            $sql="SELECT application_ID FROM applications
+            where vacancy_ID=:id AND candidate_ID=:user_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':user_id', $user_id);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if(isset($result)){
+                return true;
+            }else{
+                return false;
+            }
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }

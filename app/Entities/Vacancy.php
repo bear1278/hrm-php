@@ -30,7 +30,6 @@ class Vacancy
     protected $status;
     private $author;
     private $skills;
-    private $image;
     private ?array $processes;
 
 
@@ -45,7 +44,7 @@ class Vacancy
         $this->processes = $processes;
     }
 
-    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills,$image,$processes)
+    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills,$processes)
     {
         $this->setId($id);
         $this->setName($name);
@@ -57,19 +56,9 @@ class Vacancy
         $this->setStatus($status);
         $this->setAuthor($author);
         $this->setSkills($skills);
-        $this->setImage($image);
         $this->setProcesses($processes);
     }
 
-    public function getImage()
-    {
-        return $this->image;
-    }
-
-    public function setImage($image)
-    {
-        $this->image = $image;
-    }
 
     public function copy(Vacancy $vacancy)
     {
