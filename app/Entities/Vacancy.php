@@ -31,8 +31,21 @@ class Vacancy
     private $author;
     private $skills;
     private $image;
+    private ?array $processes;
 
-    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills,$image)
+
+    public function getProcesses():?array
+    {
+        return $this->processes;
+    }
+
+
+    public function setProcesses(?array $processes): void
+    {
+        $this->processes = $processes;
+    }
+
+    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills,$image,$processes)
     {
         $this->setId($id);
         $this->setName($name);
@@ -45,6 +58,7 @@ class Vacancy
         $this->setAuthor($author);
         $this->setSkills($skills);
         $this->setImage($image);
+        $this->setProcesses($processes);
     }
 
     public function getImage()

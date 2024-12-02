@@ -126,15 +126,14 @@ class DashboardController
                 }
                 $updatedFilters = $this->encryptData(json_encode($filters));
                 setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
-                header('Location: http://localhost');
-                exit();
+
             } else {
                 array_push($filters, $newFilter);
                 $updatedFilters = $this->encryptData(json_encode($filters));
                 setcookie('filtersData', $updatedFilters, time() + 3600, '/', '', true, true);
             }
-            $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
-            require_once __DIR__ . '/../Views/dashboardCandidate.html';
+            header('Location: http://localhost/');
+            exit();
 
         } catch (PDOException $e) {
             http_response_code(500);
@@ -210,9 +209,10 @@ class DashboardController
                 2,
                 $_SESSION['user_id'],
                 $_POST['skills'],
+                null,
                 null);
             $oldVacancy = $this->model->getVacancyByID($vacancy->getId());
-            $vacancy->copy($oldVacancy[0]);
+            $vacancy->copy($oldVacancy);
             $result = $this->model->UpdateVacancyAndSkills($vacancy);
             if ($result) {
                 echo json_encode(['success' => true]);
@@ -231,21 +231,28 @@ class DashboardController
         }
     }
 
-    public
-    function addVacancy()
+    public function addVacancy()
     {
         header('Content-Type: application/json');
         try {
-            $vacancy = new Vacancy(null, trim($_POST['name']),
-                trim($_POST['department_ID']),
-                trim($_POST['description']),
-                (int)trim($_POST['experience_required']),
-                trim($_POST['salary']),
+            $inputData = json_decode(file_get_contents('php://input'), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('Некорректный формат JSON');
+            }
+            $vacancy = new Vacancy(
+                null,
+                trim($inputData['name']),
+                trim($inputData['department_ID']),
+                trim($inputData['description']),
+                (int)trim($inputData['experience_required']),
+                trim($inputData['salary']),
                 date("Y-m-d H:i:s"),
                 1,
                 $_SESSION['user_id'],
-                $_POST['skills'],
-                null);
+                $inputData['skills'],
+                null,
+                $inputData['processes']
+            );
             $result = $this->model->InsertNewVacancy($vacancy);
             if ($result) {
                 echo json_encode(['success' => true]);
@@ -263,6 +270,7 @@ class DashboardController
             exit();
         }
     }
+
 
     public function deleteColumnFromFilter()
     {

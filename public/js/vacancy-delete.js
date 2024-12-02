@@ -1,16 +1,14 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Находим все кнопки с классом .trash-button
   const trashButtons = document.querySelectorAll(".trash-button");
 
-  // Для каждой кнопки вешаем обработчик события
   trashButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const vacancyID = this.value; // Получаем ID вакансии из значения кнопки
-      const row = this.closest("tr"); // Находим строку таблицы, к которой относится эта кнопка
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const vacancyID = this.value;
+      const card = this.closest(".vacancy-item");
 
-      // Подтверждение удаления
       if (confirm("Вы уверены, что хотите удалить эту вакансию?")) {
-        // Отправляем AJAX-запрос на сервер
         fetch("/delete", {
           method: "POST",
           headers: {
@@ -20,10 +18,8 @@ document.addEventListener("DOMContentLoaded", function () {
         })
           .then((response) => {
             if (response.ok) {
-              // Если статус ответа 200-299
-              return response.json(); // Получаем тело ответа
+              return response.json();
             } else if (response.status === 500) {
-              // Если статус ответа 500, перенаправляем на страницу ошибки
               return response.json().then((data) => {
                 const errorMessage =
                   data.error || "Произошла внутренняя ошибка сервера";
@@ -32,7 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 )}`;
               });
             } else {
-              // Если статус ответа вне диапазона 200-299, например 400 или 401
               return response.json().then((data) => {
                 throw new Error(data.error || "Произошла ошибка");
               });
@@ -40,11 +35,9 @@ document.addEventListener("DOMContentLoaded", function () {
           })
           .then((data) => {
             if (data.success) {
-              // Если запрос успешен, удаляем строку из таблицы
-              row.remove();
+              card.remove();
               alert("Вакансия успешно удалена.");
             } else {
-              // Если возникла ошибка
               alert("Ошибка");
             }
           })

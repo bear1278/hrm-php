@@ -21,7 +21,7 @@ $request_uri = explode('?', $request_uri)[0];
 
 $parts = explode('/', trim($request_uri, '/'));
 
-if($parts[0]==='error'){
+if ($parts[0] === 'error') {
     $errorMessage = isset($_GET['message']) ? $_GET['message'] : 'Произошла неизвестная ошибка';
     require_once __DIR__ . '/../app/Views/error.html';
     exit();
@@ -70,7 +70,7 @@ switch ($parts[0]) {
 
     case 'search':
         AuthHelper::ensureLoggedIn();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($parts[1]) && $parts[1]=='delete'){
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($parts[1]) && $parts[1] == 'delete') {
             $dashboardController->deleteColumnFromFilter();
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -171,9 +171,9 @@ switch ($parts[0]) {
     case 'profile':
         AuthHelper::ensureLoggedIn();
         if (AuthHelper::isCandidate()) {
-            if(isset($parts[1]) && $parts[1]==='edit' && $_SERVER['REQUEST_METHOD'] === 'POST'){
+            if (isset($parts[1]) && $parts[1] === 'edit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 $profileController->SetNewProfileImage();
-            }elseif($_SERVER['REQUEST_METHOD'] === 'GET') {
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $profileController->ShowProfileForCandidate();
             }
         } else {
@@ -285,8 +285,7 @@ switch ($parts[0]) {
                     $adminController->Delete('user_history', 'id');
                 }
             }
-            if (isset($parts[1]) && $parts[1]==='change')
-            {
+            if (isset($parts[1]) && $parts[1] === 'change') {
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $adminController->changeRecommendationParameters();
                 }
@@ -299,17 +298,17 @@ switch ($parts[0]) {
 
     case 'vacancy':
         AuthHelper::ensureLoggedIn();
-        if (AuthHelper::isCandidate()) {
-            if ($_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1])) {
-                $vacancyController->ShowVacancyDetails((int)$parts[1]);
-            }
-            if($_SERVER['REQUEST_METHOD']==='POST' && isset($parts[1]) && isset($parts[2]) && $parts[2]=='edit'){
-                $vacancyController->SetNewImage((int)$parts[1]);
-            }
-        } else {
-            header('Location: /');
-            exit();
+        if ($_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1]) && isset($parts[2]) && $parts[2]=='json') {
+            $vacancyController->GetVacancy((int)$parts[1]);
         }
+        if ($_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1])) {
+            $vacancyController->ShowVacancyDetails((int)$parts[1]);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($parts[1]) && isset($parts[2]) && $parts[2] == 'edit') {
+            $vacancyController->SetNewImage((int)$parts[1]);
+        }
+
         break;
 
 

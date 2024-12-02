@@ -68,6 +68,7 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
+                    null,
                     null
                 );
             }
@@ -109,6 +110,7 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
+                    null,
                     null
                 );
             }
@@ -184,6 +186,7 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
+                    null,
                     null
                 );
             }
@@ -268,6 +271,7 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
+                    null,
                     null
                 );
             }
@@ -388,7 +392,8 @@ class VacancyModel
                     $row['status'],
                     null,
                     [],
-                    $row['image']
+                    $row['image'],
+                    null
                 );
             }
             return $vacancy;
@@ -456,6 +461,11 @@ class VacancyModel
                 $vacancy->getPostingDate()->format('Y-m-d'),
                 $vacancy->getStatus(),
                 $vacancy->getAuthor());
+            $processes =$vacancy->getProcesses();
+            foreach ($processes as $process) {
+                $id = $this->InsertProcess($process);
+                $this->InsertVacancyProcess($vacancy_ID,$id);
+            }
             $result = $this->InsertVacancySkills($vacancy_ID, $vacancy->getSkills());
             $this->pdo->commit();
             return $result;
@@ -491,6 +501,33 @@ class VacancyModel
             return $result;
         } catch (PDOException $e) {
             $this->pdo->rollBack();
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function InsertProcess($process)
+    {
+        try {
+            $sql = "INSERT INTO processes ( description, type, orderable) VALUES (:description,:type,:orderable)";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':description', $process['description']);
+            $stmt->bindParam(':type', $process['type']);
+            $stmt->bindParam(':orderable', $process['orderable']);
+            $stmt->execute();
+            return $this->pdo->lastInsertId();
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function InsertVacancyProcess($id, $process_id)
+    {
+        try {
+            $sql = "INSERT INTO processes_vacancy (vacancy_ID, process_ID) VALUES (:id,:process_id)";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(['id' => $id, 'process_id' => $process_id]);
+            return true;
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
@@ -550,17 +587,30 @@ class VacancyModel
         }
     }
 
-    public function UpdateVacancyImage(int $id,$fileData)
+    public function UpdateVacancyImage(int $id, $fileData)
     {
-        try{
+        try {
             $sql = "UPDATE vacancies set image=:file_data where vacancy_ID=:id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':file_data', $fileData, PDO::PARAM_LOB);
             return $stmt->execute();
-        }catch (PDOException $e) {
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
 
+
+    public function getVacancySkills($id)
+    {
+        try{
+            $sql = "SELECT skill_ID FROM vacancy_skills WHERE vacancy_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
 }

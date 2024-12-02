@@ -48,6 +48,33 @@ class VacancyController
         }
     }
 
+    public function GetVacancy(int $id)
+    {
+        try
+        {
+            $vacancy = $this->model->getVacancyByID($id);
+            $skills = $this->model->getVacancySkills($id);
+            $vacancyArray=[
+                'name'=>$vacancy->getName(),
+                'department'=>$vacancy->getDepartment(),
+                'description'=>$vacancy->getDescription(),
+                'experience'=>$vacancy->getExperience(),
+                'salary'=>$vacancy->getSalary(),
+                'skills'=>$skills
+            ];
+            echo json_encode($vacancyArray);
+            exit();
+        }catch (PDOException $e) {
+            http_response_code(500);
+            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+        }catch (Exception $e){
+            http_response_code(400);
+            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+        }
+    }
+
     public function SetNewImage(int $id)
     {
         try

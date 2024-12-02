@@ -87,6 +87,11 @@
 }
 
 @media (max-width: 768px) {
+
+    .vacancy-link{
+        width: 80%;
+    }
+
     .vacancy-item {
         flex-direction: column;
         align-items: flex-start;
