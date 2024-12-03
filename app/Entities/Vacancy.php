@@ -20,17 +20,16 @@ class Vacancy
         'image' => 'getImage'
     ];
     const maxInt = 2147483647;
-    private $id;
+    protected $id;
     protected $name;
     protected $department;
     protected $description;
     protected $experience;
     protected $salary;
     protected $posting_date;
-    protected $status;
     private $author;
-    private $skills;
-    private ?array $processes;
+    protected $skills;
+    protected ?array $processes;
 
 
     public function getProcesses():?array
@@ -44,7 +43,7 @@ class Vacancy
         $this->processes = $processes;
     }
 
-    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $status, $author, $skills,$processes)
+    public function __construct($id, $name, $department, $description, $experience, $salary, $posting_date, $author, $skills,$processes)
     {
         $this->setId($id);
         $this->setName($name);
@@ -53,7 +52,6 @@ class Vacancy
         $this->setExperience($experience);
         $this->setSalary($salary);
         $this->setPostingDate($posting_date);
-        $this->setStatus($status);
         $this->setAuthor($author);
         $this->setSkills($skills);
         $this->setProcesses($processes);
@@ -79,12 +77,6 @@ class Vacancy
         }
         if (empty($this->posting_date)) {
             $this->posting_date = $vacancy->getPostingDate();
-        }
-        if (empty($this->status)) {
-            $this->status = $vacancy->getStatus();
-        }
-        if ($this->image==null && $vacancy->getImage()!=null){
-            $this->setImage($vacancy->getImage());
         }
     }
 
@@ -150,10 +142,6 @@ class Vacancy
 
     }
 
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
 
     public function setAuthor($author)
     {
@@ -203,11 +191,6 @@ class Vacancy
     public function getPostingDate()
     {
         return $this->posting_date;
-    }
-
-    public function getStatus()
-    {
-        return $this->status;
     }
 
     public function getAuthor()

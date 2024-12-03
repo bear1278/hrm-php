@@ -1,15 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const Button = document.querySelectorAll(".button-unapply");
+    const Button = document.querySelectorAll(".btn");
 
     Button.forEach((button) => {
         button.addEventListener("click", function (event) {
             event.preventDefault();
             event.stopPropagation();
-            const id = this.value;
-            const row = this.closest(".vacancy-item");
+            const id = this.id.slice(0,-1);
+            const status = this.value;
 
-            if (confirm("Вы уверены, что хотите отказаться от отклика на эту вакансию?")) {
-                fetch("/applications/delete", {
+            if (confirm("Вы уверены?")) {
+                fetch("/applications/"+status, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .then((data) => {
                         if (data.success) {
-                            row.remove();
-                            alert("Отклик отменен.");
+                            alert("Успех!");
+                            window.location.reload();
                         } else {
                             alert("Ошибка");
                         }

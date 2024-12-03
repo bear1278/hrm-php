@@ -62,16 +62,4 @@ class ErrorHelper
         return $errorImage;
     }
 
-    public static function ImageBlobErrorHandler($mime_type,$image)
-    {
-        $errorImage="";
-        $image_data = base64_encode($image);
-        if (base64_decode($image_data, true) === false) {
-            $errorImage="Ошибка кодировки изображения.";
-        }
-        if (!preg_match('/^image\//', $mime_type)) {
-            $errorImage="Данные не являются изображением.";
-        }
-        return $errorImage;
-    }
 }

@@ -42,7 +42,7 @@ h1 {
 
 .profile-info {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin-bottom: 30px;
     width: 100%;
@@ -51,13 +51,16 @@ h1 {
 .profile-details {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 15px;
     font-size: 1.5em;
     color: #555;
 }
 
-
+.p-2rem{
+    padding-left: 2rem;
+}
 
 .button-image-change {
     position: relative;
@@ -98,14 +101,21 @@ h1 {
 .vacancy-title{
     display: flex;
     flex-direction: row;
+    align-content: center;
     gap: 40px;
-    height: 40px;
+    align-items: center;
 }
 
 @media (max-width: 768px) {
     .profile-info {
         display: flex;
         flex-direction: column;
+    }
+
+    .vacancy-title{
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
     }
 }
 

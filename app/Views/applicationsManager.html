@@ -7,126 +7,143 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: /login');
     exit();
 }
-
-// You can access session variables like the username or user ID
-$username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>User Dashboard</title>
-  <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-      rel="stylesheet"
-  />
-  <link rel="stylesheet" href="/css/dashboardCandidate.css"/>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>User Dashboard</title>
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+            rel="stylesheet"
+    />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/css/application.css"/>
 </head>
 <body>
 <header>
-  <div class="header-container">
-    <nav class="navigation">
-      <ul>
-        <li><a class="a" href="http://localhost/">Вакансии</a></li>
-        <li><a class="a" href="http://localhost/applications">Отклики</a></li>
-      </ul>
-    </nav>
-
-    <form action="/logout" method="POST">
-      <button class="button" type="submit">Выйти</button>
-    </form>
-  </div>
-  <div class="search-container">
-    <form id="search-form" action="/applications/search" method="POST">
-      <input
-          class="input"
-          type="search"
-          placeholder="Поиск"
-          name="search"
-      />
-      <button class="button" type="submit">Поиск</button>
-    </form>
-  </div>
+    <div class="header-container" id="error">
+        <nav class="navigation">
+            <ul>
+                <li><a class="a" href="http://localhost/">Вакансии</a></li>
+                <li><a class="a" href="http://localhost/applications">Отклики</a></li>
+            </ul>
+        </nav>
+        <form action="/logout" method="POST">
+            <button class="button-exit" type="submit">Выйти</button>
+        </form>
+    </div>
+    <div class="search-container">
+        <form class="search-form" id="search-form" action="/applications/search" method="POST">
+            <div class="search">
+                <input id="column" type="hidden" name="column" value="name">
+                <input
+                        class="input-search"
+                        type="search"
+                        placeholder="Поиск"
+                        name="search"
+                        id="search-input"
+                />
+                <button class="button-search" type="submit">Поиск</button>
+            </div>
+        </form>
+    </div>
 </header>
 <main>
-  <div>
-    <div class="table-container">
-      <table border="1">
-        <tr>
-          <?php foreach ($columns as $column): ?>
-          <th><?php echo htmlspecialchars($column); ?></th>
-          <?php endforeach; ?>
-          <th></th>
-          <th></th>
-        </tr>
-
-        <?php if (!empty($data)) { ?>
-        <?php foreach ($data as $row): ?>
-        <tr>
-          <?php foreach ($columns as $column): ?>
-          <td><?php if ($column == 'posting date')
-                  {
-                    echo htmlspecialchars($row->
-            {Application::fieldMapping[$column]}()->format('Y-m-d'));
-            }else{
-            echo htmlspecialchars($row->{Application::fieldMapping[$column]}());
-            }
-            ?>
-          </td>
-          </td>
-
-          <?php endforeach; ?>
-
-          <td>
-            <form action="/applications/refuse" method="POST">
-              <input type="hidden" name="application_ID"
-                     value="<?php echo htmlspecialchars($row->getApplicationId()); ?>">
-              <button
-                  class="button-table button-refuse red"
-                  type="submit"
-                  value="<?php echo htmlspecialchars($row->getApplicationId()); ?>"
-              >
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </form>
-          </td>
-          <td>
-            <form action="/applications/accept" method="POST">
-              <input type="hidden" name="application_ID"
-                     value="<?php echo htmlspecialchars($row->getApplicationId()); ?>">
-              <button
-                  class="button-table button-accept green"
-                  type="submit"
-                  value="<?php echo htmlspecialchars($row->getApplicationId()); ?>"
-              >
-                <i class="fa-solid fa-check"></i>
-              </button>
-            </form>
-          </td>
-
-        </tr>
-
-
-        <?php endforeach; ?>
-
-        <?php } else { ?>
-        <tr>
-          <td colspan="<?php echo count($columns); ?>">
-            Нет данных для отображения
-          </td>
-        </tr>
-        <?php } ?>
-      </table>
+    <?php if (!empty($applications)) { ?>
+    <?php foreach ($applications as $status => $application): ?>
+    <?php if(   $application){ ?>
+    <div class="heading-container">
+        <div class="heading-width">
+            <h1 class="text-dark fs-2"> <?= Application::TABS[$status] ?> </h1>
+        </div>
     </div>
-  </div>
+    <?php } ?>
+    <ul class="vacancy-list">
+        <?php foreach ($application as $row): ?>
+        <?php if($row) ?>
+        <a href="http://localhost/application/<?= $row->getApplicationId() ?>" class="vacancy-link text-reset">
+            <li class="vacancy-item">
+                <div class="vacancy-container">
+                    <h3 class="vacancy-title mb-1"><?= $row->getName() ?> Кандидат: </h3>
+                    <h5 class="text-dark fs-5">Кандидат: <?= $row->getCandidateName() ?></h5>
+                    <div class="vacancy-content-container">
+                        <div class="vacancy-content">
+                            <p class="vacancy-department mb-1"><strong>Отдел: </strong><?= $row->getDepartment() ?></p>
+                            <p class="mb-1"><strong>Опыт:</strong> <?= $row->getExperience() ?> года</p>
+                        </div>
+                        <div class="vacancy-content">
+                            <p class="mb-1"><strong>Зарплата:</strong> <?= $row->getSalary() ?> $</p>
+                            <p class="mb-1"><strong>Дата отклика:</strong> <?=$row->getApplicationDate() ?></p>
+                        </div>
+                    </div>
+                </div>
+                <?php if($row->getApplicationStatus()!='отказ'){ ?>
+                <div class="button-container">
+                    <?php if($row->getApplicationStatus()!='приглашение'){ ?>
+                    <button
+                            class="btn btn-success"
+                            type="submit"
+                            id="<?= htmlspecialchars($row->getApplicationId()) ?>+"
+                            value="accept"
+                    >Одобрить
+                    </button>
+                    <?php } ?>
+                    <button
+                            class="btn btn-danger"
+                            type="submit"
+                            id="<?= htmlspecialchars($row->getApplicationId()) ?>*"
+                            value="refuse"
+                    >Отказать
+                    </button>
+                </div>
+                <?php } ?>
+            </li>
+        </a>
+        <?php endforeach; ?>
+    </ul>
+    <?php endforeach; ?>
+    <?php } else { ?>
+    <h2 class="text-danger text-center">Нет данных для отображения</h2>
+    <?php } ?>
 </main>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>О нас</h4>
+            <p>Мы предлагаем лучший сервис для поиска вакансий и откликов на них. Наша цель — сделать процесс поиска
+                работы удобным и эффективным.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Контакты</h4>
+            <ul class="footer-links">
+                <li>Email: support@gmail.com</li>
+                <li>Телефон: +375 33 1456 789</li>
+                <li>Адрес: ул. Толковая, 12</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Социальные сети</h4>
+            <ul class="social-links">
+                <li><a href="#"><i class="fa-brands fa-facebook"></i> Facebook</a></li>
+                <li><a href="#"><i class="fa-brands fa-twitter"></i> Twitter</a></li>
+                <li><a href="#"><i class="fa-brands fa-linkedin"></i> LinkedIn</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 RemZona. Все права защищены.</p>
+    </div>
+</footer>
+<script src="/js/change-app-status.js"></script>
 </body>
 </html>

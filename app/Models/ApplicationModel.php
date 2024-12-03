@@ -21,20 +21,17 @@ class ApplicationModel
     public function selectApplicationById($applicationId)
     {
         try {
-            $sql = "SELECT application_ID, candidate_ID, V.name, D.name as department, description, experience_required as experience, 
-                salary, posting_date as `posting date`, S.name as `vacancy status`, 
-                application_date as `application date`, St.name as `application status`
+            $sql = "SELECT V.vacancy_ID as id, application_ID, CONCAT(last_name,' ',first_name) as candidate,user_ID, V.name, D.name as department, description, experience_required as experience, 
+                salary, posting_date as `posting date`,
+                application_date as `application date`, A.status as `application status`
                 FROM vacancies as V
                 INNER JOIN applications as A 
                 ON V.vacancy_ID = A.vacancy_ID
                 INNER JOIN departments as D
                 ON V.department_ID = D.department_id
-                INNER JOIN status as S
-                ON V.status = S.status_ID
-                INNER JOIN status as St
-                ON A.status = St.status_ID
+                INNER JOIN users as U 
+                ON A.candidate_ID = U.user_ID
                 WHERE A.application_ID = :applicationId";
-
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':applicationId', $applicationId, PDO::PARAM_INT);
             $stmt->execute();
@@ -42,9 +39,9 @@ class ApplicationModel
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($row) {
-                return new Application(
+                $app =  new Application(
                     $row['application_ID'],
-                    $row['candidate_ID'],
+                    $row['candidate'],
                     $row['application date'],
                     $row['application status'],
                     $row['name'],
@@ -52,9 +49,11 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date'],
-                    $row['vacancy status']
+                    $row['posting date']
                 );
+                $app->setId($row['id']);
+                $app->setCandidateId($row['user_ID']);
+                return $app;
             } else {
                 return null;
             }
@@ -67,18 +66,14 @@ class ApplicationModel
     {
         try{
             $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
+            application_date as `application date`,A.status as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
             INNER JOIN
             departments as D
-            ON V.department_ID = D.department_id  
-            INNER JOIN status as S
-            ON V.status = S.status_ID 
-            INNER JOIN status as St
-            ON A.status = St.status_ID 
-            Where candidate_ID= :id";
+            ON V.department_ID = D.department_id
+            Where candidate_ID= :id ORDER BY application_date DESC";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
@@ -94,8 +89,7 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date'],
-                    $row['vacancy status']
+                    $row['posting date']
                 );
             }
             return $applications;
@@ -108,20 +102,16 @@ class ApplicationModel
     {
         try{
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
+            application_date as `application date`,A.status as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
             INNER JOIN
             departments as D
             ON V.department_ID = D.department_id
-            INNER JOIN status as S
-            ON V.status = S.status_ID 
-            INNER JOIN status as St
-            ON A.status = St.status_ID 
             INNER JOIN users as U
             ON U.user_ID=A.candidate_ID 
-            Where author= :id";
+            Where author= :id ORDER BY application_date DESC";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
@@ -137,8 +127,7 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date'],
-                    $row['vacancy status']
+                    $row['posting date']
                 );
             }
             return $applications;
@@ -147,28 +136,6 @@ class ApplicationModel
         }
     }
 
-    public function getTableColumns() {
-        try{
-            $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            V.status as `vacancy status`,application_date as `application date`,A.status as `application status` 
-            FROM vacancies as V 
-            LEFT JOIN applications as A 
-            ON V.vacancy_ID=A.vacancy_ID 
-            LEFT JOIN
-            departments as D
-            ON V.department_ID = D.department_id
-            LEFT JOIN users as U
-            ON U.user_ID=A.candidate_ID 
-            LIMIT 1";
-            $query = $this->pdo->query($sql);
-            $result = $query->fetchAll(PDO::FETCH_ASSOC);
-
-            return array_keys($result[0]);
-
-        }catch (PDOException $e) {
-            throw new PDOException("Ошибка: " . $e->getMessage());
-        }
-    }
 
     public function createApplication($vacancy_ID, $candidate_ID)
     {
@@ -194,11 +161,11 @@ class ApplicationModel
     public function DeleteApplication($id)
     {
         try{
+            $this->pdo->beginTransaction();
             $app = $this->SelectApplicationByIdForDelete($id);
             if (empty($app)){
                 throw new PDOException('Select by id with error');
             }
-            $this->pdo->beginTransaction();
             $result = $this->DeleteFromApplication($id);
             if (!$result){
                 throw new PDOException('Insert application with error');
@@ -221,7 +188,7 @@ class ApplicationModel
         try {
             $sql = "INSERT INTO applications (vacancy_ID, candidate_ID, application_date,status) VALUES (:vacancy_ID, :candidate_ID, :application_date,:status)";
             $stmt = $this->pdo->prepare($sql);
-            $status = 1;
+            $status = 'не просмотрен';
             $date = date("Y-m-d H:i:s");
             $stmt->bindParam(':vacancy_ID', $vacancy_ID);
             $stmt->bindParam(':candidate_ID', $candidate_ID);
@@ -266,17 +233,13 @@ class ApplicationModel
     {
         try {
             $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
+            application_date as `application date`,A.status as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
             INNER JOIN
             departments as D
             ON V.department_ID = D.department_id
-            INNER JOIN status as S
-            ON V.status = S.status_ID 
-            INNER JOIN status as St
-            ON A.status = St.status_ID 
             Where candidate_ID= :id and V.name LIKE :search";
             $stmt = $this->pdo->prepare($sql);
             $search = "%".$search."%";
@@ -295,8 +258,7 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date'],
-                    $row['vacancy status']
+                    $row['posting date']
                 );
             }
             return $applications;
@@ -309,17 +271,13 @@ class ApplicationModel
     {
         try {
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            S.name as `vacancy status`,application_date as `application date`,St.name as `application status` 
+            application_date as `application date`,A.status as `application status` 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
             INNER JOIN
             departments as D
             ON V.department_ID = D.department_id
-            INNER JOIN status as S
-            ON V.status = S.status_ID 
-            INNER JOIN status as St
-            ON A.status = St.status_ID 
             INNER JOIN users as U
             ON U.user_ID=A.candidate_ID 
             Where author= :id and V.name LIKE :search";
@@ -340,8 +298,7 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date'],
-                    $row['vacancy status']
+                    $row['posting date']
                 );
             }
             return $applications;
@@ -377,4 +334,5 @@ class ApplicationModel
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
+
 }

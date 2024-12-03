@@ -82,210 +82,210 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 </header>
 <main>
-    <div class="main-container">
-        <div class="button-container">
-            <button id="button-add" class="button-add-vacancy" type="button" data-bs-toggle="modal"
-                    data-bs-target="#vacancyModal">Добавить вакансию
-            </button>
-        </div>
-        <div class="modal fade" id="vacancyModal" tabindex="-1" aria-labelledby="fullScreenModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog modal-fullscreen">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title" id="fullScreenModalLabel">Добавить вакансию</h1>
-                        <div id="error-message" style="color: red; display: none;"></div>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="vacancy-form" action="/add" method="POST" class="modal-form">
-                            <label for="vacancy-title">Название вакансии</label>
-                            <input class="input-modal" type="text" id="vacancy-title" name="name" required/>
 
-                            <label for="vacancy-department">Отдел</label>
-                            <select class="input-modal" id="vacancy-department" name="department_ID">
-                                <?php foreach ($departments as $department): ?>
-                                <option value="<?php echo htmlspecialchars($department['department_id']); ?>">
-                                    <?php echo htmlspecialchars($department['name']); ?>
+    <div class="button-container">
+        <button id="button-add" class="button-add-vacancy" type="button" data-bs-toggle="modal"
+                data-bs-target="#vacancyModal">Добавить вакансию
+        </button>
+    </div>
+    <div class="modal fade" id="vacancyModal" tabindex="-1" aria-labelledby="fullScreenModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title" id="fullScreenModalLabel">Добавить вакансию</h1>
+                    <div id="error-message" style="color: red; display: none;"></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="vacancy-form" action="/add" method="POST" class="modal-form">
+                        <label for="vacancy-title">Название вакансии</label>
+                        <input class="input-modal" type="text" id="vacancy-title" name="name" required/>
+
+                        <label for="vacancy-department">Отдел</label>
+                        <select class="input-modal" id="vacancy-department" name="department_ID">
+                            <?php foreach ($departments as $department): ?>
+                            <option value="<?php echo htmlspecialchars($department['department_id']); ?>">
+                                <?php echo htmlspecialchars($department['name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <label for="vacancy-description">Описание вакансии</label>
+                        <textarea class="input-modal skills-select" id="vacancy-description" name="description"
+                                  required></textarea>
+
+                        <label for="vacancy-skills">Необходимые навыки</label>
+                        <select class="input-modal skills-select" id="vacancy-skills" name="skills" multiple
+                                size="5"
+                                required>
+                            <?php foreach ($skills as $skill): ?>
+                            <option value=<?php echo htmlspecialchars($skill[
+                            'skill_ID']); ?>>
+                            <?php echo htmlspecialchars($skill['name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <label for="vacancy-experience">Требуемый опыт</label>
+                        <input class="input-modal" type="number" min="0" id="vacancy-experience"
+                               name="experience_required"
+                               required/>
+
+                        <label for="vacancy-salary">Зарплата</label>
+                        <input class="input-modal" min="1" type="number" id="vacancy-salary" name="salary"
+                               required/>
+                        <div>
+                            <h4 class="modal-title">Этапы собеседования</h4>
+                            <div class="list-group-horizontal">
+                                <button type="button" class="btn btn-primary" id="add-process">Добавить этап
+                                </button>
+                                <button type="button" class="btn btn-danger" id="delete-process">Удалить этап
+                                </button>
+                            </div>
+
+                        </div>
+                        <div class="modal-form" id="process-1">
+                            <h5 class="modal-title">Этап 1</h5>
+                            <input type="hidden" name="orderable" value="1">
+                            <label for="process-select-1">Тип</label>
+                            <select class="input-modal" name="type" id="process-select-1" required>
+                                <option value="Интервью с Hr">
+                                    Интервью с Hr
                                 </option>
-                                <?php endforeach; ?>
+                                <option value="Техническое интервью">
+                                    Техническое интервью
+                                </option>
+                                <option value="Тестовое задание">
+                                    Тестовое задание
+                                </option>
                             </select>
-
-                            <label for="vacancy-description">Описание вакансии</label>
-                            <textarea class="input-modal skills-select" id="vacancy-description" name="description"
+                            <label for="process-description">Описание этапа</label>
+                            <textarea class="input-modal skills-select" id="process-description"
+                                      name="process-description"
                                       required></textarea>
-
-                            <label for="vacancy-skills">Необходимые навыки</label>
-                            <select class="input-modal skills-select" id="vacancy-skills" name="skills" multiple
-                                    size="5"
-                                    required>
-                                <?php foreach ($skills as $skill): ?>
-                                <option value=<?php echo htmlspecialchars($skill[
-                                'skill_ID']); ?>>
-                                <?php echo htmlspecialchars($skill['name']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-
-                            <label for="vacancy-experience">Требуемый опыт</label>
-                            <input class="input-modal" type="number" min="0" id="vacancy-experience"
-                                   name="experience_required"
-                                   required/>
-
-                            <label for="vacancy-salary">Зарплата</label>
-                            <input class="input-modal" min="1" type="number" id="vacancy-salary" name="salary"
-                                   required/>
-                            <div>
-                                <h4 class="modal-title">Этапы собеседования</h4>
-                                <div class="list-group-horizontal">
-                                    <button type="button" class="btn btn-primary" id="add-process">Добавить этап
-                                    </button>
-                                    <button type="button" class="btn btn-danger" id="delete-process">Удалить этап
-                                    </button>
-                                </div>
-
-                            </div>
-                            <div class="modal-form" id="process-1">
-                                <h5 class="modal-title">Этап 1</h5>
-                                <input type="hidden" name="orderable" value="1">
-                                <label for="process-select-1">Тип</label>
-                                <select class="input-modal" name="type" id="process-select-1" required>
-                                    <option value="Интервью с Hr">
-                                        Интервью с Hr
-                                    </option>
-                                    <option value="Техническое интервью">
-                                        Техническое интервью
-                                    </option>
-                                    <option value="Тестовое задание">
-                                        Тестовое задание
-                                    </option>
-                                </select>
-                                <label for="process-description">Описание этапа</label>
-                                <textarea class="input-modal skills-select" id="process-description"
-                                          name="process-description"
-                                          required></textarea>
-                            </div>
-                        </form>
-                        <script src="/js/process.js"></script>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="close" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть
-                        </button>
-                        <button type="button" id="submit-vacancy" class="btn btn-primary">Добавить</button>
-                    </div>
+                        </div>
+                    </form>
+                    <script src="/js/process.js"></script>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="close" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть
+                    </button>
+                    <button type="button" id="submit-vacancy" class="btn btn-primary">Добавить</button>
                 </div>
             </div>
-            <script src="/js/vacancy-add.js"></script>
         </div>
+        <script src="/js/vacancy-add.js"></script>
+    </div>
 
-        <div class="modal fade" id="edit-vacancyModal" tabindex="-1" aria-labelledby="edit-fullScreenModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog modal-fullscreen">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title" id="edit-fullScreenModalLabel">Добавить вакансию</h1>
-                        <div id="edit-error-message" style="color: red; display: none;"></div>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="edit-vacancy-form" action="/add" method="POST" class="modal-form">
-                            <input type="hidden" name="vacancy_ID" value="" id="vacancy_id">
-                            <label for="edit-vacancy-title">Название вакансии</label>
-                            <input class="input-modal" type="text" id="edit-vacancy-title" name="name" required/>
-
-                            <label for="edit-vacancy-department">Отдел</label>
-                            <select class="input-modal" id="edit-vacancy-department" name="department_ID">
-                                <?php foreach ($departments as $department): ?>
-                                <option value="<?php echo htmlspecialchars($department['department_id']); ?>">
-                                    <?php echo htmlspecialchars($department['name']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-
-                            <label for="edit-vacancy-description">Описание вакансии</label>
-                            <textarea class="input-modal skills-select" id="edit-vacancy-description"
-                                      name="description"
-                                      required></textarea>
-
-                            <label for="edit-vacancy-skills">Необходимые навыки</label>
-                            <select class="input-modal skills-select" id="edit-vacancy-skills" name="skills[]"
-                                    multiple
-                                    size="5"
-                                    required>
-                                <?php foreach ($skills as $skill): ?>
-                                <option value=<?php echo htmlspecialchars($skill[
-                                'skill_ID']); ?>>
-                                <?php echo htmlspecialchars($skill['name']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-
-                            <label for="edit-vacancy-experience">Требуемый опыт</label>
-                            <input class="input-modal" type="number" min="0" id="edit-vacancy-experience"
-                                   name="experience_required"
-                                   required/>
-
-                            <label for="edit-vacancy-salary">Зарплата</label>
-                            <input class="input-modal" min="1" type="number" id="edit-vacancy-salary" name="salary"
-                                   required/>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="close-edit" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Закрыть
-                        </button>
-                        <button type="button" id="edit-vacancy" class="btn btn-primary">Редактировать</button>
-                    </div>
+    <div class="modal fade" id="edit-vacancyModal" tabindex="-1" aria-labelledby="edit-fullScreenModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title" id="edit-fullScreenModalLabel">Добавить вакансию</h1>
+                    <div id="edit-error-message" style="color: red; display: none;"></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <script src="/js/edit-button-modal.js"></script>
+                <div class="modal-body">
+                    <form id="edit-vacancy-form" action="/add" method="POST" class="modal-form">
+                        <input type="hidden" name="vacancy_ID" value="" id="vacancy_id">
+                        <label for="edit-vacancy-title">Название вакансии</label>
+                        <input class="input-modal" type="text" id="edit-vacancy-title" name="name" required/>
+
+                        <label for="edit-vacancy-department">Отдел</label>
+                        <select class="input-modal" id="edit-vacancy-department" name="department_ID">
+                            <?php foreach ($departments as $department): ?>
+                            <option value="<?php echo htmlspecialchars($department['department_id']); ?>">
+                                <?php echo htmlspecialchars($department['name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <label for="edit-vacancy-description">Описание вакансии</label>
+                        <textarea class="input-modal skills-select" id="edit-vacancy-description"
+                                  name="description"
+                                  required></textarea>
+
+                        <label for="edit-vacancy-skills">Необходимые навыки</label>
+                        <select class="input-modal skills-select" id="edit-vacancy-skills" name="skills[]"
+                                multiple
+                                size="5"
+                                required>
+                            <?php foreach ($skills as $skill): ?>
+                            <option value=<?php echo htmlspecialchars($skill[
+                            'skill_ID']); ?>>
+                            <?php echo htmlspecialchars($skill['name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <label for="edit-vacancy-experience">Требуемый опыт</label>
+                        <input class="input-modal" type="number" min="0" id="edit-vacancy-experience"
+                               name="experience_required"
+                               required/>
+
+                        <label for="edit-vacancy-salary">Зарплата</label>
+                        <input class="input-modal" min="1" type="number" id="edit-vacancy-salary" name="salary"
+                               required/>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="close-edit" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Закрыть
+                    </button>
+                    <button type="button" id="edit-vacancy" class="btn btn-primary">Редактировать</button>
+                </div>
             </div>
+            <script src="/js/edit-button-modal.js"></script>
         </div>
-        <?php if (!empty($data)) { ?>
-        <ul class="vacancy-list">
-            <?php foreach ($data as $row): ?>
-            <a href="http://localhost/vacancy/<?= $row->getId() ?>" class="vacancy-link">
-                <li class="vacancy-item">
-                    <div class="vacancy-container">
-                        <h3 class="vacancy-title"><?= $row->getName() ?></h3>
-                        <div class="vacancy-content-container">
-                            <div class="vacancy-content">
-                                <p class="vacancy-department"><strong>Отдел: </strong><?= $row->getDepartment()
-                                    ?></p>
-                                <p><strong>Опыт:</strong> <?= $row->getExperience() ?> года</p>
-                            </div>
-                            <div class="vacancy-content">
-                                <p><strong>Зарплата:</strong> <?= $row->getSalary() ?> $</p>
-                                <p><strong>Дата публикации:</strong> <?=$row->getPostingDate()->format('Y-m-d')
-                                    ?></p>
-                            </div>
+    </div>
+    <?php if (!empty($data)) { ?>
+    <ul class="vacancy-list">
+        <?php foreach ($data as $row): ?>
+        <a  href="http://localhost/vacancy/<?= $row->getId() ?>" class="vacancy-link text-decoration-none outline-0 text-reset">
+            <li class="vacancy-item">
+                <div class="vacancy-container">
+                    <h3 class="vacancy-title"><?= $row->getName() ?></h3>
+                    <div class="vacancy-content-container">
+                        <div class="vacancy-content">
+                            <p class="vacancy-department mb-1"><strong>Отдел: </strong><?= $row->getDepartment()
+                                ?></p>
+                            <p class="mb-1"><strong>Опыт:</strong> <?= $row->getExperience() ?> года</p>
+                        </div>
+                        <div class="vacancy-content">
+                            <p class="mb-1"><strong>Зарплата:</strong> от <?= $row->getSalary() ?> $</p>
+                            <p class="mb-1"><strong>Дата публикации:</strong> <?=$row->getPostingDate()->format('Y-m-d')
+                                ?></p>
                         </div>
                     </div>
-                    <div class="button-container">
-                        <button
-                                data-bs-target="#edit-vacancyModal"
-                                data-bs-toggle="modal"
-                                class="edit-button"
-                                type="button"
-                                value="<?= $row->getId() ?>"
-                        >
-                            <i class="fa-solid fa-pen-to-square "></i>
-                        </button>
-                        <button
-                                class="trash-button"
-                                type="button"
-                                value="<?= $row->getId() ?>"
-                        >
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                        <script type="module" src="/js/vacancy-delete.js"></script>
-                    </div>
-                </li>
-            </a>
-            <?php endforeach; ?>
-        </ul>
-        <?php } else { ?>
-        <h2>Нет данных для отображения</h2>
-        <?php } ?>
+                </div>
+                <div class="button-group">
+                    <button
+                            data-bs-target="#edit-vacancyModal"
+                            data-bs-toggle="modal"
+                            class="edit-button"
+                            type="button"
+                            value="<?= $row->getId() ?>"
+                    >
+                        <i class="fa-solid fa-pen-to-square "></i>
+                    </button>
+                    <button
+                            class="trash-button"
+                            type="button"
+                            value="<?= $row->getId() ?>"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <script type="module" src="/js/vacancy-delete.js"></script>
+                </div>
+            </li>
+        </a>
+        <?php endforeach; ?>
+    </ul>
+    <?php } else { ?>
+    <h2>Нет данных для отображения</h2>
+    <?php } ?>
 </main>
 <footer class="footer">
     <div class="footer-container">

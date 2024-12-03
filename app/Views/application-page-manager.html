@@ -1,0 +1,210 @@
+<?php
+// Start the session to access session variables
+use app\Entities\Vacancy;
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login');
+    exit();
+}
+
+// Fetch the user information from the server-side function
+$user = isset($data) ? $data : null;
+$columns = isset($columns) ? $columns : [];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacancy</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+          rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/css/profile.css"/>
+</head>
+<body>
+
+<header>
+    <div class="header-container" id="error">
+        <nav class="navigation">
+            <ul>
+                <li><a href="http://localhost/">Вакансии</a></li>
+                <li><a href="http://localhost/applications">Отклики</a></li>
+                <?php if($_SESSION['role']==4){ ?>
+                <li><a href="http://localhost/profile">Профиль</a></li>
+                <?php } ?>
+            </ul>
+        </nav>
+        <form action="/logout" method="POST">
+            <button class="button" type="submit">Выйти</button>
+        </form>
+    </div>
+</header>
+<main>
+    <div class="vacancy-title mb-4">
+        <h1>Вакансия <?= htmlspecialchars($vacancy->getName()) ?></h1>
+        <?php if ($vacancy->getApplicationStatus()=='не просмотрен' || $vacancy->getApplicationStatus()=='просмотрен'){
+        ?>
+        <div class="alert alert-warning p-2" role="alert">
+            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+        </div>
+        <?php }elseif ($vacancy->getApplicationStatus()=='отказ'){ ?>
+        <div class="alert alert-danger p-2" role="alert">
+            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+        </div>
+        <?php }elseif ($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас
+        приняли'){ ?>
+        <div class="alert alert-success p-2" role="alert">
+            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+        </div>
+        <?php } ?>
+        <?php if($vacancy->getApplicationStatus()!='отказ'){ ?>
+        <div class="button-container mb-3">
+            <?php if($vacancy->getApplicationStatus()!='приглашение'){ ?>
+            <button
+                    class="btn btn-success"
+                    type="submit"
+                    id="<?= htmlspecialchars($vacancy->getApplicationId()) ?>+"
+                    value="accept"
+            >Одобрить
+            </button>
+            <?php } ?>
+            <button
+                    class="btn btn-danger"
+                    type="submit"
+                    id="<?= htmlspecialchars($vacancy->getApplicationId()) ?>*"
+                    value="refuse"
+            >Отказать
+            </button>
+        </div>
+        <?php } ?>
+    </div>
+    <?php if ($vacancy && $candidate): ?>
+    <div class="profile-details p-2rem"><strong>Дата отклика:</strong>
+        <?= $vacancy->getApplicationDate() ?>
+    </div>
+    <div class="profile-info">
+        <ul>
+            <li class="profile-details"><strong>Отдел:</strong>
+                <?= $vacancy->getDepartment() ?>
+            </li>
+            <li class="profile-details"><strong>Описание:</strong>
+                <?= htmlspecialchars($vacancy->getDescription()) ?>
+            </li>
+            <li class="profile-details"><strong>Опыт:</strong>
+                <?= htmlspecialchars($vacancy->getExperience()) ?>
+            </li>
+            <li class="profile-details"><strong>Зарплата:</strong>
+                от <?= htmlspecialchars($vacancy->getSalary()) ?>$
+            </li>
+            <li class="profile-details"><strong>Дата публикации:</strong>
+                <?= htmlspecialchars($vacancy->getPostingDate()->format('Y-m-d')) ?>
+            </li>
+            <li class="profile-details"><strong>Необходимые навыки:</strong>
+                <?php foreach($vacancy->getSkills() as $key => $skill):
+                if ($key+1 == count($vacancy->getSkills())){
+                echo $skill['name'];
+                }else{
+                echo $skill['name'].', ';
+                }
+                endforeach ?>
+            </li>
+        </ul>
+        <ul>
+            <li class="profile-details"><strong>Позиция:</strong>
+                <?= $candidate->getPosition() ?>
+            </li>
+            <li class="profile-details"><strong>Имя:</strong>
+                <?= htmlspecialchars($candidate->getFirstName()) ?> <?= htmlspecialchars($candidate->getLastName()) ?>
+            </li>
+            <li class="profile-details"><strong>Почта:</strong>
+                <?= htmlspecialchars($candidate->getEmail()) ?>
+            </li>
+            <li class="profile-details"><strong>Телефон:</strong>
+                <?= htmlspecialchars($candidate->getPhone()) ?>
+            </li>
+            <li class="profile-details"><strong>Резюме:</strong>
+                <?= htmlspecialchars($candidate->getResume()) ?>
+            </li>
+            <li class="profile-details"><strong>Опыт:</strong>
+                <?= htmlspecialchars($candidate->getExperience()) ?>
+            </li>
+            <li class="profile-details"><strong>Расположение:</strong>
+                <?= htmlspecialchars($candidate->getLocation()) ?>
+            </li>
+            <li class="profile-details"><strong>Навыки:</strong>
+                <?php foreach($candidate->getSkills() as $key => $skill):
+                if ($key+1 == count($candidate->getSkills())){
+                echo $skill['name'];
+                }else{
+                echo $skill['name'].', ';
+                }
+                endforeach ?>
+            </li>
+        </ul>
+    </div>
+    <div class="text-center">
+        <?php if($percent>70){ ?>
+        <div class="alert alert-success m-0 p-2" role="alert">
+            Соответствие: <?= $percent ?>%
+        </div>
+        <?php }elseif($percent>30){ ?>
+        <div class="alert alert-warning m-0 p-2" role="alert">
+            Соответствие: <?= $percent ?>%
+        </div>
+        <?php }else{ ?>
+        <div class="alert alert-danger m-0 p-2" role="alert">
+            Соответствие: <?= $percent ?>%
+        </div>
+        <?php } ?>
+    </div>
+    <div class="profile-details p-2rem">
+        <div>
+            <h1>Этапы</h1>
+            <?php foreach($vacancy->getProcesses() as $process): ?>
+            <h>Этап <?= $process['orderable']?> <?= $process['type']?></h>
+            <p>Описание: <?= $process['description']?></p>
+            <?php endforeach?>
+        </div>
+    </div>
+    <?php else: ?>
+    <p>Информация о пользователе недоступна.</p>
+    <?php endif; ?>
+</main>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>О нас</h4>
+            <p>Мы предлагаем лучший сервис для поиска вакансий и откликов на них. Наша цель — сделать процесс поиска
+                работы удобным и эффективным.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Контакты</h4>
+            <ul class="footer-links">
+                <li>Email: support@gmail.com</li>
+                <li>Телефон: +375 33 1456 789</li>
+                <li>Адрес: ул. Толковая, 12</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Социальные сети</h4>
+            <ul class="social-links">
+                <li><a href="#"><i class="fa-brands fa-facebook"></i> Facebook</a></li>
+                <li><a href="#"><i class="fa-brands fa-twitter"></i> Twitter</a></li>
+                <li><a href="#"><i class="fa-brands fa-linkedin"></i> LinkedIn</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 RemZona. Все права защищены.</p>
+    </div>
+</footer>
+<script src="/js/change-app-status.js"></script>
+</body>
+</html>

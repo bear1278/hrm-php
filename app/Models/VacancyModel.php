@@ -45,12 +45,10 @@ class VacancyModel
     public function getVacancies($id): array
     {
         try {
-            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
+            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`
                 FROM vacancies as V 
                 INNER JOIN departments as D 
                 ON V.department_ID=D.department_ID
-                INNER JOIN status as S
-                ON S.status_ID=V.status 
                 WHERE author = :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id);
@@ -65,7 +63,6 @@ class VacancyModel
                     $row['experience'],
                     $row['salary'],
                     $row['posting date'],
-                    $row['status'],
                     null,
                     [],
                     null
@@ -80,12 +77,10 @@ class VacancyModel
     public function getVacanciesForManagerWithParams($id, $data): array
     {
         try {
-            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
+            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`
             FROM vacancies as V 
             INNER JOIN departments as D 
             ON V.department_ID=D.department_ID
-            INNER JOIN status as S
-            ON S.status_ID=V.status 
             WHERE author = :id AND ";
             $conditions = $this->handleCondition($data);
             $params = $this->handleParams($data);
@@ -106,7 +101,6 @@ class VacancyModel
                     $row['experience'],
                     $row['salary'],
                     $row['posting date'],
-                    $row['status'],
                     null,
                     [],
                     null
@@ -127,8 +121,7 @@ class VacancyModel
                 VA.description, 
                 VA.experience_required AS experience, 
                 VA.salary, 
-                VA.posting_date AS `posting date`, 
-                S.name AS status, 
+                VA.posting_date AS `posting date`,
                 F.relevance_score
             FROM vacancies AS VA
             INNER JOIN (
@@ -164,8 +157,7 @@ class VacancyModel
                 LEFT JOIN user_history AS uh ON V.vacancy_ID = uh.vacancy_ID AND uh.user_ID = :id
                 GROUP BY V.vacancy_ID
             ) AS F ON F.vacancy_ID = VA.vacancy_ID
-            INNER JOIN departments AS D ON VA.department_ID = D.department_ID 
-            INNER JOIN status AS S ON S.status_ID = VA.status
+            INNER JOIN departments AS D ON VA.department_ID = D.department_ID
             WHERE VA.vacancy_ID NOT IN (SELECT vacancy_ID FROM applications WHERE candidate_ID = :id)
             ORDER BY F.relevance_score DESC";
             $stmt = $this->pdo->prepare($sql);
@@ -181,7 +173,6 @@ class VacancyModel
                     $row['experience'],
                     $row['salary'],
                     $row['posting date'],
-                    $row['status'],
                     null,
                     [],
                     null
@@ -197,12 +188,10 @@ class VacancyModel
     public function getTableColumns(): array
     {
         try {
-            $sql = "SELECT image,V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
+            $sql = "SELECT V.name, D.name as department, experience_required as experience, salary, posting_date as `posting date`
             FROM vacancies as V 
             Left JOIN departments as D 
             ON V.department_ID=D.department_ID
-            Left JOIN status as S
-            ON S.status_ID=V.status
             LIMIT 1";
             $stmt = $this->pdo->query($sql);
             $columns = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -215,12 +204,10 @@ class VacancyModel
     public function getColumnsType(): array
     {
         try {
-            $query = "SELECT V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
+            $query = "SELECT V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date` 
                   FROM vacancies as V 
                   INNER JOIN departments as D 
                   ON V.department_ID=D.department_ID
-                  INNER JOIN status as S
-                ON S.status_ID=V.status
                   LIMIT 1";
             $stmt = $this->pdo->prepare($query);
             $stmt->execute();
@@ -239,12 +226,10 @@ class VacancyModel
     public function getVacanciesWithParamForCandidate($data, $id): array
     {
         try {
-            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`, S.name as status 
+            $sql = "SELECT vacancy_ID, V.name, D.name as department, description, experience_required as experience, salary, posting_date as `posting date`
                 FROM vacancies as V 
                 INNER JOIN departments as D 
-                ON V.department_ID=D.department_ID 
-                INNER JOIN status as S
-                ON S.status_ID=V.status
+                ON V.department_ID=D.department_ID
                 WHERE vacancy_ID not in (Select vacancy_ID from applications where candidate_ID= :id) AND ";
             $conditions = $this->handleCondition($data);
             $params = $this->handleParams($data);
@@ -265,7 +250,6 @@ class VacancyModel
                     $row['experience'],
                     $row['salary'],
                     $row['posting date'],
-                    $row['status'],
                     null,
                     [],
                     null
@@ -331,7 +315,7 @@ class VacancyModel
         return $params;
     }
 
-    public function updateVacancy($id, $name, $department_ID, $description, $experience_required, $salary, $status)
+    public function updateVacancy($id, $name, $department_ID, $description, $experience_required, $salary)
     {
         try {
             $sql = "UPDATE vacancies 
@@ -339,8 +323,7 @@ class VacancyModel
                 department_ID = :department,
                 description= :newdescription,
                 experience_required=:newexperience_required,
-                salary= :newsalary,
-                status= :newstatus
+                salary= :newsalary
                 where vacancy_ID= :Id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':Id', $id, PDO::PARAM_INT);
@@ -349,7 +332,6 @@ class VacancyModel
             $stmt->bindParam(':newdescription', $description, PDO::PARAM_STR);
             $stmt->bindParam(':newexperience_required', $experience_required, PDO::PARAM_INT);
             $stmt->bindParam(':newsalary', $salary, PDO::PARAM_INT);
-            $stmt->bindParam(':newstatus', $status, PDO::PARAM_INT);
             return $stmt->execute();
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
@@ -385,7 +367,6 @@ class VacancyModel
                     $row['experience_required'],
                     $row['salary'],
                     $row['posting_date'],
-                    $row['status'],
                     null,
                     [],
                     null
@@ -409,11 +390,11 @@ class VacancyModel
         }
     }
 
-    public function Insert($name, $department_ID, $description, $experience_required, $salary, $posting_date, $status, $author)
+    public function Insert($name, $department_ID, $description, $experience_required, $salary, $posting_date, $author)
     {
         try {
-            $sql = "INSERT INTO vacancies (name, department_ID, description,experience_required,salary,posting_date,status,author) 
-        VALUES (:name, :department_ID, :description,:experience_required,:salary,:posting_date,:status, :author)";
+            $sql = "INSERT INTO vacancies (name, department_ID, description,experience_required,salary,posting_date,author) 
+        VALUES (:name, :department_ID, :description,:experience_required,:salary,:posting_date, :author)";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':name', $name);
             $stmt->bindParam(':department_ID', $department_ID);
@@ -421,7 +402,6 @@ class VacancyModel
             $stmt->bindParam(':experience_required', $experience_required);
             $stmt->bindParam(':salary', $salary);
             $stmt->bindParam(':posting_date', $posting_date);
-            $stmt->bindParam(':status', $status);
             $stmt->bindParam(':author', $author);
             $stmt->execute();
             return $this->pdo->lastInsertId();
@@ -454,7 +434,6 @@ class VacancyModel
                 $vacancy->getExperience(),
                 $vacancy->getSalary(),
                 $vacancy->getPostingDate()->format('Y-m-d'),
-                $vacancy->getStatus(),
                 $vacancy->getAuthor());
             $processes =$vacancy->getProcesses();
             foreach ($processes as $process) {
@@ -479,8 +458,7 @@ class VacancyModel
                 $vacancy->getDepartment(),
                 $vacancy->getDescription(),
                 $vacancy->getExperience(),
-                $vacancy->getSalary(),
-                $vacancy->getStatus());
+                $vacancy->getSalary());
             if (!$result) {
                 throw new PDOException("Ошибка транзакции: ");
             }
@@ -566,34 +544,7 @@ class VacancyModel
         }
     }
 
-    public function SelectNumberOfApps($id)
-    {
-        try {
-            $sql = "SELECT count(*) as count FROM applications as A
-                         INNER JOIN vacancies as V
-                         ON V.vacancy_ID=A.vacancy_ID
-                WHERE A.status = 1 AND V.author= :id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new PDOException("Ошибка: " . $e->getMessage());
-        }
-    }
 
-    public function UpdateVacancyImage(int $id, $fileData)
-    {
-        try {
-            $sql = "UPDATE vacancies set image=:file_data where vacancy_ID=:id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':file_data', $fileData, PDO::PARAM_LOB);
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            throw new PDOException("Ошибка: " . $e->getMessage());
-        }
-    }
 
 
     public function getVacancySkills($id)
@@ -648,12 +599,21 @@ class VacancyModel
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':user_id', $user_id);
             $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            if(isset($result)){
-                return true;
-            }else{
-                return false;
-            }
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function getDepartmentById($id)
+    {
+        try{
+            $sql="SELECT name FROM departments
+            where department_id=:id ";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

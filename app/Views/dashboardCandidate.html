@@ -29,7 +29,6 @@ if (!isset($_SESSION['user_id'])) {
             rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/dashboardCandidate.css"/>
-    <link rel="stylesheet" href="/css/notifications.css"/>
 </head>
 <body>
 <header>
@@ -96,7 +95,7 @@ if (!isset($_SESSION['user_id'])) {
                             <p><strong>Опыт:</strong> <?= $row->getExperience() ?> года</p>
                         </div>
                         <div class="vacancy-content">
-                            <p><strong>Зарплата:</strong> <?= $row->getSalary() ?> $</p>
+                            <p><strong>Зарплата:</strong> от <?= $row->getSalary() ?> $</p>
                             <p><strong>Дата публикации:</strong> <?=$row->getPostingDate()->format('Y-m-d') ?></p>
                         </div>
                     </div>

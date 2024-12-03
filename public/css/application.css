@@ -1,0 +1,36 @@
+@import "body.css";
+@import "header.css";
+@import "search.css";
+@import "vacancy.css";
+@import "footer.css";
+
+.button-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
+
+.heading-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.heading-width {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 60%;
+}
+h1{
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .heading-width {
+        width: 80%;
+    }
+}
+

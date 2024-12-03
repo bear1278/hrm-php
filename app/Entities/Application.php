@@ -2,12 +2,16 @@
 
 namespace app\Entities;
 
+use InvalidArgumentException;
+
 class Application extends Vacancy
 {
     private $application_id;
     private $candidate_name;
     private $application_date;
     private $application_status;
+    private $candidate_id;
+
     const fieldMapping = [
         'application_ID' => 'getApplicationId',
         'name' => 'getName',
@@ -16,11 +20,35 @@ class Application extends Vacancy
         'experience' => 'getExperience',
         'salary' => 'getSalary',
         'posting date' => 'getPostingDate',
-        'vacancy status' => 'getStatus',
         'application date' => 'getApplicationDate',
         'application status' => 'getApplicationStatus',
         'candidate' => 'getCandidateName'
     ];
+
+    const TABS =[
+        'не просмотрен'=>'Не просмотрены',
+        'просмотрен'=>'Просмотрены',
+        'отказ' => 'Отказы',
+        'приглашение'=>'Приглашения',
+        'вас приняли'=>'Приняты'
+    ];
+
+    /**
+     * @return mixed
+     */
+    public function getCandidateId()
+    {
+        return $this->candidate_id;
+    }
+
+    /**
+     * @param mixed $candidate_id
+     */
+    public function setCandidateId($candidate_id): void
+    {
+        $this->candidate_id = $candidate_id;
+    }
+
 
     /**
      * @param $application_id
@@ -32,19 +60,18 @@ class Application extends Vacancy
                                 $candidate_name,
                                 $application_date,
                                 $application_status,
-                                $name, $department, $description, $experience, $salary, $posting_date, $status)
+                                $name, $department, $description, $experience, $salary, $posting_date)
     {
         $this->application_id = $application_id;
         $this->candidate_name = $candidate_name;
-        $this->application_date = $application_date;
-        $this->application_status = $application_status;
+        $this->setApplicationDate($application_date);
+        $this->setApplicationStatus($application_status);
         $this->setName($name);
         $this->setDepartment($department);
         $this->setDescription($description);
         $this->setExperience($experience);
         $this->setSalary($salary);
         $this->setPostingDate($posting_date);
-        $this->setStatus($status);
     }
 
     /**
@@ -92,7 +119,13 @@ class Application extends Vacancy
      */
     public function setApplicationDate($application_date)
     {
-        $this->application_date = $application_date;
+        if ($application_date != null) {
+            $timestamp = strtotime($application_date);
+            $date = date("Y-m-d H:i", $timestamp);
+            $this->application_date = $date;
+        } else {
+            $this->application_date = $application_date;
+        }
     }
 
     /**

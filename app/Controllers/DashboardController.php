@@ -28,11 +28,9 @@ class DashboardController
     {
         try {
             $columns = $this->model->getTableColumns();
-            $columns = array_diff($columns, ["image"]);
             $columns_type = $this->model->getColumnsType();
             $departments = $this->model->SelectAllDepartments();
             $skills = $this->model->SelectAllSkills();
-            $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
             if (AuthHelper::isCandidate()) {
                 if (isset($_COOKIE['filtersData']) && $encryptedFilters = $_COOKIE['filtersData']) {
                     $encryptedFilters = $_COOKIE['filtersData'];

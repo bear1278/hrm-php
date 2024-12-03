@@ -3,11 +3,13 @@ const buttons = document.querySelectorAll(".button-apply");
 buttons.forEach(function (button) {
     button.addEventListener("click", function (event) {
         event.stopPropagation();
-        event.stopImmediatePropagation();
         event.preventDefault();
 
+        let card;
         const vacancyID = this.value;
-        const card = this.closest(".vacancy-item");
+        if (this.id!=='vacancy-page'){
+            card = this.closest(".vacancy-item");
+        }
 
         if (confirm("Вы уверены, что хотите откликнуться на эту вакансию?")) {
             fetch("/apply", {
@@ -33,8 +35,11 @@ buttons.forEach(function (button) {
                 })
                 .then((data) => {
                     if (data.success) {
-                        card.remove();
+                        if (this.id!=='vacancy-page'){
+                            card.remove();
+                        }
                         alert("Отклик оставлен.");
+                        window.location.reload();
                     } else {
                         alert("Ошибка");
                     }

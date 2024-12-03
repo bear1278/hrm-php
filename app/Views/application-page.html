@@ -47,20 +47,29 @@ $columns = isset($columns) ? $columns : [];
     </div>
 </header>
 <main>
-
     <div class="vacancy-title mb-4">
         <h1>Вакансия <?= htmlspecialchars($vacancy->getName()) ?></h1>
-        <?php if($_SESSION['role']==4){ ?>
-        <?php if(!$canBeApplied){ ?>
-        <button class="btn btn-primary button-apply" id="vacancy-page" value="<?= $id ?>" type="submit">Откликнуться</button>
-        <?php }else{ ?>
-        <h5>Вы оставили отклик на эту вакансию</h5>
-        <?php }} ?>
+        <?php if ($vacancy->getApplicationStatus()=='не просмотрен' || $vacancy->getApplicationStatus()=='просмотрен'){ ?>
+        <div class="alert alert-warning p-2" role="alert">
+            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+        </div>
+        <?php }elseif ($vacancy->getApplicationStatus()=='отказ'){ ?>
+        <div class="alert alert-danger p-2" role="alert">
+            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+        </div>
+        <?php }elseif ($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас приняли'){ ?>
+        <div class="alert alert-success p-2" role="alert">
+            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+        </div>
+        <?php } ?>
     </div>
     <?php if ($vacancy): ?>
     <ul>
+        <li class="profile-details"><strong>Дата отклика:</strong>
+            <?= $vacancy->getApplicationDate() ?>
+        </li>
         <li class="profile-details"><strong>Отдел:</strong>
-            <?= $department['name'] ?>
+            <?= $vacancy->getDepartment() ?>
         </li>
         <li class="profile-details"><strong>Описание:</strong>
             <?= htmlspecialchars($vacancy->getDescription()) ?>

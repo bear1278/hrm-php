@@ -36,7 +36,7 @@
             </div>
             <div class="form-field">
                 <label for="candidate-skills">Необходимые навыки</label>
-                <select class="input-modal skills-select" id="candidate-skills" name="skills[]" multiple size="5"
+                <select style="height: 100px;" class="input-modal skills-select" id="candidate-skills" name="skills[]" multiple size="5"
                         required>
                     <?php foreach ($skills as $skill): ?>
                     <option value="<?php echo htmlspecialchars($skill['skill_ID']); ?>">

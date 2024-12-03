@@ -4,7 +4,6 @@ use app\Controllers\AdminController;
 use app\Controllers\ApplicationController;
 use app\Controllers\DashboardController;
 use app\Controllers\LoginController;
-use app\Controllers\NotificationController;
 use app\Controllers\ProfileController;
 use app\Controllers\ResumeController;
 use app\Controllers\SignUpController;
@@ -34,7 +33,6 @@ $applicationController = new ApplicationController();
 $resumeController = new ResumeController();
 $profileController = new ProfileController();
 $adminController = new AdminController();
-$notificationController = new NotificationController();
 $vacancyController = new VacancyController();
 
 switch ($parts[0]) {
@@ -114,20 +112,17 @@ switch ($parts[0]) {
         }
         break;
 
+    case 'application':
+        AuthHelper::ensureLoggedIn();
+        if ($_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1])) {
+            $applicationController->ShowApplicationDetails((int)$parts[1]);
+        }
+        break;
+
     case 'applications':
         AuthHelper::ensureLoggedIn();
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $applicationController->ShowApplicationsForCandidate();
-        }
-        if (isset($parts[1]) && $parts[1] === 'refuse') {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $applicationController->ChangeApplicationStatus(5);
-            }
-        }
-        if (isset($parts[1]) && $parts[1] === 'accept') {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $applicationController->ChangeApplicationStatus(6);
-            }
         }
         if (isset($parts[1]) && $parts[1] === 'delete') {
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['application_ID'])) {
@@ -139,6 +134,22 @@ switch ($parts[0]) {
         if (isset($parts[1]) && $parts[1] === 'search') {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $applicationController->SearchApplication();
+            } else {
+                echo "Не указан ID заявки или неверный метод запроса.";
+            }
+        }
+
+        if (isset($parts[1]) && $parts[1] === 'accept') {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $applicationController->AcceptApplication($parts[1]);
+            } else {
+                echo "Не указан ID заявки или неверный метод запроса.";
+            }
+        }
+
+        if (isset($parts[1]) && $parts[1] === 'refuse') {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $applicationController->AcceptApplication($parts[1]);
             } else {
                 echo "Не указан ID заявки или неверный метод запроса.";
             }
@@ -260,20 +271,6 @@ switch ($parts[0]) {
         }
         break;
 
-    case 'get-notifications':
-        AuthHelper::ensureLoggedIn();
-        if ($_SERVER['REQUEST_METHOD'] == "GET") {
-            $notificationController->getNotifications();
-        }
-        break;
-
-    case 'update-notification-status':
-        AuthHelper::ensureLoggedIn();
-        if ($_SERVER['REQUEST_METHOD'] == "POST") {
-            $notificationController->updateNotificationStatus();
-        }
-        break;
-
     case 'history':
         AuthHelper::ensureLoggedIn();
         if (AuthHelper::isAdmin()) {
@@ -305,8 +302,8 @@ switch ($parts[0]) {
             $vacancyController->ShowVacancyDetails((int)$parts[1]);
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($parts[1]) && isset($parts[2]) && $parts[2] == 'edit') {
-            $vacancyController->SetNewImage((int)$parts[1]);
+        if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($parts[2]) &&  $parts[2]='apply' && AuthHelper::isCandidate()) {
+            $applicationController->CreateApplication();
         }
 
         break;
