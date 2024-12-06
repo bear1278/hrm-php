@@ -33,6 +33,12 @@ class DashboardController
             $departments = $this->model->SelectAllDepartments();
             $skills = $this->model->SelectAllSkills();
             $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
+            $page = 1;
+            if(isset($_GET['page'])){
+                if($_GET['page']>0){
+                    $page = $_GET['page'];
+                }
+            }
             $time = 0;
             $memory = 0;
             if (AuthHelper::isCandidate()) {
@@ -44,7 +50,7 @@ class DashboardController
                     $filters = json_decode($decodedFilters, true);
                     $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
                 } else {
-                    $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id']);
+                    $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id'],$page);
                 }
                 $end_time = microtime(true);
                 $end_memory = memory_get_usage();

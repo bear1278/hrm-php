@@ -109,9 +109,20 @@ body {
 
 .table-container {
     margin-top: 50px;
-    max-width: 100%;
+    width: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+
+.button-container{
+    margin-top: 20px;
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
 }
 
 table {

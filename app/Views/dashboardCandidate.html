@@ -149,6 +149,24 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
                 </tr>
                 <?php } ?>
             </table>
+            <?php if(!empty($data)){ ?>
+            <div class="button-container">
+                <form method="get" action="/">
+                    <input type="hidden" name="page" value="1">
+                    <button type="submit" class="button">First</button>
+                </form>
+                <?php if($page-1>0){ ?>
+                <form method="get" action="/">
+                    <input type="hidden" name="page" value="<?= $page-1 ?>">
+                    <button type="submit" class="button">Previous</button>
+                </form>
+                <?php } ?>
+                <form method="get" action="/">
+                    <input type="hidden" name="page" value="<?= $page+1 ?>">
+                    <button type="submit" class="button">Next</button>
+                </form>
+            </div>
+            <?php } ?>
         </div>
     </div>
 </main>

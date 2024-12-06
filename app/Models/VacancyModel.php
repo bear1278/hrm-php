@@ -133,7 +133,7 @@ class VacancyModel
         }
     }
 
-    public function SelectVacanciesForCandidate($id): array
+    public function SelectVacanciesForCandidate($id,$page): array
     {
         try {
             $sql = "
@@ -184,13 +184,15 @@ class VacancyModel
             INNER JOIN status AS S ON S.status_ID = VA.status
             LEFT JOIN applications A ON VA.vacancy_ID = A.vacancy_ID AND A.candidate_ID = :id
             WHERE A.vacancy_ID IS NULL
-            ORDER BY F.relevance_score DESC";
+            ORDER BY F.relevance_score DESC LIMIT 15 OFFSET :page";
             $stmt = $this->pdo->prepare($sql);
             $weights = $this->weights();
             foreach ($weights as $index =>$weight){
                 $stmt->bindParam(':'.$index, $weight, PDO::PARAM_INT);
             }
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $offset = 15 *($page-1);
+            $stmt->bindParam(':page', $offset, PDO::PARAM_INT);
             $stmt->execute();
             $vacancies = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
