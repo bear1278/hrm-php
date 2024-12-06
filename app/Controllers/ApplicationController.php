@@ -169,6 +169,10 @@ class ApplicationController
                 $processes = $this->vacancyModel->selectProcessesForVacancy($vacancy->getId());
                 $vacancy->setSkills($skills);
                 $vacancy->setProcesses($processes);
+                $chat = [];
+                if($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас приняли' || $vacancy->getApplicationStatus()=='отказ') {
+                    $chat = $this->model->getChat($vacancy->getApplicationId());
+                }
                 require_once __DIR__ . '/../Views/application-page.html';
             } elseif (AuthHelper::isManager()) {
                 $vacancy = $this->model->selectApplicationById($param);
@@ -183,6 +187,10 @@ class ApplicationController
                 $candidate = $this->profileModel->SelectCandidate($vacancy->getCandidateId());
                 $candidate->setSkills($this->profileModel->selectSkillForCandidate($vacancy->getCandidateId()));
                 $percent = $this->getComparison($candidate,$vacancy);
+                $chat=[];
+                if($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас приняли' || $vacancy->getApplicationStatus()=='отказ') {
+                    $chat = $this->model->getChat($vacancy->getApplicationId());
+                }
                 require_once __DIR__ . '/../Views/application-page-manager.html';
             }
         } catch (PDOException $e) {

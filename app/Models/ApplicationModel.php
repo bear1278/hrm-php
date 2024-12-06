@@ -335,4 +335,17 @@ class ApplicationModel
         }
     }
 
+    public function getChat($id)
+    {
+        try{
+            $sql = "SELECT * FROM chat where application_ID = :id ORDER BY date";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
 }

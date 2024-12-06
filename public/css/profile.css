@@ -106,6 +106,15 @@ h1 {
     align-items: center;
 }
 
+.chat-container{
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    background: #dadada;
+    border-radius: 15px;
+    overflow-y: auto;
+}
+
 @media (max-width: 768px) {
     .profile-info {
         display: flex;

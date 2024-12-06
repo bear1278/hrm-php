@@ -47,7 +47,7 @@ $columns = isset($columns) ? $columns : [];
     </div>
 </header>
 <main>
-    <div class="vacancy-title mb-4">
+    <div class="vacancy-title mb-4" id="<?= $vacancy->getApplicationId() ?>">
         <h1>Вакансия <?= htmlspecialchars($vacancy->getName()) ?></h1>
         <?php if ($vacancy->getApplicationStatus()=='не просмотрен' || $vacancy->getApplicationStatus()=='просмотрен'){
         ?>
@@ -68,7 +68,7 @@ $columns = isset($columns) ? $columns : [];
         <div class="button-container mb-3">
             <?php if($vacancy->getApplicationStatus()!='приглашение'){ ?>
             <button
-                    class="btn btn-success"
+                    class="btn btn-success button-change"
                     type="submit"
                     id="<?= htmlspecialchars($vacancy->getApplicationId()) ?>+"
                     value="accept"
@@ -76,7 +76,7 @@ $columns = isset($columns) ? $columns : [];
             </button>
             <?php } ?>
             <button
-                    class="btn btn-danger"
+                    class="btn btn-danger button-change"
                     type="submit"
                     id="<?= htmlspecialchars($vacancy->getApplicationId()) ?>*"
                     value="refuse"
@@ -176,6 +176,29 @@ $columns = isset($columns) ? $columns : [];
     <?php else: ?>
     <p>Информация о пользователе недоступна.</p>
     <?php endif; ?>
+    <?php if($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='отказ' ||
+    $vacancy->getApplicationStatus()=='вас приняли'){ ?>
+    <div class="container-fluid chat-container mb-1 p-2" id="chat">
+        <?php foreach($chat as $msg){ ?>
+        <?php if($msg['user'] == 'candidate'){ ?>
+        <div class="container-fluid d-flex">
+            <div class="card p-2"><?= htmlspecialchars($msg['message']) ?></div>
+        </div>
+        <?php } else { ?>
+        <div class="container-fluid d-flex justify-content-end">
+            <div class="card p-2"><?= htmlspecialchars($msg['message']) ?></div>
+        </div>
+        <?php } ?>
+        <?php } ?>
+    </div>
+    <?php if($vacancy->getApplicationStatus()=='приглашение'){ ?>
+    <div class="d-flex flex-row">
+        <input class="form-control container" type="text" id="message" placeholder="Введите сообщение">
+        <button class="btn btn-primary" id="web-send" value="hr">Отправить</button>
+    </div>
+    <script src="/js/chat.js"></script>
+    <?php } ?>
+    <?php } ?>
 </main>
 <footer class="footer">
     <div class="footer-container">

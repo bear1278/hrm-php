@@ -74,7 +74,7 @@ if (!isset($_SESSION['user_id'])) {
         <a href="http://localhost/application/<?= $row->getApplicationId() ?>" class="vacancy-link text-reset">
             <li class="vacancy-item">
                 <div class="vacancy-container">
-                    <h3 class="vacancy-title mb-1"><?= $row->getName() ?> Кандидат: </h3>
+                    <h3 class="vacancy-title mb-1"><?= $row->getName() ?> </h3>
                     <h5 class="text-dark fs-5">Кандидат: <?= $row->getCandidateName() ?></h5>
                     <div class="vacancy-content-container">
                         <div class="vacancy-content">
@@ -91,7 +91,7 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="button-container">
                     <?php if($row->getApplicationStatus()!='приглашение'){ ?>
                     <button
-                            class="btn btn-success"
+                            class="btn btn-success button-change"
                             type="submit"
                             id="<?= htmlspecialchars($row->getApplicationId()) ?>+"
                             value="accept"
@@ -99,7 +99,7 @@ if (!isset($_SESSION['user_id'])) {
                     </button>
                     <?php } ?>
                     <button
-                            class="btn btn-danger"
+                            class="btn btn-danger button-change"
                             type="submit"
                             id="<?= htmlspecialchars($row->getApplicationId()) ?>*"
                             value="refuse"

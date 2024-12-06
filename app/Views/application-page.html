@@ -7,9 +7,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Fetch the user information from the server-side function
-$user = isset($data) ? $data : null;
-$columns = isset($columns) ? $columns : [];
 ?>
 
 <!DOCTYPE html>
@@ -36,7 +33,7 @@ $columns = isset($columns) ? $columns : [];
             <ul>
                 <li><a href="http://localhost/">Вакансии</a></li>
                 <li><a href="http://localhost/applications">Отклики</a></li>
-                <?php if($_SESSION['role']==4){ ?>
+                <?php if($_SESSION['role'] == 4){ ?>
                 <li><a href="http://localhost/profile">Профиль</a></li>
                 <?php } ?>
             </ul>
@@ -47,29 +44,29 @@ $columns = isset($columns) ? $columns : [];
     </div>
 </header>
 <main>
-    <div class="vacancy-title mb-4">
+    <div class="vacancy-title mb-4" id="<?= htmlspecialchars($vacancy->getApplicationId()) ?>">
         <h1>Вакансия <?= htmlspecialchars($vacancy->getName()) ?></h1>
-        <?php if ($vacancy->getApplicationStatus()=='не просмотрен' || $vacancy->getApplicationStatus()=='просмотрен'){ ?>
+        <?php if ($vacancy->getApplicationStatus() == 'не просмотрен' || $vacancy->getApplicationStatus() == 'просмотрен') { ?>
         <div class="alert alert-warning p-2" role="alert">
-            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+            Статус отклика: <?= htmlspecialchars($vacancy->getApplicationStatus()) ?>
         </div>
-        <?php }elseif ($vacancy->getApplicationStatus()=='отказ'){ ?>
+        <?php } elseif ($vacancy->getApplicationStatus() == 'отказ') { ?>
         <div class="alert alert-danger p-2" role="alert">
-            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+            Статус отклика: <?= htmlspecialchars($vacancy->getApplicationStatus()) ?>
         </div>
-        <?php }elseif ($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас приняли'){ ?>
+        <?php } elseif ($vacancy->getApplicationStatus() == 'приглашение' || $vacancy->getApplicationStatus() == 'вас приняли') { ?>
         <div class="alert alert-success p-2" role="alert">
-            Статус отклика: <?= $vacancy->getApplicationStatus() ?>
+            Статус отклика: <?= htmlspecialchars($vacancy->getApplicationStatus()) ?>
         </div>
         <?php } ?>
     </div>
     <?php if ($vacancy): ?>
     <ul>
         <li class="profile-details"><strong>Дата отклика:</strong>
-            <?= $vacancy->getApplicationDate() ?>
+            <?= htmlspecialchars($vacancy->getApplicationDate()) ?>
         </li>
         <li class="profile-details"><strong>Отдел:</strong>
-            <?= $vacancy->getDepartment() ?>
+            <?= htmlspecialchars($vacancy->getDepartment()) ?>
         </li>
         <li class="profile-details"><strong>Описание:</strong>
             <?= htmlspecialchars($vacancy->getDescription()) ?>
@@ -84,26 +81,52 @@ $columns = isset($columns) ? $columns : [];
             <?= htmlspecialchars($vacancy->getPostingDate()->format('Y-m-d')) ?>
         </li>
         <li class="profile-details"><strong>Необходимые навыки:</strong>
-            <?php foreach($vacancy->getSkills() as $key => $skill):
-            if ($key+1 == count($vacancy->getSkills())){
-            echo $skill['name'];
-            }else{
-            echo $skill['name'].', ';
+            <?php
+                $skills = $vacancy->getSkills();
+            foreach($skills as $key => $skill){
+            echo htmlspecialchars($skill['name']);
+            if ($key + 1 < count($skills)) {
+            echo ', ';
             }
-            endforeach ?>
+            }
+            ?>
         </li>
         <li class="profile-details">
             <div>
-                <h1>Этапы</h1>
+                <h2>Этапы</h2>
                 <?php foreach($vacancy->getProcesses() as $process): ?>
-                <h>Этап <?= $process['orderable']?> <?= $process['type']?></h>
-                <p>Описание: <?= $process['description']?></p>
-                <?php endforeach?>
+                <h3>Этап <?= htmlspecialchars($process['orderable']) ?> <?= htmlspecialchars($process['type']) ?></h3>
+                <p>Описание: <?= htmlspecialchars($process['description']) ?></p>
+                <?php endforeach; ?>
             </div>
         </li>
     </ul>
     <?php else: ?>
-    <p>Информация о пользователе недоступна.</p>
+    <p>Информация о вакансии недоступна.</p>
+    <?php endif; ?>
+
+    <?php if($vacancy->getApplicationStatus() == 'приглашение' || $vacancy->getApplicationStatus() == 'отказ' || $vacancy->getApplicationStatus() == 'вас приняли'): ?>
+    <h1 class="vacancy-title">Чат</h1>
+    <div class="container-fluid chat-container mb-1 p-2" id="chat">
+        <?php foreach($chat as $msg){ ?>
+        <?php if($msg['user'] == 'hr'){ ?>
+        <div class="container-fluid d-flex">
+            <div class="card p-2"><?= htmlspecialchars($msg['message']) ?></div>
+        </div>
+        <?php } else { ?>
+        <div class="container-fluid d-flex justify-content-end">
+            <div class="card p-2"><?= htmlspecialchars($msg['message']) ?></div>
+        </div>
+        <?php } ?>
+        <?php } ?>
+    </div>
+    <?php if($vacancy->getApplicationStatus() == 'приглашение'){ ?>
+    <div class="d-flex flex-row">
+        <input class="form-control container" type="text" id="message" placeholder="Введите сообщение">
+        <button class="btn btn-primary" id="web-send" value="candidate">Отправить</button>
+    </div>
+    <script src="/js/chat.js"></script>
+    <?php } ?>
     <?php endif; ?>
 </main>
 <footer class="footer">

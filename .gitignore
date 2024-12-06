@@ -3,3 +3,7 @@
 hrm.sql
 .env
 /public/img/candidates/*
+/vendor
+/hrm-chat/vendor
+/hrm-chat/.idea
+/hrm-chat/hrm-chat.iml
