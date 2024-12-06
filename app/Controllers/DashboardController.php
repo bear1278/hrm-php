@@ -36,21 +36,20 @@ class DashboardController
             $time = 0;
             $memory = 0;
             if (AuthHelper::isCandidate()) {
-
+                $start_time = microtime(true);
+                $start_memory = memory_get_usage();
                 if (isset($_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) && $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) {
                     $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])];
                     $decodedFilters = $this->decryptData($encryptedFilters);
                     $filters = json_decode($decodedFilters, true);
                     $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
                 } else {
-                    $start_time = microtime(true);
-                    $start_memory = memory_get_usage();
                     $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id']);
-                    $end_time = microtime(true);
-                    $end_memory = memory_get_usage();
-                    $time=$end_time-$start_time;
-                    $memory= $end_memory-$start_memory;
                 }
+                $end_time = microtime(true);
+                $end_memory = memory_get_usage();
+                $time=$end_time-$start_time;
+                $memory= $end_memory-$start_memory;
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';
                 exit();
             } elseif (AuthHelper::isManager()) {
@@ -149,8 +148,8 @@ class DashboardController
                     $updatedFilters = $this->encryptData(json_encode($filters));
                     setcookie('filtersData'.base64_decode($_SESSION['user_id']), $updatedFilters, time() + 3600, '/', '', true, true);
                 }
-                $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
-                require_once __DIR__ . '/../Views/dashboardCandidate.html';
+                header('Location: http://localhost');
+                exit();
             }
         } catch (PDOException $e) {
             http_response_code(500);
