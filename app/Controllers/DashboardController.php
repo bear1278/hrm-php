@@ -33,14 +33,23 @@ class DashboardController
             $departments = $this->model->SelectAllDepartments();
             $skills = $this->model->SelectAllSkills();
             $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
+            $time = 0;
+            $memory = 0;
             if (AuthHelper::isCandidate()) {
+
                 if (isset($_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) && $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) {
                     $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])];
                     $decodedFilters = $this->decryptData($encryptedFilters);
                     $filters = json_decode($decodedFilters, true);
                     $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
                 } else {
+                    $start_time = microtime(true);
+                    $start_memory = memory_get_usage();
                     $data = $this->model->SelectVacanciesForCandidate($_SESSION['user_id']);
+                    $end_time = microtime(true);
+                    $end_memory = memory_get_usage();
+                    $time=$end_time-$start_time;
+                    $memory= $end_memory-$start_memory;
                 }
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';
                 exit();
