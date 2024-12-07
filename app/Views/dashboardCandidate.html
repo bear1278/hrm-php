@@ -33,6 +33,7 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
     />
     <link rel="stylesheet" href="/css/dashboardCandidate.css"/>
     <link rel="stylesheet" href="/css/notifications.css"/>
+    <script src="/js/filters.js"></script>
 </head>
 <body>
 <div id="notifications"></div>
@@ -73,18 +74,10 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
         <script type="module" src="/js/change-search-field.js"></script>
     </div>
     <div id="filters" class="filter-container">
-        <?php if (!empty($filters)){ ?>
-        <?php foreach($filters as $filter){ ?>
-        <div class="filter">
-            <form method="post" action="/search/delete">
-                <?= $filter['column'] ?>: <?= $filter['value']?>
-                <input type="hidden"  value="<?= $filter['column'] ?>" name="delete-column">
-                <button type="submit" class="button-delete-filter"><i class="fa-solid fa-xmark"></i></button>
-            </form>
-        </div>
-        <?php }} ?>
+
     </div>
 </header>
+<input type="hidden" value="<?= $string ?>" id="test">
 <main>
     <div>
         <div class="table-container">

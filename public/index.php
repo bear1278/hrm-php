@@ -274,6 +274,13 @@ switch ($parts[0]) {
         }
         break;
 
+    case 'key':
+        AuthHelper::ensureLoggedIn();
+        if ($_SERVER['REQUEST_METHOD'] == "GET") {
+            $dashboardController->getSecretKey();
+        }
+        break;
+
     case 'history':
         AuthHelper::ensureLoggedIn();
         if (AuthHelper::isAdmin()) {
