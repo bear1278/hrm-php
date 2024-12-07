@@ -161,11 +161,19 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
                     <button type="submit" class="button">Previous</button>
                 </form>
                 <?php } ?>
+                <div>
+                    <h5><?= $page    ?></h5>
+                </div>
                 <form method="get" action="/">
                     <input type="hidden" name="page" value="<?= $page+1 ?>">
                     <button type="submit" class="button">Next</button>
                 </form>
             </div>
+            <?php }elseif($page!=1 || $page!=o){ ?>
+            <form method="get" action="/">
+                <input type="hidden" name="page" value="1">
+                <button type="submit" class="button">First</button>
+            </form>
             <?php } ?>
         </div>
     </div>
