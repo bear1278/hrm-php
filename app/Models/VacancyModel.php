@@ -187,7 +187,6 @@ class VacancyModel
             WHERE A.vacancy_ID IS NULL
             ORDER BY F.relevance_score DESC LIMIT 15 OFFSET :page";
             $stmt = $this->pdo->prepare($sql);
-            $weights = $this->weights();
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $offset = 15 *($page-1);
             $stmt->bindParam(':page', $offset, PDO::PARAM_INT);
