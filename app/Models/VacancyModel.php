@@ -115,29 +115,12 @@ class VacancyModel
     }
 
 
-    public function weights()
-    {
-        try {
 
-            $sql="SELECT * FROM relevance_weights";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
-            $weights = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $result = [];
-            foreach ($weights as $weight){
-                $result[$weight['parameter_name']]=$weight['value'];
-            }
-            return $result;
-        } catch (PDOException $e) {
-            throw new PDOException("Ошибка: " . $e->getMessage());
-        }
-    }
 
     public function SelectVacanciesForCandidate($id): array
     {
         try {
-            $sql = "
-                SELECT DISTINCT VA.vacancy_ID, 
+            $sql = "SELECT DISTINCT VA.vacancy_ID, 
                 VA.name, 
                 D.name AS department, 
                 VA.description, 
@@ -151,19 +134,19 @@ class VacancyModel
                 SELECT 
                     V.vacancy_ID, 
                     SUM(
-                        CASE WHEN V.department_ID = R.department_ID THEN :department_match ELSE 0 END +
+                        CASE WHEN V.department_ID = R.department_ID THEN (SELECT value FROM relevance_weights Where parameter_name='department_match') ELSE 0 END +
                         CASE
-                            WHEN ABS(V.experience_required - R.experience_required) <= 1 THEN :experience_close
-                            WHEN ABS(V.experience_required - R.experience_required) <= 3 THEN :experience_medium
+                            WHEN ABS(V.experience_required - R.experience_required) <= 1 THEN (SELECT value FROM relevance_weights Where parameter_name='experience_close')
+                            WHEN ABS(V.experience_required - R.experience_required) <= 3 THEN (SELECT value FROM relevance_weights Where parameter_name='experience_medium')
                             ELSE 0
                         END +
                         CASE
-                            WHEN V.salary BETWEEN R.salary * 0.9 AND R.salary * 1.1 THEN :salary_close
-                            WHEN V.salary BETWEEN R.salary * 0.8 AND R.salary * 1.2 THEN :salary_medium
+                            WHEN V.salary BETWEEN R.salary * 0.9 AND R.salary * 1.1 THEN (SELECT value FROM relevance_weights Where parameter_name='salary_close')
+                            WHEN V.salary BETWEEN R.salary * 0.8 AND R.salary * 1.2 THEN (SELECT value FROM relevance_weights Where parameter_name='salary_medium')
                             ELSE 0
                         END +
                         CASE
-                            WHEN uh.action = 'unapply' THEN :unapply_penalty * (Select count(*) from user_history) ELSE 0
+                            WHEN uh.action = 'unapply' THEN (SELECT value FROM relevance_weights Where parameter_name='unapply_penalty') * (Select count(*) from user_history) ELSE 0
                         END
                     ) AS relevance_score
                 FROM vacancies AS V
@@ -182,14 +165,9 @@ class VacancyModel
             ) AS F ON F.vacancy_ID = VA.vacancy_ID
             INNER JOIN departments AS D ON VA.department_ID = D.department_ID 
             INNER JOIN status AS S ON S.status_ID = VA.status
-            LEFT JOIN applications A ON VA.vacancy_ID = A.vacancy_ID AND A.candidate_ID = :id
-            WHERE A.vacancy_ID IS NULL
+            WHERE VA.vacancy_ID NOT IN (SELECT vacancy_ID FROM applications WHERE candidate_ID = :id)
             ORDER BY F.relevance_score DESC";
             $stmt = $this->pdo->prepare($sql);
-            $weights = $this->weights();
-            foreach ($weights as $index =>$weight){
-                $stmt->bindParam(':'.$index, $weight, PDO::PARAM_INT);
-            }
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
             $vacancies = [];
