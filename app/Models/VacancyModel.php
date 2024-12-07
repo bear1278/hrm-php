@@ -137,6 +137,7 @@ class VacancyModel
     {
         try {
             $sql = "
+                WITH Ref as (select * from relevance_weights)
                 SELECT DISTINCT VA.vacancy_ID, 
                 VA.name, 
                 D.name AS department, 
@@ -151,19 +152,19 @@ class VacancyModel
                 SELECT 
                     V.vacancy_ID, 
                     SUM(
-                        CASE WHEN V.department_ID = R.department_ID THEN :department_match ELSE 0 END +
+                        CASE WHEN V.department_ID = R.department_ID THEN (SELECT value FROM Ref Where parameter_name='department_match') ELSE 0 END +
                         CASE
-                            WHEN ABS(V.experience_required - R.experience_required) <= 1 THEN :experience_close
-                            WHEN ABS(V.experience_required - R.experience_required) <= 3 THEN :experience_medium
+                            WHEN ABS(V.experience_required - R.experience_required) <= 1 THEN (SELECT value FROM Ref Where parameter_name='experience_close')
+                            WHEN ABS(V.experience_required - R.experience_required) <= 3 THEN (SELECT value FROM Ref Where parameter_name='experience_medium')
                             ELSE 0
                         END +
                         CASE
-                            WHEN V.salary BETWEEN R.salary * 0.9 AND R.salary * 1.1 THEN :salary_close
-                            WHEN V.salary BETWEEN R.salary * 0.8 AND R.salary * 1.2 THEN :salary_medium
+                            WHEN V.salary BETWEEN R.salary * 0.9 AND R.salary * 1.1 THEN (SELECT value FROM Ref Where parameter_name='salary_close')
+                            WHEN V.salary BETWEEN R.salary * 0.8 AND R.salary * 1.2 THEN (SELECT value FROM Ref Where parameter_name='salary_medium')
                             ELSE 0
                         END +
                         CASE
-                            WHEN uh.action = 'unapply' THEN :unapply_penalty * (Select count(*) from user_history) ELSE 0
+                            WHEN uh.action = 'unapply' THEN (SELECT value FROM Ref Where parameter_name='unapply_penalty') * (Select count(*) from user_history) ELSE 0
                         END
                     ) AS relevance_score
                 FROM vacancies AS V
@@ -187,9 +188,6 @@ class VacancyModel
             ORDER BY F.relevance_score DESC LIMIT 15 OFFSET :page";
             $stmt = $this->pdo->prepare($sql);
             $weights = $this->weights();
-            foreach ($weights as $index =>$weight){
-                $stmt->bindParam(':'.$index, $weight, PDO::PARAM_INT);
-            }
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $offset = 15 *($page-1);
             $stmt->bindParam(':page', $offset, PDO::PARAM_INT);
