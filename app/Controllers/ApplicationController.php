@@ -6,7 +6,7 @@ use app\Entities\Candidate;
 use app\Entities\Vacancy;
 use app\Helpers\AuthHelper;
 use app\Models\ApplicationModel;
-use app\Models\NotificationModel;
+use app\Models\InterviewModel;
 use app\Models\ProfileModel;
 use app\Models\VacancyModel;
 use Exception;
@@ -19,7 +19,7 @@ class ApplicationController
     private $vacancyModel;
     private $applications;
     private $profileModel;
-
+    private $interviewModel;
     public function __construct()
     {
         $this->model = new ApplicationModel();
@@ -32,6 +32,7 @@ class ApplicationController
             'вас приняли' => [],
             'отказ' => []
         ];
+        $this->interviewModel = new InterviewModel();
     }
 
     public function ShowApplicationsForCandidate()
@@ -187,9 +188,24 @@ class ApplicationController
                 $candidate = $this->profileModel->SelectCandidate($vacancy->getCandidateId());
                 $candidate->setSkills($this->profileModel->selectSkillForCandidate($vacancy->getCandidateId()));
                 $percent = $this->getComparison($candidate,$vacancy);
+                $current_process_id=0;
+                foreach ($processes as $process){
+                    if ($process['orderable']==$vacancy->getCurrentProcess()){
+                        $current_process_id=$process['process_ID'];
+                        break;
+                    }
+                }
+                $interview = $this->interviewModel->selectInterviewByAppIDProcessID($vacancy->getApplicationId(),$current_process_id);
                 $chat=[];
                 if($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас приняли' || $vacancy->getApplicationStatus()=='отказ') {
                     $chat = $this->model->getChat($vacancy->getApplicationId());
+                }
+                $isInterviewEnded = false;
+                if($interview){
+                    date_default_timezone_set('Europe/Moscow');
+                    if(strtotime(date('Y-m-d\TH:i:sP'))>=strtotime($interview['date'])){
+                        $isInterviewEnded=true;
+                    }
                 }
                 require_once __DIR__ . '/../Views/application-page-manager.html';
             }
@@ -219,6 +235,27 @@ class ApplicationController
             $all += 1;
         }
         return round(($sum/$all)*100);
+    }
+
+    public function nextProcess($id)
+    {
+        try{
+            $result = $this->model->NextProcess($id);
+            if($result){
+                echo json_encode(['success'=>true]);
+            }else{
+                throw new Exception('Ошибка изменения текущего этапа');
+            }
+        }catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Ошибка сервера: ' . $e->getMessage()]);
+            exit();
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Ошибка: ' . $e->getMessage()]);
+            exit();
+        }
+
     }
 
 

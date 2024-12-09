@@ -578,7 +578,7 @@ class VacancyModel
     public function selectProcessesForVacancy(int $id)
     {
         try{
-            $sql="SELECT type, description,orderable FROM processes_vacancy pv
+            $sql="SELECT p.process_ID, type, description,orderable FROM processes_vacancy pv
             inner join processes p on p.process_ID = pv.process_ID
             where vacancy_ID=:id";
             $stmt = $this->pdo->prepare($sql);

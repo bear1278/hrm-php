@@ -19,7 +19,7 @@ class ProfileModel
     public function SelectCandidate($id)
     {
         try {
-            $sql = "SELECT position, first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
+            $sql = "SELECT candidate_ID,position, first_name as `first name`, last_name as 'last name', email, phone_number as `phone number`, 
             resume, experience_years as `experience years`, location,image, C.status 
             FROM users as U
             INNER JOIN candidates as C 
@@ -31,7 +31,7 @@ class ProfileModel
             $candidate = null;
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $candidate = new Candidate(
-                    null,
+                    $row['candidate_ID'],
                     $row['email'],
                     $row['last name'],
                     $row['first name'],

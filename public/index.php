@@ -9,6 +9,7 @@ use app\Controllers\ResumeController;
 use app\Controllers\SignUpController;
 use app\Helpers\AuthHelper;
 use app\Controllers\VacancyController;
+use app\Controllers\InterviewController;
 
 require_once '../autoload.php';
 
@@ -34,6 +35,7 @@ $resumeController = new ResumeController();
 $profileController = new ProfileController();
 $adminController = new AdminController();
 $vacancyController = new VacancyController();
+$interviewController = new InterviewController();
 
 switch ($parts[0]) {
 
@@ -116,6 +118,24 @@ switch ($parts[0]) {
         AuthHelper::ensureLoggedIn();
         if ($_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1])) {
             $applicationController->ShowApplicationDetails((int)$parts[1]);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($parts[1]) && isset($parts[2])) {
+            if($parts[2]=='interview'){
+                $interviewController->authenticate();
+                $interviewController->createInterview($parts[1]);
+            }
+
+            if($parts[2]=='next'){
+                $applicationController->nextProcess($parts[1]);
+            }
+        }
+        break;
+
+    case 'meet':
+        AuthHelper::ensureLoggedIn();
+        if (isset($_GET['code'])){
+            $interviewController->fetchToken();
         }
         break;
 
@@ -307,6 +327,7 @@ switch ($parts[0]) {
         }
 
         break;
+
 
 
     default:

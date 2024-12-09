@@ -23,7 +23,7 @@ class ApplicationModel
         try {
             $sql = "SELECT V.vacancy_ID as id, application_ID, CONCAT(last_name,' ',first_name) as candidate,user_ID, V.name, D.name as department, description, experience_required as experience, 
                 salary, posting_date as `posting date`,
-                application_date as `application date`, A.status as `application status`
+                application_date as `application date`, A.status as `application status`,current_process
                 FROM vacancies as V
                 INNER JOIN applications as A 
                 ON V.vacancy_ID = A.vacancy_ID
@@ -49,7 +49,8 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date']
+                    $row['posting date'],
+                    $row['current_process']
                 );
                 $app->setId($row['id']);
                 $app->setCandidateId($row['user_ID']);
@@ -66,7 +67,7 @@ class ApplicationModel
     {
         try{
             $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            application_date as `application date`,A.status as `application status` 
+            application_date as `application date`,A.status as `application status`,current_process 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
@@ -89,7 +90,8 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date']
+                    $row['posting date'],
+                    $row['current_process']
                 );
             }
             return $applications;
@@ -102,7 +104,7 @@ class ApplicationModel
     {
         try{
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            application_date as `application date`,A.status as `application status` 
+            application_date as `application date`,A.status as `application status`, current_process 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
@@ -127,7 +129,8 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date']
+                    $row['posting date'],
+                    $row['current_process']
                 );
             }
             return $applications;
@@ -189,6 +192,7 @@ class ApplicationModel
             $sql = "INSERT INTO applications (vacancy_ID, candidate_ID, application_date,status) VALUES (:vacancy_ID, :candidate_ID, :application_date,:status)";
             $stmt = $this->pdo->prepare($sql);
             $status = 'не просмотрен';
+            $current =0;
             $date = date("Y-m-d H:i:s");
             $stmt->bindParam(':vacancy_ID', $vacancy_ID);
             $stmt->bindParam(':candidate_ID', $candidate_ID);
@@ -233,7 +237,7 @@ class ApplicationModel
     {
         try {
             $sql = "SELECT application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            application_date as `application date`,A.status as `application status` 
+            application_date as `application date`,A.status as `application status`,current_process 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
@@ -258,7 +262,8 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date']
+                    $row['posting date'],
+                    $row['current_process']
                 );
             }
             return $applications;
@@ -271,7 +276,7 @@ class ApplicationModel
     {
         try {
             $sql = "SELECT CONCAT(last_name,' ',first_name) as candidate,  application_ID, V.name,D.name as department,description,experience_required as experience,salary,posting_date as `posting date`,
-            application_date as `application date`,A.status as `application status` 
+            application_date as `application date`,A.status as `application status`, current_process 
             FROM vacancies as V 
             INNER JOIN applications as A 
             ON V.vacancy_ID=A.vacancy_ID 
@@ -298,7 +303,8 @@ class ApplicationModel
                     $row['description'],
                     $row['experience'],
                     $row['salary'],
-                    $row['posting date']
+                    $row['posting date'],
+                    $row['current_process']
                 );
             }
             return $applications;
@@ -343,6 +349,18 @@ class ApplicationModel
             $stmt->bindParam(':id', $id);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function NextProcess($id)
+    {
+        try{
+            $sql = "UPDATE applications SET current_process=current_process+1 WHERE application_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            return $stmt->execute();
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

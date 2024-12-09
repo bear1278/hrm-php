@@ -11,6 +11,23 @@ class Application extends Vacancy
     private $application_date;
     private $application_status;
     private $candidate_id;
+    protected $current_process;
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentProcess()
+    {
+        return $this->current_process;
+    }
+
+    /**
+     * @param mixed $current_process
+     */
+    public function setCurrentProcess($current_process): void
+    {
+        $this->current_process = $current_process;
+    }
 
     const fieldMapping = [
         'application_ID' => 'getApplicationId',
@@ -60,7 +77,7 @@ class Application extends Vacancy
                                 $candidate_name,
                                 $application_date,
                                 $application_status,
-                                $name, $department, $description, $experience, $salary, $posting_date)
+                                $name, $department, $description, $experience, $salary, $posting_date,$current_process)
     {
         $this->application_id = $application_id;
         $this->candidate_name = $candidate_name;
@@ -72,6 +89,7 @@ class Application extends Vacancy
         $this->setExperience($experience);
         $this->setSalary($salary);
         $this->setPostingDate($posting_date);
+        $this->setCurrentProcess($current_process);
     }
 
     /**

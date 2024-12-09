@@ -43,7 +43,7 @@ document.getElementById('web-send').addEventListener('click',function (e){
     const messageElement = document.createElement("div");
     messageElement.classList.add('container-fluid', 'd-flex', 'justify-content-end');
     const message = document.createElement("div");
-    message.classList.add('card', 'p-2')
+    message.classList.add('card', 'p-2','bg-info');
     message.textContent = text;
     messageElement.appendChild(message);
     messagesDiv.appendChild(messageElement);
