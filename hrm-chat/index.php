@@ -14,7 +14,7 @@ class Chat implements MessageComponentInterface {
 
     public function __construct() {
 
-        $pdo = new PDO("mysql:host=localhost;dbname=hrmc", 'root', '');
+        $pdo = new PDO("mysql:host=localhost;dbname=hrmc", '', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->clients = new \SplObjectStorage;  // Храним все соединения
         $this->chatRooms = [];

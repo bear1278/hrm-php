@@ -5,12 +5,21 @@ document.querySelector("#create-interview-btn").addEventListener("click", functi
     let type = document.getElementById('btn-active').value;
     let date = document.getElementById('date').value;
     let name = document.getElementById('user_name').value;
+    let user = 0;
+    if(document.getElementById('user')){
+        user = document.getElementById('user').value;
+    }
+
 
     const data = {
         name: name,
         type: type,
         date: date,
     };
+
+    if (user!==0){
+        data.user = user;
+    }
 
     const urlEncodedData = new URLSearchParams(data).toString();
 

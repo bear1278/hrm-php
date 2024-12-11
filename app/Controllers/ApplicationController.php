@@ -8,6 +8,7 @@ use app\Helpers\AuthHelper;
 use app\Models\ApplicationModel;
 use app\Models\InterviewModel;
 use app\Models\ProfileModel;
+use app\Models\UserModel;
 use app\Models\VacancyModel;
 use Exception;
 use PDOException;
@@ -20,6 +21,7 @@ class ApplicationController
     private $applications;
     private $profileModel;
     private $interviewModel;
+    private $userModel;
     public function __construct()
     {
         $this->model = new ApplicationModel();
@@ -33,6 +35,7 @@ class ApplicationController
             'отказ' => []
         ];
         $this->interviewModel = new InterviewModel();
+        $this->userModel= new UserModel();
     }
 
     public function ShowApplicationsForCandidate()
@@ -183,30 +186,39 @@ class ApplicationController
                 }
                 $skills = $this->vacancyModel->selectSkillForVacancy($vacancy->getId());
                 $processes = $this->vacancyModel->selectProcessesForVacancy($vacancy->getId());
+                $isInterviewEnded = false;
+                $current_order =$vacancy->getCurrentProcess();
+                $current_process_id=0;
+                $isCurrentProcessTypeTechInterview = false;
+                foreach ($processes as $index => $process){
+                    if ($process['orderable']==$current_order){
+                        $current_process_id=$process['process_ID'];
+                        if($process['type']=='Техническое интервью'){
+                            $isCurrentProcessTypeTechInterview=true;
+                        }
+                    }
+                    $interview = $this->interviewModel->selectInterviewByAppIDProcessID($vacancy->getApplicationId(),$process['process_ID']);
+                    if($interview){
+                        $processes[$index]['interview']= $interview;
+                        if($current_process_id == $process['process_ID']){
+                            date_default_timezone_set('Europe/Moscow');
+                            if(strtotime(date('Y-m-d\TH:i:sP'))>=strtotime($interview['date'])){
+                                $isInterviewEnded=true;
+                            }
+                        }
+                    }
+                }
                 $vacancy->setSkills($skills);
                 $vacancy->setProcesses($processes);
                 $candidate = $this->profileModel->SelectCandidate($vacancy->getCandidateId());
                 $candidate->setSkills($this->profileModel->selectSkillForCandidate($vacancy->getCandidateId()));
                 $percent = $this->getComparison($candidate,$vacancy);
-                $current_process_id=0;
-                foreach ($processes as $process){
-                    if ($process['orderable']==$vacancy->getCurrentProcess()){
-                        $current_process_id=$process['process_ID'];
-                        break;
-                    }
-                }
-                $interview = $this->interviewModel->selectInterviewByAppIDProcessID($vacancy->getApplicationId(),$current_process_id);
                 $chat=[];
                 if($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас приняли' || $vacancy->getApplicationStatus()=='отказ') {
                     $chat = $this->model->getChat($vacancy->getApplicationId());
                 }
-                $isInterviewEnded = false;
-                if($interview){
-                    date_default_timezone_set('Europe/Moscow');
-                    if(strtotime(date('Y-m-d\TH:i:sP'))>=strtotime($interview['date'])){
-                        $isInterviewEnded=true;
-                    }
-                }
+                $interviewers = $this->userModel->selectInterviewersByDepartment($vacancy->getDepartment());
+
                 require_once __DIR__ . '/../Views/application-page-manager.html';
             }
         } catch (PDOException $e) {

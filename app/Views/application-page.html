@@ -110,12 +110,12 @@ if (!isset($_SESSION['user_id'])) {
     <div class="container-fluid chat-container mb-1 p-2" id="chat">
         <?php foreach($chat as $msg){ ?>
         <?php if($msg['user'] == 'hr'){ ?>
-        <div class="container-fluid d-flex">
-            <div class="card p-2"><?= htmlspecialchars($msg['message']) ?></div>
+        <div class="container-fluid d-flex my-1">
+            <div class="card rounded-pill p-2 mw-50"><?= htmlspecialchars($msg['message']) ?></div>
         </div>
         <?php } else { ?>
-        <div class="container-fluid d-flex justify-content-end">
-            <div class="card p-2 bg-info"><?= htmlspecialchars($msg['message']) ?></div>
+        <div class="container-fluid d-flex justify-content-end my-1">
+            <div class="card rounded-pill p-2 bg-info mw-50"><?= htmlspecialchars($msg['message']) ?></div>
         </div>
         <?php } ?>
         <?php } ?>

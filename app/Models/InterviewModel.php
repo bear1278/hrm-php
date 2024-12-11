@@ -43,4 +43,16 @@ class InterviewModel
             throw new PDOException("Ошибка базы данных: " . $e->getMessage());
         }
     }
+
+    public function selectInterviewByUser($user_id)
+    {
+        try{
+            $stmt = $this->pdo->prepare("SELECT * FROM interviews WHERE user_ID=:user_ID");
+            $stmt->bindParam(':user_ID', $user_id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }catch (PDOException $e) {
+            throw new PDOException("Ошибка базы данных: " . $e->getMessage());
+        }
+    }
 }

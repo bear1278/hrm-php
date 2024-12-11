@@ -40,6 +40,7 @@ class AuthHelper
         }
     }
 
+
     public static function isCandidate()
     {
         if ($_SESSION['role'] == 4) {
@@ -51,6 +52,14 @@ class AuthHelper
     public static function isManager()
     {
         if ($_SESSION['role'] == 2) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function isInterviewer()
+    {
+        if ($_SESSION['role'] == 3) {
             return true;
         }
         return false;

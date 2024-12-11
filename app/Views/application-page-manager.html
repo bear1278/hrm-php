@@ -164,7 +164,7 @@ $columns = isset($columns) ? $columns : [];
         </div>
         <?php } ?>
     </div>
-    <div class="profile-details p-2rem">
+    <div class="profile-details p-2rem w-100 my-3">
         <div>
             <h1>Этапы</h1>
             <?php foreach($vacancy->getProcesses() as $process): ?>
@@ -172,7 +172,7 @@ $columns = isset($columns) ? $columns : [];
                 <div class="d-flex flex-row gap-5">
                     <h2>Этап <?= $process['orderable']?> <?= $process['type']?></h2>
                     <?php if($process['orderable']==$vacancy->getCurrentProcess()){ ?>
-                    <div class="alert alert-success p-0 fs-4" role="alert">Текущий этап</div>
+                    <div class="alert alert-success px-1 py-0 fs-4" role="alert">Текущий этап</div>
                     <?php } ?>
                 </div>
                 <p>Описание: <?= $process['description']?></p>
@@ -181,26 +181,38 @@ $columns = isset($columns) ? $columns : [];
                         aria-controls="collapseExample">
                     Детали
                 </button>
-                <div class="collapse mt-2" id="details<?= $process['process_ID'] ?>">
+                <div class="collapse my-2 w-100
+                    <?php if($process['orderable']==$vacancy->getCurrentProcess()){ ?>
+                     show
+                    <?php } ?>
+                    " id="details<?= $process['process_ID'] ?>">
                     <div class="card card-body">
                         <?php if($process['orderable']==$vacancy->getCurrentProcess()){ ?>
                         <div class="btn-group gap-5">
-                            <?php if(!$interview){ ?>
+                            <?php if(!isset($process['interview'])){ ?>
                             <button class="btn btn-primary" id="btn-active" value="<?= $process['process_ID'] ?>"
                                     data-bs-toggle="modal" data-bs-target="#create-interview">Создать интервью
                             </button>
                             <?php } ?>
-                            <button id="next-process" class="btn <?php if($isInterviewEnded){ ?>btn-success" <?php }else{ ?> btn-secondary" disabled <?php } ?>>Следующий этап</button>
+                            <button id="next-process" class="btn <?php if($isInterviewEnded){ ?>btn-success"
+                            <?php }else{ ?> btn-secondary" disabled <?php } ?>>Следующий этап</button>
                             <script src="/js/next-process.js"></script>
                         </div>
-                        <?php if($interview){ ?>
-                        <div>
-                            <a class="text-secondary" href="<?= $interview['interview_link'] ?>">Ссылка на интервью</a>
-                            <p class="profile-details fs-5"><strong>Когда:</strong>
-                                <?= $interview['date'] ?>
-                            </p>
-                        </div>
                         <?php } ?>
+                        <?php if(isset($process['interview'])){ ?>
+                        <div>
+                            <a class="text-primary mb-1"
+                               href="<?= $process['interview']['interview_link'] ?>" <?php if($process['orderable']!==$vacancy->
+                            getCurrentProcess()){ ?> onclick="event.preventDefault();" <?php } ?>>Ссылка на интервью</a>
+                            <p class="profile-details fs-5 mb-1"><strong>Когда:</strong>
+                                <?= $process['interview']['date'] ?>
+                            </p>
+                            <?php if($process['orderable']!==$vacancy->getCurrentProcess()){ ?>
+                            <p class="profile-details fs-5 mb-1"><strong>Результат:</strong>
+                                <?= $process['interview']['result'] ?>
+                            </p>
+                            <?php } ?>
+                        </div>
                         <?php } ?>
                     </div>
                 </div>
@@ -216,12 +228,12 @@ $columns = isset($columns) ? $columns : [];
     <div class="container-fluid chat-container mb-1 p-2" id="chat">
         <?php foreach($chat as $msg){ ?>
         <?php if($msg['user'] == 'candidate'){ ?>
-        <div class="container-fluid d-flex">
-            <div class="card p-2"><?= htmlspecialchars($msg['message']) ?></div>
+        <div class="container-fluid d-flex my-1">
+            <div class="card rounded-pill p-2 mw-50"><?= htmlspecialchars($msg['message']) ?></div>
         </div>
         <?php } else { ?>
-        <div class="container-fluid d-flex justify-content-end">
-            <div class="card p-2 bg-info"><?= htmlspecialchars($msg['message']) ?></div>
+        <div class="container-fluid d-flex justify-content-end my-1">
+            <div class="card rounded-pill p-2 bg-info mw-50"><?= htmlspecialchars($msg['message']) ?></div>
         </div>
         <?php } ?>
         <?php } ?>
@@ -244,6 +256,16 @@ $columns = isset($columns) ? $columns : [];
                 <div class="modal-body">
                     <label class="form-label" for="date">Дата и время</label>
                     <input id="date" class="form-control" type="datetime-local" name="date">
+                    <?php if($isCurrentProcessTypeTechInterview){ ?>
+                        <label class="form-label" for="user">Интервьюер</label>
+                        <select class="form-control" id="user" name="user">
+                            <?php foreach ($interviewers as $interviewer): ?>
+                            <option value="<?php echo htmlspecialchars($interviewer['user_ID']); ?>">
+                                <?php echo htmlspecialchars($interviewer['name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php } ?>
                     <input id="type" type="hidden" value="<?= $current_process_id?>" name="type">
                     <input type="hidden" id="user_name"
                            value="<?=$candidate->getLastName().' '.$candidate->getFirstName()?>" name="name">

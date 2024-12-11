@@ -10,6 +10,7 @@ use app\Controllers\SignUpController;
 use app\Helpers\AuthHelper;
 use app\Controllers\VacancyController;
 use app\Controllers\InterviewController;
+use app\Controllers\InterviewerController;
 
 require_once '../autoload.php';
 
@@ -36,6 +37,7 @@ $profileController = new ProfileController();
 $adminController = new AdminController();
 $vacancyController = new VacancyController();
 $interviewController = new InterviewController();
+$interviewerController = new InterviewerController();
 
 switch ($parts[0]) {
 
@@ -65,7 +67,11 @@ switch ($parts[0]) {
 
     case '':
         AuthHelper::ensureLoggedIn();
-        $dashboardController->showDashboard();
+        if(AuthHelper::isInterviewer()){
+            $interviewerController->showDashboard();
+        }else{
+            $dashboardController->showDashboard();
+        }
         break;
 
     case 'search':
