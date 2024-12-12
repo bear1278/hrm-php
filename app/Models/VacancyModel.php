@@ -563,7 +563,7 @@ class VacancyModel
     public function selectSkillForVacancy($id)
     {
         try{
-            $sql="SELECT name FROM vacancy_skills vs
+            $sql="SELECT s.skill_ID, name FROM vacancy_skills vs
             inner join skills s on vs.skill_ID = s.skill_ID
             where vacancy_ID=:id";
             $stmt = $this->pdo->prepare($sql);

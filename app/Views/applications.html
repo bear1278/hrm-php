@@ -65,7 +65,7 @@ if (!isset($_SESSION['user_id'])) {
 <main>
     <?php if (!empty($applications)) { ?>
     <?php foreach ($applications as $status => $application):?>
-    <?php if(   $application){ ?>
+    <?php if($application){ ?>
     <div class="heading-container">
         <div class="heading-width">
             <h1 class="text-dark fs-2"> <?= Application::TABS[$status] ?> </h1>

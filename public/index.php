@@ -334,6 +334,18 @@ switch ($parts[0]) {
 
         break;
 
+    case 'interview':
+        AuthHelper::ensureLoggedIn();
+        if(AuthHelper::isInterviewer() && $_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1])){
+            $interviewerController->getInterviewPage($parts[1]);
+        }
+        if(AuthHelper::isInterviewer() && $_SERVER['REQUEST_METHOD'] == "POST" && isset($parts[1]) && isset($parts[2])){
+            if($parts[2]=='feedback'){
+                $interviewerController->setInterviewFeedback($parts[2]);
+            }
+        }
+        break;
+
 
 
     default:

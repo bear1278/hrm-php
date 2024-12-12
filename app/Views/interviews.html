@@ -1,11 +1,134 @@
+<?php
+// Start the session to access session variables
+use app\Entities\Vacancy;
+use app\Controllers\InterviewerController;
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // If the user is not logged in, redirect them to the login page
+    header('Location: /login');
+    exit();
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Interviews</title>
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+            rel="stylesheet"
+    />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/css/interviews.css"/>
 </head>
 <body>
-<pre><?= var_dump($interviews)?></pre>
+<header>
+    <div class="header-container" id="error">
+        <nav class="navigation">
+            <ul>
+                <li><a class="a" href="http://localhost/">Интервью</a></li>
+                <li><a class="a" href="http://localhost/tasks">Тестовые задания</a></li>
+            </ul>
+        </nav>
+        <form action="/logout" method="POST">
+            <button class="button-exit" type="submit">Выйти</button>
+        </form>
+    </div>
 
+</header>
+<main>
+    <?php if (!empty($interviews)) { ?>
+    <?php foreach ($tabs as $tab => $interviews) { ?>
+    <?php if (!empty($interviews)) { ?>
+    <div class="heading-container mt-4">
+        <div class="heading-width">
+            <h1 class="text-dark fs-2"> <?= $tab ?> </h1>
+        </div>
+    </div>
+    <ul class="vacancy-list mt-1">
+        <?php foreach ($interviews as $interview): ?>
+        <a href="http://localhost/interview/<?= $interview['interview_ID'] ?>" class="vacancy-link text-reset">
+            <li class="vacancy-item">
+                <div class="vacancy-container">
+                    <h2 class="vacancy-title fs-3 mb-1"><?= $interview['application']->getName() ?> </h2>
+                    <h5 class="text-dark fs-5">Кандидат: <?= $interview['application']->getCandidateName() ?></h5>
+                    <div class="vacancy-content-container">
+                        <div class="vacancy-content">
+                            <p class="mb-1"><strong>Дата интервью: </strong><?= $interview['date'] ?></p>
+                            <p class="mb-1"><strong>Опыт:</strong> <?= $interview['application']->getExperience() ?>
+                                года</p>
+                        </div>
+                        <div class="vacancy-content">
+                            <p class="mb-1"><strong>Зарплата:</strong> <?= $interview['application']->getSalary() ?> $
+                            </p>
+                            <p class="mb-1"><strong>Дата отклика:</strong> <?=$interview['application']->
+                                getApplicationDate() ?></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-link link-success" href="<?= $interview['interview_link'] ?>">
+                        Интервью
+                    </button>
+                </div>
+            </li>
+        </a>
+        <?php endforeach; ?>
+    </ul>
+    <?php } ?>
+    <?php } ?>
+    <?php } else { ?>
+    <h2>Нет данных для отображения</h2>
+    <?php } ?>
+</main>
+<script>
+    let links = document.querySelectorAll('.link-success');
+    links.forEach(function (button){
+       button.addEventListener('click',function (event){
+           event.stopPropagation();
+           event.preventDefault();
+           window.location.href = this.getAttribute('href');
+       });
+    });
+</script>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>О нас</h4>
+            <p>Мы предлагаем лучший сервис для поиска вакансий и откликов на них. Наша цель — сделать процесс поиска
+                работы удобным и эффективным.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Контакты</h4>
+            <ul class="footer-links">
+                <li>Email: support@gmail.com</li>
+                <li>Телефон: +375 33 1456 789</li>
+                <li>Адрес: ул. Толковая, 12</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Социальные сети</h4>
+            <ul class="social-links">
+                <li><a href="#"><i class="fa-brands fa-facebook"></i> Facebook</a></li>
+                <li><a href="#"><i class="fa-brands fa-twitter"></i> Twitter</a></li>
+                <li><a href="#"><i class="fa-brands fa-linkedin"></i> LinkedIn</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 RemZona. Все права защищены.</p>
+    </div>
+</footer>
+<script src="/js/vacancy-edit.js"></script>
 </body>
 </html>

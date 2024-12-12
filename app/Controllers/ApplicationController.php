@@ -2,8 +2,10 @@
 
 namespace app\Controllers;
 
+use app\Entities\Application;
 use app\Entities\Candidate;
 use app\Entities\Vacancy;
+use app\Helpers\ApplicationHelper;
 use app\Helpers\AuthHelper;
 use app\Models\ApplicationModel;
 use app\Models\InterviewModel;
@@ -212,7 +214,7 @@ class ApplicationController
                 $vacancy->setProcesses($processes);
                 $candidate = $this->profileModel->SelectCandidate($vacancy->getCandidateId());
                 $candidate->setSkills($this->profileModel->selectSkillForCandidate($vacancy->getCandidateId()));
-                $percent = $this->getComparison($candidate,$vacancy);
+                $percent = ApplicationHelper::getComparison($candidate,$vacancy);
                 $chat=[];
                 if($vacancy->getApplicationStatus()=='приглашение' || $vacancy->getApplicationStatus()=='вас приняли' || $vacancy->getApplicationStatus()=='отказ') {
                     $chat = $this->model->getChat($vacancy->getApplicationId());
@@ -227,26 +229,6 @@ class ApplicationController
             header("Location: /error?message=" . $errorMessage);
             exit();
         }
-    }
-
-    public function getComparison(Candidate $candidate, Vacancy $vacancy)
-    {
-        $sum = 0;
-        $all = 2;
-        if ($candidate->getExperience() == $vacancy->getExperience()) {
-            $sum += 1;
-        } elseif ($candidate->getExperience() > $vacancy->getExperience()) {
-            $sum += 2;
-        }
-        foreach ($vacancy->getSkills() as $skill) {
-            foreach ($candidate->getSkills() as $candidateSkill) {
-                if ($candidateSkill == $skill) {
-                    $sum += 1;
-                }
-            }
-            $all += 1;
-        }
-        return round(($sum/$all)*100);
     }
 
     public function nextProcess($id)

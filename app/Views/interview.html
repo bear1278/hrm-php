@@ -1,0 +1,216 @@
+<?php
+// Start the session to access session variables
+use app\Entities\Vacancy;
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login');
+    exit();
+}
+
+// Fetch the user information from the server-side function
+$user = isset($data) ? $data : null;
+$columns = isset($columns) ? $columns : [];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+          rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/css/profile.css"/>
+</head>
+<body>
+
+<header>
+    <div class="header-container" id="error">
+        <nav class="navigation">
+            <ul>
+                <li><a href="http://localhost/">Интервью</a></li>
+                <li><a href="http://localhost/tasks">Тестовые задания</a></li>
+            </ul>
+        </nav>
+        <form action="/logout" method="POST">
+            <button class="button" type="submit">Выйти</button>
+        </form>
+    </div>
+</header>
+<main>
+    <div class="vacancy-title mb-4" id="<?= $vacancy->getApplicationId() ?>">
+        <h1>Вакансия <?= htmlspecialchars($vacancy->getName()) ?></h1>
+    </div>
+    <?php if ($vacancy && $candidate): ?>
+    <div class="profile-details p-2rem"><strong>Дата интервью:</strong>
+        <?= $interview['date'] ?>
+    </div>
+    <div class="profile-details p-2rem">
+        <a class="text-primary mb-1"
+           href="<?= $interview['interview_link'] ?>" <?php if($isInterviewEnded){ ?> onclick="event.preventDefault();" <?php } ?>>Ссылка на интервью</a>
+    </div>
+    <div class="profile-details p-2rem"><strong>Дата отклика:</strong>
+        <?= $vacancy->getApplicationDate() ?>
+    </div>
+    <div class="profile-info">
+        <ul>
+            <li class="profile-details"><strong>Отдел:</strong>
+                <?= $vacancy->getDepartment() ?>
+            </li>
+            <li class="profile-details"><strong>Описание:</strong>
+                <?= htmlspecialchars($vacancy->getDescription()) ?>
+            </li>
+            <li class="profile-details"><strong>Опыт:</strong>
+                <?= htmlspecialchars($vacancy->getExperience()) ?>
+            </li>
+            <li class="profile-details"><strong>Зарплата:</strong>
+                от <?= htmlspecialchars($vacancy->getSalary()) ?>$
+            </li>
+            <li class="profile-details"><strong>Дата публикации:</strong>
+                <?= htmlspecialchars($vacancy->getPostingDate()->format('Y-m-d')) ?>
+            </li>
+            <li class="profile-details"><strong>Необходимые навыки:</strong>
+                <?php foreach($vacancy->getSkills() as $key => $skill):
+                if ($key+1 == count($vacancy->getSkills())){
+                echo $skill['name'];
+                }else{
+                echo $skill['name'].', ';
+                }
+                endforeach ?>
+            </li>
+        </ul>
+        <ul>
+            <li class="profile-details"><strong>Позиция:</strong>
+                <?= $candidate->getPosition() ?>
+            </li>
+            <li class="profile-details"><strong>Имя:</strong>
+                <?= htmlspecialchars($candidate->getFirstName()) ?> <?= htmlspecialchars($candidate->getLastName()) ?>
+            </li>
+            <li class="profile-details"><strong>Почта:</strong>
+                <?= htmlspecialchars($candidate->getEmail()) ?>
+            </li>
+            <li class="profile-details"><strong>Телефон:</strong>
+                <?= htmlspecialchars($candidate->getPhone()) ?>
+            </li>
+            <li class="profile-details"><strong>Резюме:</strong>
+                <?= htmlspecialchars($candidate->getResume()) ?>
+            </li>
+            <li class="profile-details"><strong>Опыт:</strong>
+                <?= htmlspecialchars($candidate->getExperience()) ?>
+            </li>
+            <li class="profile-details"><strong>Расположение:</strong>
+                <?= htmlspecialchars($candidate->getLocation()) ?>
+            </li>
+            <li class="profile-details"><strong>Навыки:</strong>
+                <?php foreach($candidate->getSkills() as $key => $skill):
+                if ($key+1 == count($candidate->getSkills())){
+                echo $skill['name'];
+                }else{
+                echo $skill['name'].', ';
+                }
+                endforeach ?>
+            </li>
+        </ul>
+    </div>
+    <div class="text-center">
+        <?php if($percent>70){ ?>
+        <div class="alert alert-success m-0 p-2" role="alert">
+            Соответствие: <?= $percent ?>%
+        </div>
+        <?php }elseif($percent>30){ ?>
+        <div class="alert alert-warning m-0 p-2" role="alert">
+            Соответствие: <?= $percent ?>%
+        </div>
+        <?php }else{ ?>
+        <div class="alert alert-danger m-0 p-2" role="alert">
+            Соответствие: <?= $percent ?>%
+        </div>
+        <?php } ?>
+    </div>
+    <?php if($interview['result']=='нет'){ ?>
+    <div class="d-flex justify-content-center mt-3 w-100">
+        <button data-bs-toggle="modal" data-bs-target="#give-review"
+                <?php if($isInterviewEnded){ ?>
+                class="w-50 btn  btn-primary">
+                <?php }else{ ?>
+                class="w-50 btn btn-secondary" disabled > <?php } ?>
+        Дать ревью
+        </button>
+    </div>
+    <?php } ?>
+    <?php else: ?>
+    <p>Информация о пользователе недоступна.</p>
+    <?php endif; ?>
+
+    <div class="modal fade" id="give-review" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <form class="modal-content" action="/interview/<?=$vacancy->getApplicationId()?>/feedback" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ревью навыков</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php foreach($vacancy->getSkills() as $skill){ ?>
+                    <h4 class="mt-2"><?= $skill['name'] ?>:</h4>
+                    <label class="form-label" for="important<?= $skill['skill_ID'] ?>">Важность навыка</label>
+                    <input id="important<?= $skill['skill_ID'] ?>" class="form-control" type="number" min="0" max="1" step="0.01" name="importance">
+                    <label class="form-label" for="mark<?= $skill['skill_ID'] ?>">Оценка кандидату</label>
+                    <input id="mark<?= $skill['skill_ID'] ?>" class="form-control" type="number" min="0" max="10" step="1" name="mark">
+                    <?php } ?>
+                    <h4 class="mt-2">Решение по интервью:</h4>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="result" id="inlineRadio1" value="пройдено">
+                        <label class="form-check-label" for="inlineRadio1">Пройдено</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="result" id="inlineRadio2" value="не пройдено">
+                        <label class="form-check-label" for="inlineRadio2">Не пройдено</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" id="create-review-btn">Сохранить</button>
+                    <script src="/js/create-review.js"></script>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>О нас</h4>
+            <p>Мы предлагаем лучший сервис для поиска вакансий и откликов на них. Наша цель — сделать процесс поиска
+                работы удобным и эффективным.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Контакты</h4>
+            <ul class="footer-links">
+                <li>Email: support@gmail.com</li>
+                <li>Телефон: +375 33 1456 789</li>
+                <li>Адрес: ул. Толковая, 12</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Социальные сети</h4>
+            <ul class="social-links">
+                <li><a href="#"><i class="fa-brands fa-facebook"></i> Facebook</a></li>
+                <li><a href="#"><i class="fa-brands fa-twitter"></i> Twitter</a></li>
+                <li><a href="#"><i class="fa-brands fa-linkedin"></i> LinkedIn</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 RemZona. Все права защищены.</p>
+    </div>
+</footer>
+<script src="/js/change-app-status.js"></script>
+
+</body>
+</html>
