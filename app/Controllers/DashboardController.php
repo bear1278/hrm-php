@@ -54,7 +54,7 @@ class DashboardController
                 }
                 $end_time = microtime(true);
                 $end_memory = memory_get_usage();
-                $time=($end_time-$start_time)*1000;
+                $time=round((($end_time-$start_time)*1000),2);
                 $memory= ($end_memory-$start_memory)/1024;
                 require_once __DIR__ . '/../Views/dashboardCandidate.html';
                 exit();
