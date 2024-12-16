@@ -8,3 +8,11 @@ body {
     font-family: "Roboto", sans-serif;
     background-color: #f0f2f5;
 }
+
+.fs-7{
+    font-size: 10px;
+}
+
+.bg-gray{
+    background-color: #e1e0e0;
+}

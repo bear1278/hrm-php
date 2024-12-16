@@ -11,6 +11,7 @@ use app\Helpers\AuthHelper;
 use app\Controllers\VacancyController;
 use app\Controllers\InterviewController;
 use app\Controllers\InterviewerController;
+use app\Controllers\TaskController;
 
 require_once '../autoload.php';
 
@@ -38,6 +39,7 @@ $adminController = new AdminController();
 $vacancyController = new VacancyController();
 $interviewController = new InterviewController();
 $interviewerController = new InterviewerController();
+$taskController = new TaskController();
 
 switch ($parts[0]) {
 
@@ -128,12 +130,20 @@ switch ($parts[0]) {
 
         if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($parts[1]) && isset($parts[2])) {
             if($parts[2]=='interview'){
+                $_SESSION['app_id']=$parts[1];
                 $interviewController->authenticate();
                 $interviewController->createInterview($parts[1]);
             }
 
             if($parts[2]=='next'){
                 $applicationController->nextProcess($parts[1]);
+            }
+
+            if($parts[2]=='set-for-task'){
+                $applicationController->nextSetInterviewerForTask($parts[1]);
+            }
+            if($parts[2]=='set-response'){
+                $taskController->setTaskResponse($parts[1]);
             }
         }
         break;
@@ -341,7 +351,34 @@ switch ($parts[0]) {
         }
         if(AuthHelper::isInterviewer() && $_SERVER['REQUEST_METHOD'] == "POST" && isset($parts[1]) && isset($parts[2])){
             if($parts[2]=='feedback'){
-                $interviewerController->setInterviewFeedback($parts[2]);
+                $interviewerController->setInterviewFeedback($parts[1]);
+            }
+        }
+        break;
+
+    case 'tasks':
+        AuthHelper::ensureLoggedIn();
+        if(AuthHelper::isInterviewer() && $_SERVER['REQUEST_METHOD'] == "GET"){
+            $taskController->getTasksPage();
+        }
+        break;
+
+    case 'task':
+        AuthHelper::ensureLoggedIn();
+        if(AuthHelper::isInterviewer() && $_SERVER['REQUEST_METHOD'] == "GET" && isset($parts[1])){
+            $taskController->getTaskPage($parts[1]);
+        }
+        if(AuthHelper::isInterviewer() && $_SERVER['REQUEST_METHOD'] == "POST" && isset($parts[1]) && isset($parts[2])){
+            if($parts[2]=='set-clause'){
+                $taskController->setTaskClause($parts[1]);
+            }
+
+            if($parts[2]=='feedback'){
+                $taskController->setTaskFeedback($parts[1]);
+            }
+
+            if($parts[2]=='reject'){
+                $taskController->setTaskReject($parts[1]);
             }
         }
         break;

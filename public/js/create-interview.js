@@ -6,7 +6,7 @@ document.querySelector("#create-interview-btn").addEventListener("click", functi
     let date = document.getElementById('date').value;
     let name = document.getElementById('user_name').value;
     let user = 0;
-    if(document.getElementById('user')){
+    if (document.getElementById('user')) {
         user = document.getElementById('user').value;
     }
 
@@ -17,13 +17,13 @@ document.querySelector("#create-interview-btn").addEventListener("click", functi
         date: date,
     };
 
-    if (user!==0){
+    if (user !== 0) {
         data.user = user;
     }
 
     const urlEncodedData = new URLSearchParams(data).toString();
 
-    fetch(window.location.href+'/interview', {
+    fetch(window.location.href + '/interview', {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -38,22 +38,25 @@ document.querySelector("#create-interview-btn").addEventListener("click", functi
                     const errorMessage = data.error || "Произошла внутренняя ошибка сервера";
                     window.location.href = `/error?message=${encodeURIComponent(errorMessage)}`;
                 });
-            }else if (response.status === 302) {
-                window.location.href = document.getResponseHeader('Location');
-            }
-            else {
+            } else if (response.status === 302) {
+                response.json().then(data => {
+                    window.location.href = data.location;
+                });
+
+            } else {
                 return response.json().then((data) => {
                     throw new Error(data.error || "Произошла ошибка");
                 });
             }
         })
-        .then((data) => {
+        .then(data => {
             if (data.success) {
                 alert("Интервью создано.");
                 window.location.reload();
             } else {
                 alert("Ошибка");
             }
+
         })
         .catch((error) => {
             alert("Произошла ошибка: " + error.message);

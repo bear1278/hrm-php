@@ -316,14 +316,69 @@ class ApplicationModel
     public function UpdateApplication($id,$status)
     {
         try{
+            $this->pdo->beginTransaction();
+            if($status=='приглашение'){
+                $sql="UPDATE applications 
+                SET current_process=current_process+1
+                where applications.application_ID=:id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':id',$id);
+                $result=  $stmt->execute();
+                if(!$result){
+                    $this->pdo->rollBack();
+                    return false;
+                }
+            }elseif($status=='отказ'){
+                $process = $this->getCurrentProcess($id)[0];
+
+                $isInterview = true;
+                if($process['type']=='Тестовое задание'){
+                    $isInterview = false;
+                }
+                $item_id = 0;
+                if($isInterview){
+                    $item_id = $this->selectInterviewId($id)['interview_ID'];
+                }else{
+                    $item_id = $this->selectTaskIdByApplication($id)['task_ID'];
+                }
+                if(!$item_id){
+                    $this->pdo->rollBack();
+                    return false;
+                }
+                $sql = "UPDATE " . ($isInterview ? "interviews":"tasks" ) . " set result= 'не пройдено'  WHERE " . ($isInterview ?  "interview_ID":"task_ID" ) . "=:id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':id', $item_id);
+                $result = $stmt->execute();
+                if(!$result){
+                    $this->pdo->rollBack();
+                    return false;
+                }
+                $sql="UPDATE applications 
+                SET current_process=0
+                where applications.application_ID=:id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':id',$id);
+                $result=  $stmt->execute();
+                if(!$result){
+                    $this->pdo->rollBack();
+                    return false;
+                }
+            }
             $sql="UPDATE applications 
             SET status= :status
             where applications.application_ID=:id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id',$id);
             $stmt->bindParam(':status',$status);
-            return $stmt->execute();
+            $result=  $stmt->execute();
+            if(!$result){
+                $this->pdo->rollBack();
+                return false;
+            }
+            $this->pdo->commit();
+            return $result;
         } catch (PDOException $e) {
+            $this->pdo->rollBack();
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }
@@ -354,13 +409,105 @@ class ApplicationModel
         }
     }
 
-    public function NextProcess($id)
+    public function getCurrentProcess($id)
     {
         try{
-            $sql = "UPDATE applications SET current_process=current_process+1 WHERE application_ID=:id";
+            $sql = "SELECT p.process_ID, p.type, p.orderable FROM processes as p
+            INNER JOIN processes_vacancy as pv
+            on p.process_ID = pv.process_ID 
+            INNER JOIN applications as a
+            ON a.vacancy_ID=pv.vacancy_ID
+            where application_ID=:id and p.orderable=(SELECT current_process from applications where application_ID=:id)";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id);
-            return $stmt->execute();
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function NextProcess($app_id,$process,$all_process)
+    {
+        try{
+            $this->pdo->beginTransaction();
+
+            if($process['orderable']==$all_process){
+                $sql = "UPDATE applications SET status='вас приняли' WHERE application_ID=:id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':id', $app_id);
+                $result = $stmt->execute();
+                if(!$result){
+                    $this->pdo->rollBack();
+                    return false;
+                }
+            }
+
+            $isInterview = true;
+            if($process['type']=='Тестовое задание'){
+                $isInterview = false;
+            }
+            $id = 0;
+            if($isInterview){
+                $id = $this->selectInterviewId($app_id)['interview_ID'];
+            }else{
+                $id = $this->selectTaskIdByApplication($app_id)['task_ID'];
+            }
+            if($id==0){
+                $this->pdo->rollBack();
+                return false;
+            }
+            $sql = "UPDATE " . ($isInterview ? "interviews":"tasks" ) . " set result= 'пройдено'  WHERE " . ($isInterview ?  "interview_ID":"task_ID" ) . "=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $result = $stmt->execute();
+            if(!$result){
+                $this->pdo->rollBack();
+                return false;
+            }
+            $sql = "UPDATE applications SET current_process=current_process+1 WHERE application_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $app_id);
+            $result = $stmt->execute();
+            if(!$result){
+                $this->pdo->rollBack();
+                return false;
+            }
+            $this->pdo->commit();
+            return $result;
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    public function selectInterviewId($id)
+    {
+        try{
+            $sql = "SELECT interview_ID FROM interviews 
+                    where application_ID = :id AND
+                    process_ID = (SELECT p.process_ID from processes as p
+                                INNER JOIN processes_vacancy as pv 
+                                on p.process_ID = pv.process_ID
+                                where vacancy_ID = (select vacancy_ID from applications where application_ID=:id)
+                                AND orderable = (select current_process from applications where application_ID=:id))";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+    private function selectTaskIdByApplication($app_id)
+    {
+        try{
+            $sql = "SELECT task_ID from tasks where application_ID=:id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id', $app_id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

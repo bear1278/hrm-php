@@ -63,7 +63,7 @@ if (!isset($_SESSION['user_id'])) {
 
 </header>
 <main>
-    <?php if (!empty($applications)) { ?>
+    <?php if (!$allEmpty) { ?>
     <?php foreach ($applications as $status => $application):?>
     <?php if($application){ ?>
     <div class="heading-container">
@@ -90,14 +90,16 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                     </div>
                 </div>
+                <?php if($row->getApplicationStatus()!='отказ' && $row->getApplicationStatus()!='вас приняли'){ ?>
                 <button class="btn btn-danger button-unapply" type="button" value="<?= $row->getApplicationId() ?>">Отменить отклик</button>
+                <?php } ?>
             </li>
         </a>
         <?php endforeach; ?>
     </ul>
     <?php endforeach; ?>
     <?php } else { ?>
-    <h2 class="text-danger text-center">Нет данных для отображения</h2>
+    <h2 class="text-danger text-center m-5">Нет данных для отображения</h2>
     <?php } ?>
 </main>
 <footer class="footer">

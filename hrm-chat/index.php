@@ -114,6 +114,7 @@ class Chat implements MessageComponentInterface {
         try {
             $sql = "INSERT INTO chat (application_ID, user, message,date) VALUES (:id, :user, :message,:date)";
             $stmt = $this->pdo->prepare($sql);
+            date_default_timezone_set('Europe/Moscow');
             $date = date("Y-m-d H:i:s");
             $stmt->bindParam(':id', $application_ID);
             $stmt->bindParam(':user', $user);

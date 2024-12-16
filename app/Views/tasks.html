@@ -47,39 +47,35 @@ if (!isset($_SESSION['user_id'])) {
 
 </header>
 <main>
-    <?php if (!empty($interviews)) { ?>
-    <?php foreach ($tabs as $tab => $interviews) { ?>
-    <?php if (!empty($interviews)) { ?>
+    <?php if (!empty($tasks)) { ?>
+    <?php foreach ($tabs as $tab => $tasks) { ?>
+    <?php if (!empty($tasks)) { ?>
     <div class="heading-container mt-4">
         <div class="heading-width">
             <h1 class="text-dark fs-2"> <?= $tab ?> </h1>
         </div>
     </div>
     <ul class="vacancy-list mt-1">
-        <?php foreach ($interviews as $interview): ?>
-        <a href="http://localhost/interview/<?= $interview['interview_ID'] ?>" class="vacancy-link text-reset">
+        <?php foreach ($tasks as $task): ?>
+        <a href="http://localhost/task/<?= $task['task_ID'] ?>" class="vacancy-link text-reset">
             <li class="vacancy-item">
                 <div class="vacancy-container">
-                    <h2 class="vacancy-title fs-3 mb-1"><?= $interview['application']->getName() ?> </h2>
-                    <h5 class="text-dark fs-5">Кандидат: <?= $interview['application']->getCandidateName() ?></h5>
+                    <h2 class="vacancy-title fs-3 mb-1"><?= $task['application']->getName() ?> </h2>
+                    <h5 class="text-dark fs-5">Кандидат: <?= $task['application']->getCandidateName() ?></h5>
                     <div class="vacancy-content-container">
                         <div class="vacancy-content">
-                            <p class="mb-1"><strong>Дата интервью: </strong><?= $interview['date'] ?></p>
-                            <p class="mb-1"><strong>Опыт:</strong> <?= $interview['application']->getExperience() ?>
+                            <p class="vacancy-department mb-1"><strong>Отдел: </strong><?= $task['application']->getDepartment() ?></p>
+
+                            <p class="mb-1"><strong>Опыт:</strong> <?= $task['application']->getExperience() ?>
                                 года</p>
                         </div>
                         <div class="vacancy-content">
-                            <p class="mb-1"><strong>Зарплата:</strong> <?= $interview['application']->getSalary() ?> $
+                            <p class="mb-1"><strong>Зарплата:</strong> <?= $task['application']->getSalary() ?> $
                             </p>
-                            <p class="mb-1"><strong>Дата отклика:</strong> <?=$interview['application']->
+                            <p class="mb-1"><strong>Дата отклика:</strong> <?=$task['application']->
                                 getApplicationDate() ?></p>
                         </div>
                     </div>
-                </div>
-                <div class="button-group">
-                    <button class="btn btn-link link-success" href="<?= $interview['interview_link'] ?>">
-                        Интервью
-                    </button>
                 </div>
             </li>
         </a>
@@ -94,11 +90,11 @@ if (!isset($_SESSION['user_id'])) {
 <script>
     let links = document.querySelectorAll('.link-success');
     links.forEach(function (button){
-       button.addEventListener('click',function (event){
-           event.stopPropagation();
-           event.preventDefault();
-           window.location.href = this.getAttribute('href');
-       });
+        button.addEventListener('click',function (event){
+            event.stopPropagation();
+            event.preventDefault();
+            window.location.href = this.getAttribute('href');
+        });
     });
 </script>
 <footer class="footer">

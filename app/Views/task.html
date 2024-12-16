@@ -48,13 +48,24 @@ $columns = isset($columns) ? $columns : [];
         <h1>Вакансия <?= htmlspecialchars($vacancy->getName()) ?></h1>
     </div>
     <?php if ($vacancy && $candidate): ?>
-    <div class="profile-details p-2rem"><strong>Дата интервью:</strong>
-        <?= $interview['date'] ?>
+    <?php if ($task['deadline']){ ?>
+    <div class="profile-details p-2rem"><strong>Дедлайн:</strong>
+        <?= $task['deadline'] ?>
     </div>
+    <?php } ?>
+    <?php if ($task['clause']){ ?>
+    <div class="profile-details p-2rem">
+        <strong>Условие:</strong>
+        <?= $task['clause'] ?>
+    </div>
+    <?php } ?>
+    <?php if ($task['response']){ ?>
     <div class="profile-details p-2rem">
         <a class="text-primary mb-1"
-           href="<?= $interview['interview_link'] ?>" <?php if($isInterviewEnded){ ?> onclick="event.preventDefault();" <?php } ?>>Ссылка на интервью</a>
+           href="<?= $task['response'] ?>" <?php if($task['result']!=='нет'){ ?>
+        onclick="event.preventDefault();" <?php } ?>>Ссылка на ответ</a>
     </div>
+    <?php } ?>
     <div class="profile-details p-2rem"><strong>Дата отклика:</strong>
         <?= $vacancy->getApplicationDate() ?>
     </div>
@@ -133,55 +144,56 @@ $columns = isset($columns) ? $columns : [];
         </div>
         <?php } ?>
     </div>
-    <?php if($interview['result']=='нет'){ ?>
+    <?php if($task['result']=='нет'){ ?>
+    <?php if(!$task['clause']){ ?>
+    <form class="d-flex justify-content-start flex-column mt-3 w-100" action="/task/<?=$task['task_ID']?>/set-clause" method="post">
+        <label class="form-label mt-1" for="clause">Условие задания</label>
+        <textarea class="form-control" id="clause" name="clause"></textarea>
+        <label class="form-label mt-1" for="date">Дедлайн</label>
+        <input class="form-control" id="date" name="deadline" type="datetime-local">
+        <script>
+            const today = new Date().toISOString();
+            document.getElementById('date').setAttribute('min', today);
+        </script>
+        <button class="btn btn-primary mt-2" id="btn-active" value="<?= $process['process_ID'] ?>">
+            Задать условие
+        </button>
+    </form>
+    <?php }elseif($isDeadLineExpired && !$task['response']){ ?>
+    <div class="alert alert-danger fs-4 my-2 p-2 text-center" role="alert">
+        Срок выполнения задания истек, ответ не получен
+    </div>
+    <form class="d-flex justify-content-center mt-3 w-100" action="/task/<?=$task['task_ID']?>/reject" method="post">
+        <button class="btn btn-danger">
+            Отправить отказ
+        </button>
+    </form>
+    <?php }else{ ?>
+    <?php if($task['response']){ ?>
+    <div class="alert alert-success fs-4 my-2 p-2 text-center" role="alert">
+        <a class="alert-link mb-1"
+           href="<?= $task['response'] ?>" <?php if($task['result']!=='нет'){ ?>
+        onclick="event.preventDefault();" <?php } ?>>Ссылка на ответ</a>
+    </div>
+    <?php } ?>
     <div class="d-flex justify-content-center mt-3 w-100">
         <button data-bs-toggle="modal" data-bs-target="#give-review"
-                <?php if($isInterviewEnded){ ?>
-                class="w-50 btn  btn-primary">
-                <?php }else{ ?>
-                class="w-50 btn btn-secondary" disabled > <?php } ?>
+        <?php if($task['response']){ ?>
+        class="w-50 btn  btn-primary">
+        <?php }else{ ?>
+        class="w-50 btn btn-secondary" disabled > <?php } ?>
         Дать ревью
         </button>
     </div>
-    <?php }else{ ?>
-    <h2>Оценка навыков по итогу интервью</h2>
-    <?php foreach($interview['feedback'] as $skill){ ?>
-    <h4><?= $skill['name'] ?></h4>
-    <p class="profile-details fs-6 mb-1"><strong>Важность: </strong><?= $skill['importance'] ?>
-    </p>
-    <p class="profile-details fs-6 mb-1"><strong>Оценка: </strong><?= $skill['mark'] ?></p>
     <?php } ?>
-    <p class="profile-details fs-5  mb-1"><strong>Общая
-        оценка: </strong><?= $interview['feedbackResult'] ?></p>
-    <p class="profile-details fs-5 mb-1"><strong>Максимальная
-        оценка: </strong><?= $interview['maxResult'] ?></p>
-    <div class="text-center fs-5">
-        <?php if($interview['percent']>70){ ?>
-        <div class="alert alert-success m-0 p-2" role="alert">
-            Соотношение: <?= $interview['percent'] ?>%
-        </div>
-        <?php }elseif($interview['percent']>30){ ?>
-        <div class="alert alert-warning m-0 p-2" role="alert">
-            Соотношение: <?= $interview['percent'] ?>%
-        </div>
-        <?php }else{ ?>
-        <div class="alert alert-danger m-0 p-2" role="alert">
-            Соотношение: <?= $interview['percent'] ?>%
-        </div>
-        <?php } ?>
-    </div>
-    <p class="profile-details fs-5 mb-1"><strong>Результат:</strong>
-        <?= $interview['result'] ?>
-    </p>
     <?php } ?>
-
     <?php else: ?>
     <p>Информация о пользователе недоступна.</p>
     <?php endif; ?>
 
     <div class="modal fade" id="give-review" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
-            <form class="modal-content" action="/interview/<?=$vacancy->getApplicationId()?>/feedback" method="post">
+            <form class="modal-content" action="/task/<?=$task['task_ID']?>/feedback" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title">Ревью навыков</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

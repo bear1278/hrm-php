@@ -44,6 +44,20 @@ class InterviewModel
         }
     }
 
+    public function selectFeedback($id)
+    {
+        try{
+            $stmt = $this->pdo->prepare("SELECT s.skill_ID, s.name, mark, importance FROM feedback 
+            INNER JOIN hrmc.skills s on feedback.skill_ID = s.skill_ID
+            WHERE interview_ID=:id");
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }catch (PDOException $e) {
+            throw new PDOException("Ошибка базы данных: " . $e->getMessage());
+        }
+    }
+
     public function selectInterviewByUser($user_id)
     {
         try{
@@ -94,9 +108,9 @@ class InterviewModel
     public function ChangeInterviewResult($id,$result)
     {
         try{
-            $stmt = $this->pdo->prepare("UPDATE interviews  SET result=:result where interview_ID=:id");
+            $stmt = $this->pdo->prepare("UPDATE interviews SET result = :result where interview_ID = :id");
             $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':result', $result);
+            $stmt->bindParam(':result', $result, PDO::PARAM_STR);
             return $stmt->execute();
         }catch (PDOException $e) {
             throw new PDOException("Ошибка базы данных: " . $e->getMessage());
@@ -106,10 +120,10 @@ class InterviewModel
     public function CreateFeedback($id, mixed $skill)
     {
         try{
-            $stmt = $this->pdo->prepare("INSET INTO feedback values (:interview_ID, :skill, :mark, :imp)");
+            $stmt = $this->pdo->prepare("INSERT INTO feedback (interview_ID,skill_ID,mark,importance) values (:interview_ID, :skill, :mark, :imp)");
             $skill_id = $skill['id'];
             $mark = $skill['mark'];
-            $importance = $skill['importance'];
+            $importance =floatval( $skill['importance']);
             $stmt->bindParam(':interview_ID', $id);
             $stmt->bindParam(':skill', $skill_id);
             $stmt->bindParam(':mark', $mark);

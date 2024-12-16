@@ -12,7 +12,7 @@ use PDOException;
 
 require_once __DIR__.'/../../vendor/autoload.php';
 
-class InterviewController
+class   InterviewController
 {
     private $client;
     private $service;
@@ -43,9 +43,9 @@ class InterviewController
                 $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
                 $_SESSION['access_token'] = $this->client->getAccessToken();
             } else {
-                // Если нет refresh токена, перенаправляем на страницу авторизации
                 $authUrl = $this->client->createAuthUrl();
-                header('Location: ' . $authUrl);
+                echo json_encode(['location' => $authUrl]);
+                http_response_code(302);
                 exit();
             }
         }
@@ -137,7 +137,11 @@ class InterviewController
     {
         $token = $this->client->fetchAccessTokenWithAuthCode($_GET['code']);
         $_SESSION['access_token'] = $token;
-        header('Location: http://localhost');
+        if(isset($_SESSION['app_id'])){
+            header('Location: http://localhost/application/'.$_SESSION['app_id']);
+        }else{
+            header('Location: http://localhost');
+        }
         exit;
     }
 

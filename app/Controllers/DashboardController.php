@@ -204,7 +204,6 @@ class DashboardController
                 (int)trim($_POST['experience_required']),
                 trim($_POST['salary']),
                 null,
-                2,
                 $_SESSION['user_id'],
                 $_POST['skills'],
                 null);
@@ -241,10 +240,9 @@ class DashboardController
                 trim($inputData['name']),
                 trim($inputData['department_ID']),
                 trim($inputData['description']),
-                (int)trim($inputData['experience_required']),
-                trim($inputData['salary']),
+                intval($inputData['experience_required']),
+                $inputData['salary'],
                 date("Y-m-d H:i:s"),
-                1,
                 $_SESSION['user_id'],
                 $inputData['skills'],
                 $inputData['processes']

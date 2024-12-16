@@ -185,7 +185,7 @@ class VacancyModel
     }
 
 
-    public function getTableColumns(): array
+    public function getTableColumns()
     {
         try {
             $sql = "SELECT V.name, D.name as department, experience_required as experience, salary, posting_date as `posting date`
@@ -195,7 +195,10 @@ class VacancyModel
             LIMIT 1";
             $stmt = $this->pdo->query($sql);
             $columns = $stmt->fetch(PDO::FETCH_ASSOC);
-            return array_keys($columns);
+            if ($columns){
+                return array_keys($columns);
+            }
+            return false;
         } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }

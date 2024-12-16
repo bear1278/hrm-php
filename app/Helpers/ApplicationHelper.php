@@ -26,4 +26,20 @@ class ApplicationHelper
         }
         return round(($sum/$all)*100);
     }
+
+    public static function getMaxFeedbackResult($feedback):float{
+        $sum = floatval(0);
+        foreach ($feedback as $skill) {
+            $sum+= floatval($skill['importance'])*10;
+        }
+        return $sum;
+    }
+
+    public static function getFeedbackResult($feedback):float{
+        $sum = floatval(0);
+        foreach ($feedback as $skill) {
+            $sum+= floatval($skill['importance'])*intval($skill['mark']);
+        }
+        return $sum;
+    }
 }

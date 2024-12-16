@@ -22,9 +22,9 @@ document.querySelector("#create-review-btn").addEventListener("click", function 
     fetch(window.location.href+'/feedback', {
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
         },
-        body: "data="+encodeURIComponent(data),
+        body: data,
     })
         .then((response) => {
             if (response.ok) {
@@ -39,13 +39,14 @@ document.querySelector("#create-review-btn").addEventListener("click", function 
             }
             else {
                 return response.json().then((data) => {
+                    console.log(data);
                     throw new Error(data.error || "Произошла ошибка");
                 });
             }
         })
         .then((data) => {
             if (data) {
-                alert("Интервью создано.");
+                alert("Ревью создано.");
                 window.location.reload();
             } else {
                 alert("Ошибка");

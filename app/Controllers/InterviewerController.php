@@ -42,8 +42,7 @@ class InterviewerController
             foreach ($interviews as $key => $interview){
                 if($interview['result']!='нет'){
                     array_push($this->interviews['Архив'],$interview);
-                }
-                if(strtotime(date('Y-m-d\TH:i:sP'))>=strtotime($interview['date'])){
+                }elseif (strtotime(date('Y-m-d\TH:i:sP'))>=strtotime($interview['date'])){
                     array_push($this->interviews['Ждет ревью'],$interview);
                 }else{
                     array_push($this->interviews['Не проведено'],$interview);
@@ -75,6 +74,19 @@ class InterviewerController
             if(strtotime(date('Y-m-d\TH:i:sP'))>=strtotime($interview['date'])){
                 $isInterviewEnded=true;
             }
+            $feedback = $this->interviewModel->selectFeedback($interview['interview_ID']);
+            if ($feedback) {
+                $interview['feedback'] = $feedback;
+                $result = ApplicationHelper::getFeedbackResult($feedback);
+                $interview['feedbackResult'] = $result;
+                $maxResult = ApplicationHelper::getMaxFeedbackResult($feedback);
+                $interview['maxResult'] = $maxResult;
+                if ($maxResult != 0) {
+                    $interview['percent'] = round(($result / $maxResult) * 100, 2);
+                } else {
+                    $interview['percent'] = 0;
+                }
+            }
             require_once __DIR__.'/../Views/interview.html';
             exit();
         }catch (PDOException $e) {
@@ -88,7 +100,8 @@ class InterviewerController
     public function setInterviewFeedback($id)
     {
         try{
-            $data = json_decode($_POST['data'],true);
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
             $skills = $data['skills'];
             $result = trim($data['result']);
             $isOk = $this->interviewModel->feedback($id,$skills,$result);

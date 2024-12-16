@@ -5,6 +5,10 @@ document.querySelector("#next-process").addEventListener("click", function (even
     if (confirm("Вы уверены, что перейти к следующему этапу?")) {
         fetch(window.location.href + '/next', {
             method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: 'process='+encodeURIComponent(this.value)
         })
             .then((response) => {
                 if (response.ok) {
@@ -18,6 +22,7 @@ document.querySelector("#next-process").addEventListener("click", function (even
                     window.location.href = document.getResponseHeader('Location');
                 } else {
                     return response.json().then((data) => {
+                        console.log(data.error);
                         throw new Error(data.error || "Произошла ошибка");
                     });
                 }
@@ -28,6 +33,7 @@ document.querySelector("#next-process").addEventListener("click", function (even
                     window.location.reload();
                 } else {
                     alert("Ошибка");
+                    console.log(data.error);
                 }
             })
             .catch((error) => {

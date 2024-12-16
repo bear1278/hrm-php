@@ -11,8 +11,14 @@ socket.onmessage = function (event) {
     const messageElement = document.createElement("div");
     messageElement.classList.add('container-fluid', 'd-flex');
     const message = document.createElement("div");
-    message.classList.add('card', 'p-2')
+    message.classList.add('card', 'p-2','bg-gray', 'rounded-pill')
     message.textContent = event.data;
+    let date = document.createElement('p');
+    date.classList.add('fs-7', 'text-dark', 'm-0');
+    const now = new Date();
+    const formattedTime = `${now.getMonth() + 1}.${now.getDate()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    date.textContent = formattedTime;
+    message.appendChild(date);
     messageElement.appendChild(message);
     messagesDiv.appendChild(messageElement);
 };
@@ -43,8 +49,14 @@ document.getElementById('web-send').addEventListener('click',function (e){
     const messageElement = document.createElement("div");
     messageElement.classList.add('container-fluid', 'd-flex', 'justify-content-end');
     const message = document.createElement("div");
-    message.classList.add('card', 'p-2','bg-info');
+    message.classList.add('card', 'p-2','bg-info','rounded-pill');
     message.textContent = text;
+    let date = document.createElement('p');
+    date.classList.add('fs-7', 'text-secondary', 'm-0');
+    const now = new Date();
+    const formattedTime = `${now.getMonth() + 1}.${now.getDate()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    date.textContent = formattedTime;
+    message.appendChild(date);
     messageElement.appendChild(message);
     messagesDiv.appendChild(messageElement);
 });

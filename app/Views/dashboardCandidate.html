@@ -27,7 +27,9 @@ if (!isset($_SESSION['user_id'])) {
     <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
             rel="stylesheet"
-    />
+        />
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <script src="/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="/css/dashboardCandidate.css"/>
 </head>
 <body>
@@ -91,12 +93,12 @@ if (!isset($_SESSION['user_id'])) {
                     <h3 class="vacancy-title"><?= $row->getName() ?></h3>
                     <div class="vacancy-content-container">
                         <div class="vacancy-content">
-                            <p class="vacancy-department"><strong>Отдел: </strong><?= $row->getDepartment() ?></p>
-                            <p><strong>Опыт:</strong> <?= $row->getExperience() ?> года</p>
+                            <p class="vacancy-department mb-1"><strong>Отдел: </strong><?= $row->getDepartment() ?></p>
+                            <p class="mb-1"><strong>Опыт:</strong> <?= $row->getExperience() ?> года</p>
                         </div>
                         <div class="vacancy-content">
-                            <p><strong>Зарплата:</strong> от <?= $row->getSalary() ?> $</p>
-                            <p><strong>Дата публикации:</strong> <?=$row->getPostingDate()->format('Y-m-d') ?></p>
+                            <p class="mb-1"><strong>Зарплата:</strong> от <?= $row->getSalary() ?> $</p>
+                            <p class="mb-1"><strong>Дата публикации:</strong> <?=$row->getPostingDate()->format('Y-m-d') ?></p>
                         </div>
                     </div>
                 </div>
@@ -106,7 +108,7 @@ if (!isset($_SESSION['user_id'])) {
         <?php endforeach; ?>
     </ul>
     <?php } else { ?>
-    <h2>Нет данных для отображения</h2>
+    <h2 class="text-danger text-center m-5">Нет данных для отображения</h2>
     <?php } ?>
 </main>
 <script src="/js/logout.js"></script>

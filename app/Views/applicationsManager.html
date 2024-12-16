@@ -59,7 +59,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 </header>
 <main>
-    <?php if (!empty($applications)) { ?>
+    <?php if (!$allEmpty) { ?>
     <?php foreach ($applications as $status => $application): ?>
     <?php if(   $application){ ?>
     <div class="heading-container">
@@ -87,7 +87,7 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                     </div>
                 </div>
-                <?php if($row->getApplicationStatus()!='отказ'){ ?>
+                <?php if($row->getApplicationStatus()!='отказ' && $row->getApplicationStatus()!='вас приняли'){ ?>
                 <div class="button-container">
                     <?php if($row->getApplicationStatus()!='приглашение'){ ?>
                     <button

@@ -91,31 +91,181 @@ if (!isset($_SESSION['user_id'])) {
             }
             ?>
         </li>
-        <li class="profile-details">
-            <div>
-                <h2>Этапы</h2>
-                <?php foreach($vacancy->getProcesses() as $process): ?>
-                <h3>Этап <?= htmlspecialchars($process['orderable']) ?> <?= htmlspecialchars($process['type']) ?></h3>
-                <p>Описание: <?= htmlspecialchars($process['description']) ?></p>
-                <?php endforeach; ?>
-            </div>
-        </li>
     </ul>
+    <div class="profile-details p-2rem w-100 my-3">
+        <div>
+            <h1>Этапы</h1>
+            <?php foreach($vacancy->getProcesses() as $process): ?>
+            <div>
+                <div class="d-flex flex-row gap-5">
+                    <h2>Этап <?= $process['orderable']?> <?= $process['type']?></h2>
+                    <?php if($process['orderable']==$vacancy->getCurrentProcess()){ ?>
+                    <div class="alert alert-success px-1 py-0 fs-4" role="alert">Текущий этап</div>
+                    <?php } ?>
+                </div>
+                <p>Описание: <?= $process['description']?></p>
+                <button class="btn btn-primary mb-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#details<?= $process['process_ID'] ?>" aria-expanded="false"
+                        aria-controls="collapseExample">
+                    Детали
+                </button>
+                <div class="collapse my-2 w-100
+                    <?php if($process['orderable']==$vacancy->getCurrentProcess()){ ?>
+                     show
+                    <?php } ?>
+                    " id="details<?= $process['process_ID'] ?>">
+                    <div class="card card-body">
+                        <?php if($process['type']!='Тестовое задание'){ ?>
+                        <?php if($process['orderable']>$vacancy->getCurrentProcess()){ ?>
+                        <h2>Этого этапа видимо еще не было</h2>
+                        <?php } ?>
+                        <?php if(isset($process['interview'])){ ?>
+                        <div>
+                            <a class="text-primary mb-1"
+                               href="<?= $process['interview']['interview_link'] ?>" <?php if($process['orderable']!==$vacancy->
+                            getCurrentProcess()){ ?> onclick="event.preventDefault();" <?php } ?>>Ссылка на интервью</a>
+                            <p class="profile-details fs-5 mb-1"><strong>Когда:</strong>
+                                <?= $process['interview']['date'] ?>
+                            </p>
+                            <?php if(!empty($process['interview']['feedback'])){ ?>
+                            <h2>Оценка навыков по итогу интервью</h2>
+                            <?php foreach($process['interview']['feedback'] as $skill){ ?>
+                            <h4><?= $skill['name'] ?></h4>
+                            <p class="profile-details fs-6 mb-1"><strong>Важность: </strong><?= $skill['importance'] ?>
+                            </p>
+                            <p class="profile-details fs-6 mb-1"><strong>Оценка: </strong><?= $skill['mark'] ?></p>
+                            <?php } ?>
+                            <p class="profile-details fs-5  mb-1"><strong>Общая
+                                оценка: </strong><?= $process['interview']['feedbackResult'] ?></p>
+                            <p class="profile-details fs-5 mb-1"><strong>Максимальная
+                                оценка: </strong><?= $process['interview']['maxResult'] ?></p>
+                            <div class="text-center fs-5">
+                                <?php if($process['interview']['percent']>70){ ?>
+                                <div class="alert alert-success m-0 p-2" role="alert">
+                                    Соотношение: <?= $process['interview']['percent'] ?>%
+                                </div>
+                                <?php }elseif($process['interview']['percent']>30){ ?>
+                                <div class="alert alert-warning m-0 p-2" role="alert">
+                                    Соотношение: <?= $process['interview']['percent'] ?>%
+                                </div>
+                                <?php }else{ ?>
+                                <div class="alert alert-danger m-0 p-2" role="alert">
+                                    Соотношение: <?= $process['interview']['percent'] ?>%
+                                </div>
+                                <?php } ?>
+                            </div>
+                            <?php if($process['orderable']==$vacancy->getCurrentProcess()){ ?>
+                            <p class="profile-details fs-5 mb-1"><strong>Решение интервьюера:</strong>
+                                <?= $process['interview']['result'] ?>
+                            </p>
+                            <?php } ?>
+                            <?php } ?>
+
+                            <?php if($process['orderable']!==$vacancy->getCurrentProcess()){ ?>
+                            <p class="profile-details fs-5 mb-1"><strong>Результат:</strong>
+                                <?= $process['interview']['result'] ?>
+                            </p>
+                            <?php } ?>
+                        </div>
+                        <?php }elseif($process['orderable']==$vacancy->getCurrentProcess()){ ?>
+                        <h2>Интервью еще не назначено</h2>
+                        <?php } ?>
+                        <?php }else{ ?>
+                        <?php if($process['orderable']>$vacancy->getCurrentProcess()){ ?>
+                        <h2>Этого этапа видимо еще не было</h2>
+                        <?php }else{ ?>
+                        <?php if(!empty($process['task']['clause'])){ ?>
+                        <label class="form-label" for="clause">Условие</label>
+                        <textarea class="form-control bg-white" id="clause" readonly><?=$process['task']['clause']?></textarea>
+                        <p class="profile-details text-danger fs-4 m-1"><strong>Дедлайн: </strong><?= $process['task']['deadline'] ?>
+                        </p>
+                        <?php if(($process['task']['response'])){ ?>
+                        <a class="text-primary mb-1"
+                           href="<?= $process['task']['response'] ?>" <?php if($process['orderable']!==$vacancy->
+                        getCurrentProcess()){ ?> onclick="event.preventDefault();" <?php } ?>>Ссылка на ответ</a>
+                        <?php } ?>
+                        <?php if(!($process['task']['response'])){ ?>
+                        <form class="d-flex justify-content-start flex-column mt-3 w-100" action="/application/<?= $vacancy->getApplicationId()?>/set-response" method="post">
+                            <input type="hidden" name="task" value="<?= $process['task']['task_ID'] ?>">
+                            <label class="form-label mt-1" for="response">Ответ на задание</label>
+                            <input class="form-control" id="response" name="response" type="url" placeholder="Ссылка на решение">
+                            <button type="submit" class="btn btn-primary mt-2" id="btn-active" value="<?= $process['process_ID'] ?>">
+                                Отправить
+                            </button>
+                        </form>
+                        <?php } ?>
+                        <?php if($process['task']['result']!=='нет' && $process['task']['feedback']){ ?>
+
+                        <h2>Оценка навыков по итогу выполнения задания</h2>
+                        <?php foreach($process['task']['feedback'] as $skill){ ?>
+                        <h4><?= $skill['name'] ?></h4>
+                        <p class="profile-details fs-6 mb-1"><strong>Важность: </strong><?= $skill['importance'] ?>
+                        </p>
+                        <p class="profile-details fs-6 mb-1"><strong>Оценка: </strong><?= $skill['mark'] ?></p>
+                        <?php } ?>
+                        <p class="profile-details fs-5  mb-1"><strong>Общая
+                            оценка: </strong><?= $process['task']['feedbackResult'] ?></p>
+                        <p class="profile-details fs-5 mb-1"><strong>Максимальная
+                            оценка: </strong><?= $process['task']['maxResult'] ?></p>
+                        <div class="text-center fs-5">
+                            <?php if($process['task']['percent']>70){ ?>
+                            <div class="alert alert-success m-0 p-2" role="alert">
+                                Соотношение: <?= $process['task']['percent'] ?>%
+                            </div>
+                            <?php }elseif($process['task']['percent']>30){ ?>
+                            <div class="alert alert-warning m-0 p-2" role="alert">
+                                Соотношение: <?= $process['task']['percent'] ?>%
+                            </div>
+                            <?php }else{ ?>
+                            <div class="alert alert-danger m-0 p-2" role="alert">
+                                Соотношение: <?= $process['task']['percent'] ?>%
+                            </div>
+                            <?php } ?>
+                        </div>
+                        <?php if($process['orderable']==$vacancy->getCurrentProcess()){ ?>
+                        <p class="profile-details fs-5 mb-1"><strong>Решение интервьюера:</strong>
+                            <?= $process['task']['result'] ?>
+                        </p>
+                        <?php } ?>
+
+                        <?php if($process['orderable']!==$vacancy->getCurrentProcess()){ ?>
+                        <p class="profile-details fs-5 mb-1"><strong>Результат:</strong>
+                            <?= $process['task']['result'] ?>
+                        </p>
+                        <?php } ?>
+                        <?php } ?>
+                        <?php }else{ ?>
+                        <h2 class="text-center">Условия задания еще нет</h2>
+                        <?php } ?>
+                        <?php } ?>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach?>
+        </div>
+    </div>
     <?php else: ?>
     <p>Информация о вакансии недоступна.</p>
     <?php endif; ?>
 
-    <?php if($vacancy->getApplicationStatus() == 'приглашение' || $vacancy->getApplicationStatus() == 'отказ' || $vacancy->getApplicationStatus() == 'вас приняли'): ?>
+    <?php if(($vacancy->getApplicationStatus() == 'приглашение') || ($vacancy->getApplicationStatus() == 'отказ' || $vacancy->getApplicationStatus() == 'вас приняли') && !empty($chat)): ?>
     <h1 class="vacancy-title">Чат</h1>
-    <div class="container-fluid chat-container mb-1 p-2" id="chat">
+    <div class="container-fluid bg-white border border-2 chat-container mb-1 p-2" id="chat">
         <?php foreach($chat as $msg){ ?>
         <?php if($msg['user'] == 'hr'){ ?>
         <div class="container-fluid d-flex my-1">
-            <div class="card rounded-pill p-2 mw-50"><?= htmlspecialchars($msg['message']) ?></div>
+            <div class="card rounded-pill bg-gray p-2 mw-50">
+                <?= htmlspecialchars($msg['message']) ?>
+                <p class="fs-7 text-dark m-0"><?= date('m.d H:i',strtotime($msg['date'])) ?></p>
+            </div>
         </div>
         <?php } else { ?>
         <div class="container-fluid d-flex justify-content-end my-1">
-            <div class="card rounded-pill p-2 bg-info mw-50"><?= htmlspecialchars($msg['message']) ?></div>
+            <div class="card rounded-pill p-2 py-1 bg-info mw-50">
+                <?= htmlspecialchars($msg['message']) ?>
+                <p class="fs-7 text-secondary m-0"><?= date('m.d H:i',strtotime($msg['date'])) ?></p>
+            </div>
         </div>
         <?php } ?>
         <?php } ?>
