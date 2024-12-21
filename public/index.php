@@ -68,6 +68,11 @@ switch ($parts[0]) {
         $dashboardController->showDashboard();
         break;
 
+    case 'dash':
+        AuthHelper::ensureLoggedIn();
+        $dashboardController->showSeparateDashboard();
+        break;
+
     case 'search':
         AuthHelper::ensureLoggedIn();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($parts[1]) && $parts[1]=='delete'){

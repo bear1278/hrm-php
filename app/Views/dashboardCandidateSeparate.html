@@ -1,0 +1,183 @@
+<?php
+
+use app\Entities\Vacancy;
+
+// Start the session to access session variables
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // If the user is not logged in, redirect them to the login page
+    header('Location: /login');
+    exit();
+}
+
+// You can access session variables like the username or user ID
+$username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>User Dashboard</title>
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/dashboardCandidate.css"/>
+    <link rel="stylesheet" href="/css/notifications.css"/>
+</head>
+<body>
+<div id="notifications"></div>
+<script src="/js/notifications.js"></script>
+<header>
+    <div class="header-container" id="error">
+        <nav class="navigation">
+            <ul>
+                <li><a class="a" href="http://localhost/">Вакансии</a></li>
+                <li><a class="a" href="http://localhost/applications">Отклики</a></li>
+                <li><a class="a" href="http://localhost/profile">Профиль</a></li>
+            </ul>
+        </nav>
+
+        <form action="/logout" method="POST">
+            <button onclick="clearLocalStorage()" class="button" type="submit">Выйти</button>
+        </form>
+    </div>
+    <div class="search-container">
+        <form id="search-form" action="/search" method="POST">
+            <select id="column-select" name="columntype" class="input-choose_column">
+                <?php foreach ($columns as $column): ?>
+                <option value="<?php echo htmlspecialchars($columns_type[ltrim($column)]); ?>">
+                    <?php echo htmlspecialchars($column); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+            <input id="column" type="hidden" name="column" value="name">
+            <input
+                    class="input"
+                    type="text"
+                    placeholder="Поиск"
+                    name="value"
+                    id="search-input"
+            />
+            <button class="button" type="submit">Поиск</button>
+        </form>
+        <script type="module" src="/js/change-search-field.js"></script>
+    </div>
+    <div id="filters" class="filter-container">
+        <?php if (!empty($filters)){ ?>
+        <?php foreach($filters as $filter){ ?>
+        <div class="filter">
+            <form method="post" action="/search/delete">
+                <?= $filter['column'] ?>: <?= $filter['value']?>
+                <input type="hidden"  value="<?= $filter['column'] ?>" name="delete-column">
+                <button type="submit" class="button-delete-filter"><i class="fa-solid fa-xmark"></i></button>
+            </form>
+        </div>
+        <?php }} ?>
+    </div>
+</header>
+<?php if($time!=0 && $memory!=0){ ?>
+<pre>
+    время выполнения запроса: <?= $time ?> мс
+</pre>
+<pre>
+    использование памяти: <?= $memory ?> КБ
+</pre>
+<?php } ?>
+<main>
+    <div>
+        <div class="table-container">
+            <table border="1">
+                <tr>
+                    <?php foreach ($columns as $column): ?>
+                    <th><?php echo htmlspecialchars($column); ?></th>
+                    <?php endforeach; ?>
+                    <th></th>
+                </tr>
+
+                <?php if (!empty($data)) { ?>
+                <?php foreach ($data as $row): ?>
+                <tr>
+                    <?php foreach ($columns as $column): ?>
+                    <td><?php
+        if ($column == 'posting date')
+                  {
+                    echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}()->format('Y-m-d'));
+                        }elseif ($column == 'name'){
+                        ?> <a style="text-decoration: none"
+                              href="http://localhost/vacancy/<?= $row->getId()?>"><?= $row->
+                            {Vacancy::fieldMapping[$column]}() ?></a>
+                        <?php
+                    }else{
+                    echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}());
+                        }
+                        ?>
+                    </td>
+
+                    <?php endforeach; ?>
+
+                    <td>
+                        <button
+                                class="button-apply"
+                                type="button"
+                                value="<?php echo htmlspecialchars($row->getId()); ?>"
+                        >
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <script type="module" src="/js/apply.js"></script>
+                    </td>
+
+                </tr>
+
+
+                <?php endforeach; ?>
+
+                <?php } else { ?>
+                <tr>
+                    <td colspan="<?php echo count($columns); ?>">
+                        Нет данных для отображения
+                    </td>
+                </tr>
+                <?php } ?>
+            </table>
+            <?php if(!empty($data)){ ?>
+            <div class="button-container">
+                <form method="get" action="/dash">
+                    <input type="hidden" name="page" value="1">
+                    <button type="submit" class="button">First</button>
+                </form>
+                <?php if($page-1>0){ ?>
+                <form method="get" action="/dash">
+                    <input type="hidden" name="page" value="<?= $page-1 ?>">
+                    <button type="submit" class="button">Previous</button>
+                </form>
+                <?php } ?>
+                <div>
+                    <h5><?= $page    ?></h5>
+                </div>
+                <form method="get" action="/dash">
+                    <input type="hidden" name="page" value="<?= $page+1 ?>">
+                    <button type="submit" class="button">Next</button>
+                </form>
+            </div>
+            <?php }elseif($page!=1 || $page!=o){ ?>
+            <form method="get" action="/dash">
+                <input type="hidden" name="page" value="1">
+                <button type="submit" class="button">First</button>
+            </form>
+            <?php } ?>
+        </div>
+    </div>
+</main>
+<script src="/js/logout.js"></script>
+</body>
+</html>

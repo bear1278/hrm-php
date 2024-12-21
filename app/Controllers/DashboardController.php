@@ -24,6 +24,70 @@ class DashboardController
         $this->model = new VacancyModel();
     }
 
+    public function showSeparateDashboard()
+    {
+        try {
+            $columns = $this->model->getTableColumns();
+            $columns = array_diff($columns, ["image"]);
+            $columns_type = $this->model->getColumnsType();
+            $departments = $this->model->SelectAllDepartments();
+            $skills = $this->model->SelectAllSkills();
+            $number_of_app = $this->model->SelectNumberOfApps($_SESSION['user_id']);
+            $page = 1;
+            if(isset($_GET['page'])){
+                if($_GET['page']>0){
+                    $page = $_GET['page'];
+                }
+            }
+            $time = 0;
+            $memory = 0;
+            if (AuthHelper::isCandidate()) {
+                $start_time = microtime(true);
+                $start_memory = memory_get_usage();
+                if (isset($_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) && $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])]) {
+                    $encryptedFilters = $_COOKIE['filtersData'.base64_decode($_SESSION['user_id'])];
+                    $decodedFilters = $this->decryptData($encryptedFilters);
+                    $filters = json_decode($decodedFilters, true);
+                    $data = $this->model->getVacanciesWithParamForCandidate($filters, $_SESSION['user_id']);
+                } else {
+                    $data = $this->model->SelectSeparatelyVacanciesForCandidate($_SESSION['user_id'],$page);
+                }
+                $end_time = microtime(true);
+                $end_memory = memory_get_usage();
+                $time=round((($end_time-$start_time)*1000),2);
+                $memory= ($end_memory-$start_memory)/1024;
+                require_once __DIR__ . '/../Views/dashboardCandidateSeparate.html';
+                exit();
+            } elseif (AuthHelper::isManager()) {
+                $vacancy = null;
+                if(isset($_SESSION['vacancy'])){
+                    $vacancy = $_SESSION['vacancy'];
+                }
+                $data = $this->model->getVacancies($_SESSION['user_id']);
+                require_once __DIR__ . '/../Views/dashboard.html';
+                exit();
+            } elseif (AuthHelper::isAdmin()) { // ToDo: think about store many models and implement it
+                $data = $this->model->SelectAllUsers($_SESSION['user_id']);
+                $columns = array_keys($data[0]);
+                $columns = array_diff($columns, ['user_ID']);
+                $roles = $this->model->SelectRoles();
+                require_once __DIR__ . '/../Views/admin.html';
+                exit();
+            }
+        } catch (PDOException $e) {
+            http_response_code(500);
+            $errorMessage = urlencode('Ошибка подключения к базе данных: ' . $e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+            exit();
+        } catch (Exception $e) {
+            http_response_code(400);
+            $errorMessage = urlencode($e->getMessage());
+            header("Location: /error?message=" . $errorMessage);
+            exit();
+        }
+    }
+
+
     public function showDashboard()
     {
         try {

@@ -133,6 +133,124 @@ class VacancyModel
         }
     }
 
+    public function SelectSeparatelyVacanciesForCandidate($id,$page): array
+    {
+        try {
+            $vacanciesPerPage = 15;
+            $offset = $vacanciesPerPage * ($page - 1);
+
+            // 1. Fetch Base Vacancies
+            $sqlVacancies = "
+            SELECT vacancy_ID, name, department_ID, description, experience_required, salary, posting_date, status
+            FROM vacancies
+            WHERE vacancy_ID NOT IN (
+                SELECT vacancy_ID
+                FROM applications
+                WHERE candidate_ID = :id
+            )
+            LIMIT :limit OFFSET :offset;
+        ";
+            $stmt = $this->pdo->prepare($sqlVacancies);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $vacanciesPerPage, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $vacancies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // 2. Fetch Departments
+            $sqlDepartments = "SELECT department_ID, name AS department FROM departments;";
+            $departments = $this->pdo->query($sqlDepartments)->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            // 3. Fetch Status Names
+            $sqlStatuses = "SELECT status_ID, name AS status FROM status;";
+            $statuses = $this->pdo->query($sqlStatuses)->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            // 4. Fetch User History
+            $sqlUserHistory = "
+            SELECT vacancy_ID, action
+            FROM user_history
+            WHERE user_ID = :id;
+        ";
+            $stmt = $this->pdo->prepare($sqlUserHistory);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $userHistory = $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+
+            // 5. Fetch Relevance Weights
+            $sqlRelevanceWeights = "SELECT parameter_name, value FROM relevance_weights;";
+            $weights = $this->pdo->query($sqlRelevanceWeights)->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            // 6. Combine Data and Calculate Relevance Scores
+            foreach ($vacancies as &$vacancy) {
+                $vacancy['department'] = $departments[$vacancy['department_ID']] ?? null;
+                $vacancy['status'] = $statuses[$vacancy['status']] ?? null;
+
+                // Relevance score calculation
+                $relevanceScore = 0;
+
+                // Department match
+                if (isset($userHistory['apply'])) {
+                    foreach ($userHistory['apply'] as $history) {
+                        if ($vacancy['department_ID'] == $history['department_ID']) {
+                            $relevanceScore += $weights['department_match'];
+                        }
+                    }
+                }
+
+                // Experience match
+                foreach ($userHistory as $history) {
+                    $experienceDiff = abs($vacancy['experience_required'] - $history['experience_required']);
+                    if ($experienceDiff <= 1) {
+                        $relevanceScore += $weights['experience_close'];
+                    } elseif ($experienceDiff <= 3) {
+                        $relevanceScore += $weights['experience_medium'];
+                    }
+                }
+
+                foreach ($userHistory as $history) {
+                    if ($vacancy['salary'] >= $history['salary'] * 0.9 && $vacancy['salary'] <= $history['salary'] * 1.1) {
+                        $relevanceScore += $weights['salary_close'];
+                    } elseif ($vacancy['salary'] >= $history['salary'] * 0.8 && $vacancy['salary'] <= $history['salary'] * 1.2) {
+                        $relevanceScore += $weights['salary_medium'];
+                    }
+                }
+
+                if (isset($userHistory['unapply'])) {
+                    $relevanceScore += $weights['unapply_penalty'] * count($userHistory['unapply']);
+                }
+
+                $vacancy['relevance_score'] = $relevanceScore;
+            }
+
+            usort($vacancies, function ($a, $b) {
+                return $b['relevance_score'] <=> $a['relevance_score'];
+            });
+
+            $result = [];
+            unset($vacancy);
+            foreach ($vacancies as $vacancy) {
+                $result[] = new Vacancy(
+                    $vacancy['vacancy_ID'],
+                    $vacancy['name'],
+                    $vacancy['department'],
+                    $vacancy['description'],
+                    $vacancy['experience_required'],
+                    $vacancy['salary'],
+                    $vacancy['posting_date'],
+                    $vacancy['status'],
+                    null,
+                    [],
+                    null
+                );
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            throw new PDOException("Ошибка: " . $e->getMessage());
+        }
+    }
+
+
     public function SelectVacanciesForCandidate($id,$page): array
     {
         try {
