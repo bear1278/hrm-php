@@ -119,13 +119,13 @@ class VacancyModel
     {
         try {
 
-            $sql="SELECT * FROM relevance_weights";
+            $sql = "SELECT * FROM relevance_weights";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             $weights = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $result = [];
-            foreach ($weights as $weight){
-                $result[$weight['parameter_name']]=$weight['value'];
+            foreach ($weights as $weight) {
+                $result[$weight['parameter_name']] = $weight['value'];
             }
             return $result;
         } catch (PDOException $e) {
@@ -133,7 +133,7 @@ class VacancyModel
         }
     }
 
-    public function SelectSeparatelyVacanciesForCandidate($id,$page): array
+    public function SelectSeparatelyVacanciesForCandidate($id, $page): array
     {
         try {
             $vacanciesPerPage = 15;
@@ -167,91 +167,37 @@ class VacancyModel
 
             // 4. Fetch User History
             $sqlUserHistory = "
-            SELECT vacancy_ID, action
+            SELECT vacancy_ID, action, experience_required, salary, department_ID
             FROM user_history
             WHERE user_ID = :id;
         ";
             $stmt = $this->pdo->prepare($sqlUserHistory);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
-            $userHistory = $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+            $userHistory = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 5. Fetch Relevance Weights
             $sqlRelevanceWeights = "SELECT parameter_name, value FROM relevance_weights;";
             $weights = $this->pdo->query($sqlRelevanceWeights)->fetchAll(PDO::FETCH_KEY_PAIR);
 
-            // 6. Combine Data and Calculate Relevance Scores
-            foreach ($vacancies as &$vacancy) {
-                $vacancy['department'] = $departments[$vacancy['department_ID']] ?? null;
-                $vacancy['status'] = $statuses[$vacancy['status']] ?? null;
+            // Combine the data into a single array for the frontend
+            $response = [
+                'vacancies' => $vacancies,
+                'departments' => $departments,
+                'statuses' => $statuses,
+                'userHistory' => $userHistory,
+                'weights' => $weights,
+            ];
 
-                // Relevance score calculation
-                $relevanceScore = 0;
+            return $response;
 
-                // Department match
-                if (isset($userHistory['apply'])) {
-                    foreach ($userHistory['apply'] as $history) {
-                        if ($vacancy['department_ID'] == $history['department_ID']) {
-                            $relevanceScore += $weights['department_match'];
-                        }
-                    }
-                }
-
-                // Experience match
-                foreach ($userHistory as $history) {
-                    $experienceDiff = abs($vacancy['experience_required'] - $history['experience_required']);
-                    if ($experienceDiff <= 1) {
-                        $relevanceScore += $weights['experience_close'];
-                    } elseif ($experienceDiff <= 3) {
-                        $relevanceScore += $weights['experience_medium'];
-                    }
-                }
-
-                foreach ($userHistory as $history) {
-                    if ($vacancy['salary'] >= $history['salary'] * 0.9 && $vacancy['salary'] <= $history['salary'] * 1.1) {
-                        $relevanceScore += $weights['salary_close'];
-                    } elseif ($vacancy['salary'] >= $history['salary'] * 0.8 && $vacancy['salary'] <= $history['salary'] * 1.2) {
-                        $relevanceScore += $weights['salary_medium'];
-                    }
-                }
-
-                if (isset($userHistory['unapply'])) {
-                    $relevanceScore += $weights['unapply_penalty'] * count($userHistory['unapply']);
-                }
-
-                $vacancy['relevance_score'] = $relevanceScore;
-            }
-
-            usort($vacancies, function ($a, $b) {
-                return $b['relevance_score'] <=> $a['relevance_score'];
-            });
-
-            $result = [];
-            unset($vacancy);
-            foreach ($vacancies as $vacancy) {
-                $result[] = new Vacancy(
-                    $vacancy['vacancy_ID'],
-                    $vacancy['name'],
-                    $vacancy['department'],
-                    $vacancy['description'],
-                    $vacancy['experience_required'],
-                    $vacancy['salary'],
-                    $vacancy['posting_date'],
-                    $vacancy['status'],
-                    null,
-                    [],
-                    null
-                );
-            }
-
-            return $result;
         } catch (PDOException $e) {
-            throw new PDOException("Ошибка: " . $e->getMessage());
+            throw new PDOException("Error: " . $e->getMessage());
         }
     }
 
 
-    public function SelectVacanciesForCandidate($id,$page): array
+    public function SelectVacanciesForCandidate($id, $page): array
     {
         try {
             $sql = "
@@ -306,7 +252,7 @@ class VacancyModel
             ORDER BY F.relevance_score DESC LIMIT 15 OFFSET :page";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            $offset = 15 *($page-1);
+            $offset = 15 * ($page - 1);
             $stmt->bindParam(':page', $offset, PDO::PARAM_INT);
             $stmt->execute();
             $vacancies = [];
@@ -689,15 +635,15 @@ class VacancyModel
         }
     }
 
-    public function UpdateVacancyImage(int $id,$fileData)
+    public function UpdateVacancyImage(int $id, $fileData)
     {
-        try{
+        try {
             $sql = "UPDATE vacancies set image=:file_data where vacancy_ID=:id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':file_data', $fileData, PDO::PARAM_LOB);
             return $stmt->execute();
-        }catch (PDOException $e) {
+        } catch (PDOException $e) {
             throw new PDOException("Ошибка: " . $e->getMessage());
         }
     }

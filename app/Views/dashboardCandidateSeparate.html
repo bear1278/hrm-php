@@ -97,85 +97,95 @@ $username = $_SESSION['user_id'];  // Assuming 'user_id' contains the username
     <div>
         <div class="table-container">
             <table border="1">
+                <thead>
                 <tr>
                     <?php foreach ($columns as $column): ?>
                     <th><?php echo htmlspecialchars($column); ?></th>
                     <?php endforeach; ?>
                     <th></th>
                 </tr>
-
-                <?php if (!empty($data)) { ?>
-                <?php foreach ($data as $row): ?>
-                <tr>
-                    <?php foreach ($columns as $column): ?>
-                    <td><?php
-        if ($column == 'posting date')
-                  {
-                    echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}()->format('Y-m-d'));
-                        }elseif ($column == 'name'){
-                        ?> <a style="text-decoration: none"
-                              href="http://localhost/vacancy/<?= $row->getId()?>"><?= $row->
-                            {Vacancy::fieldMapping[$column]}() ?></a>
-                        <?php
-                    }else{
-                    echo htmlspecialchars($row->{Vacancy::fieldMapping[$column]}());
-                        }
-                        ?>
-                    </td>
-
-                    <?php endforeach; ?>
-
-                    <td>
-                        <button
-                                class="button-apply"
-                                type="button"
-                                value="<?php echo htmlspecialchars($row->getId()); ?>"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                        <script type="module" src="/js/apply.js"></script>
-                    </td>
-
-                </tr>
-
-
-                <?php endforeach; ?>
-
-                <?php } else { ?>
-                <tr>
-                    <td colspan="<?php echo count($columns); ?>">
-                        Нет данных для отображения
-                    </td>
-                </tr>
-                <?php } ?>
+                </thead>
+                <tbody id="vacancies-table-body">
+                </tbody>
             </table>
-            <?php if(!empty($data)){ ?>
-            <div class="button-container">
-                <form method="get" action="/dash">
-                    <input type="hidden" name="page" value="1">
-                    <button type="submit" class="button">First</button>
-                </form>
-                <?php if($page-1>0){ ?>
-                <form method="get" action="/dash">
-                    <input type="hidden" name="page" value="<?= $page-1 ?>">
-                    <button type="submit" class="button">Previous</button>
-                </form>
-                <?php } ?>
-                <div>
-                    <h5><?= $page    ?></h5>
-                </div>
-                <form method="get" action="/dash">
-                    <input type="hidden" name="page" value="<?= $page+1 ?>">
-                    <button type="submit" class="button">Next</button>
-                </form>
+            <div id="pagination-controls">
             </div>
-            <?php }elseif($page!=1 || $page!=o){ ?>
-            <form method="get" action="/dash">
-                <input type="hidden" name="page" value="1">
-                <button type="submit" class="button">First</button>
-            </form>
-            <?php } ?>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+                // Fetch data from the backend
+                const response = await fetch('/api/dash?id=USER_ID&page=CURRENT_PAGE');
+                const data = await response.json();
+
+                const { vacancies, departments, statuses, userHistory, weights } = data;
+
+                // Calculate relevance scores
+                vacancies.forEach(vacancy => {
+                    let relevanceScore = 0;
+
+                    // Department match
+                    userHistory.forEach(history => {
+                        if (vacancy.department_ID === history.department_ID) {
+                            relevanceScore += weights['department_match'] || 0;
+                        }
+                    });
+
+                    // Experience match
+                    userHistory.forEach(history => {
+                        if ('experience_required' in vacancy && 'experience_required' in history) {
+                            const experienceDiff = Math.abs(vacancy.experience_required - history.experience_required);
+                            if (experienceDiff <= 1) relevanceScore += weights['experience_close'] || 0;
+                            else if (experienceDiff <= 3) relevanceScore += weights['experience_medium'] || 0;
+                        }
+                    });
+
+                    // Salary match
+                    userHistory.forEach(history => {
+                        if ('salary' in vacancy && 'salary' in history) {
+                            if (vacancy.salary >= history.salary * 0.9 && vacancy.salary <= history.salary * 1.1) {
+                                relevanceScore += weights['salary_close'] || 0;
+                            } else if (vacancy.salary >= history.salary * 0.8 && vacancy.salary <= history.salary * 1.2) {
+                                relevanceScore += weights['salary_medium'] || 0;
+                            }
+                        }
+                    });
+
+                    // Unapply penalty
+                    const unapplyCount = userHistory.filter(h => h.action === 'unapply').length;
+                    relevanceScore -= (weights['unapply_penalty'] || 0) * unapplyCount;
+
+                    vacancy.relevanceScore = relevanceScore;
+                    vacancy.department = departments[vacancy.department_ID];
+                    vacancy.status = statuses[vacancy.status];
+                });
+
+                // Sort by relevance score
+                vacancies.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+                // Render table
+                const tableBody = document.querySelector(".table-container table tbody");
+                tableBody.innerHTML = "";
+                vacancies.forEach(vacancy => {
+                    const row = `
+            <tr>
+                <td>${vacancy.name}</td>
+                <td>${vacancy.department}</td>
+                <td>${vacancy.description}</td>
+                <td>${vacancy.experience_required}</td>
+                <td>${vacancy.salary}</td>
+                <td>${vacancy.posting_date}</td>
+                <td>${vacancy.status}</td>
+                <td>
+                    <button class="button-apply" value="${vacancy.vacancy_ID}">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+                    tableBody.innerHTML += row;
+                });
+            });
+        </script>
     </div>
 </main>
 <script src="/js/logout.js"></script>
